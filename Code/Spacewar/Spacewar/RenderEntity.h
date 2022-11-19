@@ -26,6 +26,7 @@ public:
 private:
 
 	std::unique_ptr<sf::Drawable> m_pObject;
+
 	std::weak_ptr<sf::Texture> m_pTexture;
 	sf::Transform m_transform;
 };

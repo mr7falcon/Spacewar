@@ -135,8 +135,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="LogicalEntity.cpp" />
+    <ClCompile Include="LogicalSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PhysicalEntity.cpp" />
+    <ClCompile Include="PhysicalPrimitive.cpp" />
+    <ClCompile Include="PhysicalSystem.cpp" />
     <ClCompile Include="RenderEntity.cpp" />
+    <ClCompile Include="RenderProxy.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -144,9 +150,12 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="LogicalEntity.h" />
     <ClInclude Include="LogicalSystem.h" />
+    <ClInclude Include="MemoryStream.h" />
     <ClInclude Include="PhysicalEntity.h" />
+    <ClInclude Include="PhysicalPrimitive.h" />
     <ClInclude Include="PhysicalSystem.h" />
     <ClInclude Include="RenderEntity.h" />
+    <ClInclude Include="RenderProxy.h" />
     <ClInclude Include="RenderSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

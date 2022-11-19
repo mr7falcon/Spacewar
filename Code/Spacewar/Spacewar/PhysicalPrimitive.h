@@ -2,45 +2,47 @@
 
 #include <SFML/Graphics/Transform.hpp>
 
-enum PrimitiveType
+namespace PhysicalPrimitive
 {
-	PrimitiveType_Circle = 0,
-	PrimitiveType_Capsule,
-	PrimitiveType_Num,
-};
+	enum EPrimitiveType
+	{
+		EPrimitiveType_Circle = 0,
+		EPrimitiveType_Capsule,
+		EPrimitiveType_Num,
+	};
 
-struct IPhysicalPrimitive 
-{
-	virtual PrimitiveType GetType() const = 0;
-};
+	struct IPhysicalPrimitive
+	{
+		virtual EPrimitiveType GetType() const = 0;
+		virtual void Transform(const sf::Transform& transform) = 0;
+	};
 
-struct Circle : public IPhysicalPrimitive
-{
-	Circle(float fRad) : m_fRad(fRad) {}
+	struct Circle : public IPhysicalPrimitive
+	{
+		Circle(const sf::Vector2f&& vOrg, float fRad) : m_vOrg(vOrg), m_fRad(fRad) {}
 
-	virtual PrimitiveType GetType() const override { return PrimitiveType_Circle; }
+		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Circle; }
+		virtual void Transform(const sf::Transform& transform) override;
 
-	float m_fRad = 0.f;
-};
+		sf::Vector2f m_vOrg;
+		float m_fRad = 0.f;
+	};
 
-struct Capsule : public IPhysicalPrimitive
-{
-	Capsule(const sf::Vector2f& vDir, float fHalfHeight, float fRad)
-		: m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
+	struct Capsule : public IPhysicalPrimitive
+	{
+		Capsule(const sf::Vector2f&& vOrg, const sf::Vector2f&& vDir, float fHalfHeight, float fRad)
+			: m_vOrg(vOrg), m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
 
-	virtual PrimitiveType GetType() const override { return PrimitiveType_Capsule; }
+		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Capsule; }
+		virtual void Transform(const sf::Transform& transform) override;
 
-	sf::Vector2f m_vDir;
-	float m_fHalfHeight = 0.f;
-	float m_fRad = 0.f;
-};
+		sf::Vector2f m_vOrg;
+		sf::Vector2f m_vDir;
+		float m_fHalfHeight = 0.f;
+		float m_fRad = 0.f;
+	};
+}
 
-bool Intersect1(const Circle* p1, const sf::Transform& t1, const Circle* p2, const sf::Transform& t2);
-bool Intersect(const Capsule* p1, const sf::Transform& t1, const Capsule* p2, const sf::Transform& t2);
-bool Intersect(const Circle* p1, const sf::Transform& t1, const Capsule* p2, const sf::Transform& t2);
-bool Intersect(const Capsule* p1, const sf::Transform& t1, const Circle* p2, const sf::Transform& t2);
+typedef bool(*Intersection)(const PhysicalPrimitive::IPhysicalPrimitive*, const PhysicalPrimitive::IPhysicalPrimitive*);
 
-bool (*g_intersectionTable[PrimitiveType_Num][PrimitiveType_Num])(const IPhysicalPrimitive*, const sf::Transform&, const IPhysicalPrimitive*, const sf::Transform&) =
-{
-	Intersect1
-};
+extern Intersection g_intersectionsTable[PhysicalPrimitive::EPrimitiveType_Num][PhysicalPrimitive::EPrimitiveType_Num];

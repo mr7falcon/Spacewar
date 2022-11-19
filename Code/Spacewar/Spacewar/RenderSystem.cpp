@@ -2,8 +2,8 @@
 
 void CRenderSystem::Render(sf::RenderTarget& target)
 {
-	//m_entityContainer.ForEach([&](const CRenderEntity& entity)
-	//	{
-	//		entity.Render(target);
-	//	});
+	for (auto& entity : m_entities)
+	{
+		entity.first.Render(target);
+	}
 }

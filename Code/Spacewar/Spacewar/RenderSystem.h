@@ -9,11 +9,5 @@ public:
 
 	CRenderSystem() : CEntitySystem(256) {}
 
-	template <typename T, typename... V>
-	SmartId CreateEntity(V... args)
-	{
-		return CreateEntity<std::unique_ptr<T>>(std::make_unique<T>(args...));
-	}
-
 	void Render(sf::RenderTarget& target);
 };

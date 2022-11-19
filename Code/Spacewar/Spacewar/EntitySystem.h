@@ -25,19 +25,21 @@ public:
 		SmartId sid = InvalidLink;
 
 		auto fnd = std::find_if(m_smartLinks.begin(), m_smartLinks.end(),
-			[](uint32_t l) { return l >= m_entities.size(); });
+			[this](uint32_t l) { return l >= m_entities.size(); });
 		if (fnd != m_smartLinks.end())
 		{
 			*fnd = m_entities.size();
-			sid = fnd - m_smartLinks.begin();
+			sid = (SmartId)(fnd - m_smartLinks.begin());
 		}
 		else
 		{
 			m_smartLinks.push_back(m_entities.size());
-		    sid = m_smartLinks.size() - 1;
+			sid = (SmartId)m_smartLinks.size() - 1;
 		}
 
-		m_entities.emplace_back(args..., sid);
+		m_entities.emplace_back(std::piecewise_construct, std::make_tuple(std::forward<V>(args)...), std::make_tuple(sid));
+
+		return sid;
 	}
 
 	void RemoveEntity(SmartId sid)
@@ -64,8 +66,6 @@ public:
 		return nullptr;
 	}
 
-protected:
-	
 	void CollectGarbage()
 	{
 		for (uint32_t i = 0; i < m_entities.size(); ++i)
