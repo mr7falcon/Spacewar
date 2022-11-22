@@ -21,19 +21,11 @@ CGame::CGame()
 
 CGame::~CGame() = default;
 
-static constexpr const float garbage_collection_inverval = 10.f;
-
 void CGame::Start()
 {
 	std::thread render(StartRender);
 
-	sf::Clock gcClock;
 	sf::Clock frameClock;
-
-
-	m_pLogicalSystem->CreateTestObject();
-
-
 
 	while (m_window.isOpen())
 	{
@@ -47,29 +39,24 @@ void CGame::Start()
 		m_pPhysicalSystem->ProcessCollisions();
 		m_pLogicalSystem->Update(frameClock.getElapsedTime());
 
-		bool bCollectGarbage = gcClock.getElapsedTime().asSeconds() >= garbage_collection_inverval;
-
-		{
-			std::lock_guard<std::mutex> lock(m_renderLock);
-			
-			if (bCollectGarbage)
-			{
-				// processing garbage within the time interval?
-				m_pRenderSystem->CollectGarbage();
-			}
-			m_pRenderProxy->SwitchStreams();
-			// pass rendering entities count
-		}
-
-		if (bCollectGarbage)
-		{
-			m_pLogicalSystem->CollectGarbage();
-			m_pPhysicalSystem->CollectGarbage();
-			
-			gcClock.restart();
-		}
-
 		frameClock.restart();
+
+		m_pLogicalSystem->CollectGarbage();
+		m_pPhysicalSystem->CollectGarbage();
+
+		{
+			std::unique_lock<std::mutex> lock(m_renderLock);
+			m_renderSync.wait(lock, [this]() { return m_bRenderComplete; });
+			
+			m_bRenderComplete = false;
+
+			m_pRenderSystem->CollectGarbage();
+			m_pRenderSystem->FixNumActiveEntities();
+			m_pRenderProxy->SwitchStreams();
+
+			m_bMainComplete = true;
+		}
+		m_renderSync.notify_one();
 	}
 
 	render.join();
@@ -84,13 +71,19 @@ void CGame::StartRender()
 	while (game.m_window.isOpen())
 	{
 		{
-			std::lock_guard<std::mutex> lock(game.m_renderLock);
-			
-			game.m_pRenderProxy->ExecuteCommands();
-		}
+			std::unique_lock<std::mutex> lock(game.m_renderLock);
+			game.m_renderSync.wait(lock, [&]() { return game.m_bMainComplete; });
 
-		game.m_window.clear();
-		game.m_pRenderSystem->Render(game.m_window);
-		game.m_window.display();
+			game.m_bMainComplete = false;
+
+			game.m_pRenderProxy->ExecuteCommands();
+
+			game.m_window.clear();
+			game.m_pRenderSystem->Render(game.m_window);
+			game.m_window.display();
+
+			game.m_bRenderComplete = true;
+		}
+		game.m_renderSync.notify_one();
 	}
 }

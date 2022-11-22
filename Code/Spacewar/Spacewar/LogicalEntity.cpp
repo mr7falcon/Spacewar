@@ -14,10 +14,10 @@ void CLogicalEntity::UpdateTransform()
 	{
 		pPhysicalEntity->OnTransformChanged(transform);
 	}
-	CGame::Get().GetRenderProxy()->OnTransformChanged(m_renderEntityId, transform);
+	CGame::Get().GetRenderProxy()->OnCommand(CRenderProxy::ERenderCommand_SetTransform, m_renderEntityId, transform);
 }
 
-void CLogicalEntity::SetPosition(const sf::Vector2f&& vPos)
+void CLogicalEntity::SetPosition(const sf::Vector2f& vPos)
 {
 	if (vPos != m_vPos)
 	{
@@ -35,7 +35,7 @@ void CLogicalEntity::SetRotation(float fRot)
 	}
 }
 
-void CLogicalEntity::SetScale(const sf::Vector2f&& vScale)
+void CLogicalEntity::SetScale(const sf::Vector2f& vScale)
 {
 	if (vScale != m_vScale)
 	{
@@ -50,23 +50,4 @@ void CLogicalEntity::Update(sf::Time dt)
 	m_fAngSpeed += m_fAngAccel * dt.asSeconds();
 	SetPosition(GetPosition() + m_vVel * dt.asSeconds());
 	SetRotation(GetRotation() + m_fAngSpeed * dt.asSeconds());
-}
-
-
-
-#include <SFML/Graphics/CircleShape.hpp>
-void CLogicalEntity::TestObject()
-{
-	// remove translation from primitive constructor
-	auto primitive = std::make_unique<PhysicalPrimitive::Circle>(sf::Vector2f(0.f, 0.f), 100.f);
-	m_physicalEntityId = CGame::Get().GetPhysicalSystem()->CreateEntity(std::move(primitive));
-
-	auto drawable = std::make_unique<sf::CircleShape>(100.f);
-	drawable->setOrigin(sf::Vector2f(100.f, 100.f));
-	drawable->setFillColor(sf::Color::Red);
-	m_renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity(std::move(drawable));
-
-	m_vPos = sf::Vector2f(400.f, 400.f);
-	m_vAccel = sf::Vector2f(1.f, 0.f);
-	m_fAngAccel = 1.f;
 }

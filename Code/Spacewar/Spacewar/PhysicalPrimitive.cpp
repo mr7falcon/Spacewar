@@ -31,7 +31,7 @@ void PhysicalPrimitive::Capsule::Transform(const sf::Transform& transform)
 }
 
 #define INTERSECTION(T1, T2) Intersection_##T1##_##T2
-#define IMPLEMENT_INTERSECTION(T1, T2) static bool INTERSECTION(T1, T2)(const PhysicalPrimitive::IPhysicalPrimitive* p1, const PhysicalPrimitive::IPhysicalPrimitive* p2)
+#define IMPLEMENT_INTERSECTION(T1, T2) static bool INTERSECTION(T1, T2)(const PhysicalPrimitive::Primitive* p1, const PhysicalPrimitive::Primitive* p2)
 #define CAST_ARGS(T1, N1, T2, N2)\
 	const PhysicalPrimitive::T1* N1 = static_cast<const PhysicalPrimitive::T1*>(p1);\
 	const PhysicalPrimitive::T2* N2 = static_cast<const PhysicalPrimitive::T2*>(p2)

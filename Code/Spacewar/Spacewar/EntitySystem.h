@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 typedef uint32_t SmartId;
 static constexpr const uint32_t InvalidLink = (uint32_t)-1;
@@ -42,11 +43,11 @@ public:
 		return sid;
 	}
 
-	void RemoveEntity(SmartId sid)
+	void RemoveEntity(SmartId sid, bool immediate = false)
 	{
 		if (sid < m_smartLinks.size())
 		{
-			if constexpr (SafeRemove)
+			if constexpr (SafeRemove || !immediate)
 			{
 				UnlinkEntity(sid);
 			}
@@ -57,13 +58,34 @@ public:
 		}
 	}
 
-	T* GetEntity(SmartId sid)
+	inline T* GetEntity(SmartId sid)
 	{
 		if (sid < m_smartLinks.size() && m_smartLinks[sid] < m_entities.size())
 		{
 			return &m_entities[m_smartLinks[sid]].first;
 		}
 		return nullptr;
+	}
+
+	inline uint32_t GetNumEntities() const
+	{
+		return (uint32_t)m_entities.size();
+	}
+
+	inline void ForEachEntity(std::function<void(T&)> f, uint32_t dRange = InvalidLink)
+	{
+		if (dRange > m_entities.size())
+		{
+			dRange = (uint32_t)m_entities.size();
+		}
+
+		for (uint32_t i = 0; i < dRange; ++i)
+		{
+			if (m_entities[i].second < m_smartLinks.size())
+			{
+				f(m_entities[i].first);
+			}
+		}
 	}
 
 	void CollectGarbage()
@@ -79,13 +101,13 @@ public:
 
 private:
 
-	void UnlinkEntity(SmartId sid)
+	inline void UnlinkEntity(SmartId sid)
 	{
 		m_entities[m_smartLinks[sid]].second = InvalidLink;
 		m_smartLinks[sid] = InvalidLink;
 	}
 
-	void DeleteEntity(uint32_t idx)
+	inline void DeleteEntity(uint32_t idx)
 	{
 		std::iter_swap(m_entities.begin() + idx, m_entities.end() - 1);
 		if (m_entities[idx].second < m_smartLinks.size())

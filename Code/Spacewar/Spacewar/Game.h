@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <mutex>
+#include <condition_variable>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
@@ -47,6 +48,9 @@ private:
 	std::unique_ptr<CRenderProxy> m_pRenderProxy;
 
 	std::mutex m_renderLock;
+	std::condition_variable m_renderSync;
+	bool m_bMainComplete = false;
+	bool m_bRenderComplete = true;
 
 	sf::RenderWindow m_window;
 	sf::View m_view;

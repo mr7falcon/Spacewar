@@ -11,16 +11,12 @@ public:
 
 	CLogicalEntity() = default;
 
-
-	void TestObject();
-
-
-	void SetPosition(const sf::Vector2f&& vPos);
+	void SetPosition(const sf::Vector2f& vPos);
 	void SetRotation(float fRot);
-	void SetScale(const sf::Vector2f&& vScale);
-	void SetVelocity(const sf::Vector2f&& vVel) { m_vVel = vVel; }
+	void SetScale(const sf::Vector2f& vScale);
+	void SetVelocity(const sf::Vector2f& vVel) { m_vVel = vVel; }
 	void SetAngularSpeed(float fAngSpeed) { m_fAngSpeed = fAngSpeed; }
-	void SetAcceleration(const sf::Vector2f&& vAccel) { m_vAccel = vAccel; }
+	void SetAcceleration(const sf::Vector2f& vAccel) { m_vAccel = vAccel; }
 	void SetAngularAcceleration(float fAngAccel) { m_fAngAccel = fAngAccel; }
 
 	const sf::Vector2f& GetPosition() const { return m_vPos; }

@@ -19,11 +19,30 @@ public:
 		m_dWriteOffset += sizeof(val);
 	}
 
+	template <typename T, typename... V>
+	void Emplace(V&&... args)
+	{
+		if (m_dWriteOffset + sizeof(T) > m_buffer.size())
+		{
+			m_buffer.resize(2 * (m_buffer.size() + sizeof(T)));
+		}
+		new (&m_buffer[m_dWriteOffset]) T(std::forward<V>(args)...);
+		m_dWriteOffset += sizeof(T);
+	}
+
 	template <typename T>
 	void operator>>(T& val)
 	{
 		memcpy(&val, &m_buffer[m_dReadOffset], sizeof(val));
 		m_dReadOffset += sizeof(val);
+	}
+
+	template <typename T>
+	const T& Extract()
+	{
+		const T& val = (*(T*)(&m_buffer[m_dReadOffset]));
+		m_dReadOffset += sizeof(T);
+		return val;
 	}
 
 	void Clear() { m_dReadOffset = m_dWriteOffset = 0; }

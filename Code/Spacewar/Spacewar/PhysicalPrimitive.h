@@ -11,27 +11,30 @@ namespace PhysicalPrimitive
 		EPrimitiveType_Num,
 	};
 
-	struct IPhysicalPrimitive
+	struct Primitive
 	{
+		Primitive(sf::Vector2f&& vOrg = sf::Vector2f()) : m_vOrg(vOrg) {}
+
 		virtual EPrimitiveType GetType() const = 0;
 		virtual void Transform(const sf::Transform& transform) = 0;
+
+		sf::Vector2f m_vOrg;
 	};
 
-	struct Circle : public IPhysicalPrimitive
+	struct Circle : public Primitive
 	{
-		Circle(const sf::Vector2f&& vOrg, float fRad) : m_vOrg(vOrg), m_fRad(fRad) {}
+		Circle(float fRad) : m_fRad(fRad) {}
 
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Circle; }
 		virtual void Transform(const sf::Transform& transform) override;
 
-		sf::Vector2f m_vOrg;
 		float m_fRad = 0.f;
 	};
 
-	struct Capsule : public IPhysicalPrimitive
+	struct Capsule : public Primitive
 	{
-		Capsule(const sf::Vector2f&& vOrg, const sf::Vector2f&& vDir, float fHalfHeight, float fRad)
-			: m_vOrg(vOrg), m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
+		Capsule(sf::Vector2f&& vDir, float fHalfHeight, float fRad)
+			: m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
 
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Capsule; }
 		virtual void Transform(const sf::Transform& transform) override;
@@ -43,6 +46,6 @@ namespace PhysicalPrimitive
 	};
 }
 
-typedef bool(*Intersection)(const PhysicalPrimitive::IPhysicalPrimitive*, const PhysicalPrimitive::IPhysicalPrimitive*);
+typedef bool(*Intersection)(const PhysicalPrimitive::Primitive*, const PhysicalPrimitive::Primitive*);
 
 extern Intersection g_intersectionsTable[PhysicalPrimitive::EPrimitiveType_Num][PhysicalPrimitive::EPrimitiveType_Num];

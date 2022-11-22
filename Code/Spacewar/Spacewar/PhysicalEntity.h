@@ -9,15 +9,15 @@ class CPhysicalEntity
 public:
 
 	CPhysicalEntity() = default;
-	CPhysicalEntity(std::unique_ptr<PhysicalPrimitive::IPhysicalPrimitive>&& pPrimitive)
-		: m_pPrimitive(std::forward<std::unique_ptr<PhysicalPrimitive::IPhysicalPrimitive>>(pPrimitive)) {}
+	CPhysicalEntity(std::unique_ptr<PhysicalPrimitive::Primitive>&& pPrimitive)
+		: m_pPrimitive(std::forward<std::unique_ptr<PhysicalPrimitive::Primitive>>(pPrimitive)) {}
 	
-	const PhysicalPrimitive::IPhysicalPrimitive* GetPhysics() const { return m_pPrimitive.get(); }
+	const PhysicalPrimitive::Primitive* GetPhysics() const { return m_pPrimitive.get(); }
 
 	void OnTransformChanged(const sf::Transform& transform);
 
 private:
 	
-	std::unique_ptr<PhysicalPrimitive::IPhysicalPrimitive> m_pPrimitive;
+	std::unique_ptr<PhysicalPrimitive::Primitive> m_pPrimitive;
 	sf::Transform m_transform;
 };
