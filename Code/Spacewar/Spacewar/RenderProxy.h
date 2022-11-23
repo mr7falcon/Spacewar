@@ -13,42 +13,33 @@ public:
 	enum ERenderCommand : unsigned char
 	{
 		ERenderCommand_SetTransform,
+		ERenderCommand_SetTexture,
+		ERenderCommand_SetScale,
 	};
 
 	CRenderProxy() = default;
 	CRenderProxy(const CRenderProxy&) = delete;
 
-	template <typename... V>
-	void OnCommand(ERenderCommand cmd, SmartId sid, V&&... args)
+	template <ERenderCommand cmd, typename... V>
+	void OnCommand(SmartId sid, V&&... args)
 	{
-		bool schedule = CGame::Get().GetRenderSystem()->IsActiveEntity(sid);
-
-		switch (cmd)
+		m_memoryStreams[m_dWriteStream] << cmd;
+		if constexpr (cmd == ERenderCommand_SetTransform)
 		{
-		case ERenderCommand_SetTransform:
-			PushCommand<SetTransformCommand>(cmd, sid, schedule, std::forward<V>(args)...);
-			break;
+			m_memoryStreams[m_dWriteStream].Emplace<SetTransformCommand>(sid, std::forward<V>(args)...);
+		}
+		else if constexpr (cmd == ERenderCommand_SetTexture)
+		{
+			m_memoryStreams[m_dWriteStream].Emplace<SetTextureCommand>(sid, std::forward<V>(args)...);
+		}
+		else if constexpr (cmd == ERenderCommand_SetScale)
+		{
+			m_memoryStreams[m_dWriteStream].Emplace<SetScaleCommand>(sid, std::forward<V>(args)...);
 		}
 	}
 
 	void SwitchStreams();
 	void ExecuteCommands();
-
-private:
-
-	template <typename T, typename... V>
-	inline void PushCommand(ERenderCommand cmd, SmartId sid, bool schedule, V&&... args)
-	{
-		if (schedule)
-		{
-			m_memoryStreams[m_dWriteStream] << cmd;
-			m_memoryStreams[m_dWriteStream].Emplace<T>(sid, std::forward<V>(args)...);
-		}
-		else
-		{
-			T(sid, std::forward<V>(args)...).Execute();
-		}
-	}
 
 private:
 
@@ -71,6 +62,28 @@ private:
 		virtual void Execute() const override;
 
 		sf::Transform transform;
+	};
+
+	struct SetTextureCommand : public RenderCommand
+	{
+		SetTextureCommand(SmartId _sid, int _textureId)
+			: RenderCommand(_sid), textureId(_textureId) {}
+
+		virtual void Execute() const override;
+
+		int textureId;
+	};
+
+	struct SetScaleCommand : public RenderCommand
+	{
+		SetScaleCommand(SmartId _sid, sf::Vector2f&& _scale)
+			: RenderCommand(_sid), scale(_scale) {}
+		SetScaleCommand(SmartId _sid, const sf::Vector2f& _scale)
+			: RenderCommand(_sid), scale(_scale) {}
+
+		virtual void Execute() const override;
+
+		sf::Vector2f scale;
 	};
 
 	static constexpr const size_t memory_buffer_initial_size = 1024;

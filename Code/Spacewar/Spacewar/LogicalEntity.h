@@ -11,6 +11,9 @@ public:
 
 	CLogicalEntity() = default;
 
+	void SetPhysics(SmartId sid) { m_physicalEntityId = sid; }
+	void SetRender(SmartId sid) { m_renderEntityId = sid; }
+
 	void SetPosition(const sf::Vector2f& vPos);
 	void SetRotation(float fRot);
 	void SetScale(const sf::Vector2f& vScale);

@@ -13,7 +13,7 @@ namespace PhysicalPrimitive
 
 	struct Primitive
 	{
-		Primitive(sf::Vector2f&& vOrg = sf::Vector2f()) : m_vOrg(vOrg) {}
+		Primitive(const sf::Vector2f& vOrg = sf::Vector2f()) : m_vOrg(vOrg) {}
 
 		virtual EPrimitiveType GetType() const = 0;
 		virtual void Transform(const sf::Transform& transform) = 0;
@@ -33,7 +33,7 @@ namespace PhysicalPrimitive
 
 	struct Capsule : public Primitive
 	{
-		Capsule(sf::Vector2f&& vDir, float fHalfHeight, float fRad)
+		Capsule(const sf::Vector2f& vDir, float fHalfHeight, float fRad)
 			: m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
 
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Capsule; }

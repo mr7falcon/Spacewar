@@ -1,5 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
+#include <SFML/Graphics/Texture.hpp>
+
 #include "EntitySystem.h"
 #include "RenderEntity.h"
 
@@ -10,11 +14,14 @@ public:
 	CRenderSystem() : CEntitySystem(256) {}
 
 	void FixNumActiveEntities();
-	bool IsActiveEntity(SmartId sid) const;
+	
+	const sf::Texture* LoadTexture(int id);
 
 	void Render(sf::RenderTarget& target);
 
 private:
 
-	uint32_t m_dNumActiveEntities = 0;
+	int m_dNumActiveEntities = 0;
+
+	std::unordered_map<int, sf::Texture> m_textures;
 };

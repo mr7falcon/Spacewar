@@ -1,0 +1,10 @@
+<Entities>
+	<Entity name="Spaceship">
+		<Physics type="Capsule" radius="25" halfheight="40" axis="0,1"/>
+		<Render texture="Resources/Textures/Spaceships/spaceship1.png" scale="0.2,0.2"/>
+	</Entity>
+	<Entity name="Projectile">
+		<Physics type="Circle" radius="5"/>
+		<Render texture="Resources/Textures/Projectiles/projectile1.png" scale="0.2,0.2"/>
+	</Entity>
+</Entities>
