@@ -3,9 +3,16 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
+#include <vector>
 
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/View.hpp>
+
+class IWindowEventListener
+{
+public:
+
+	virtual void OnWindowEvent(const sf::Event& evt) = 0;
+};
 
 class CLogicalSystem;
 class CPhysicalSystem;
@@ -38,6 +45,9 @@ public:
 	const CResourceSystem* GetResourceSystem() const { return m_pResourceSystem.get(); }
 	const CConfigurationSystem* GetConfigurationSystem() const { return m_pConfigurationSystem.get(); }
 
+	void RegisterWindowEventListener(IWindowEventListener* pEventListener);
+	void UnregisterWindowEventListener(IWindowEventListener* pEventListener);
+
 private:
 
 	CGame();
@@ -61,5 +71,6 @@ private:
 	bool m_bRenderComplete = true;
 
 	sf::RenderWindow m_window;
-	sf::View m_view;
+
+	std::vector<IWindowEventListener*> m_windowEventListeners;
 };

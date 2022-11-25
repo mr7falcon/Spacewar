@@ -2,52 +2,52 @@
 #include "Game.h"
 #include "PhysicalSystem.h"
 #include "RenderProxy.h"
+#include "MathHelpers.h"
 
-void CLogicalEntity::UpdateTransform()
+void CLogicalEntity::OnTransformUpdated()
 {
-	sf::Transform transform;
-	transform.translate(m_vPos);
-	transform.rotate(m_fRot);
-	transform.scale(m_vScale);
-
 	if (CPhysicalEntity* pPhysicalEntity = CGame::Get().GetPhysicalSystem()->GetEntity(m_physicalEntityId))
 	{
-		pPhysicalEntity->OnTransformChanged(transform);
+		pPhysicalEntity->OnTransformChanged(getTransform());
 	}
-	CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(m_renderEntityId, transform);
+	CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(m_renderEntityId, getTransform());
 }
 
 void CLogicalEntity::SetPosition(const sf::Vector2f& vPos)
 {
-	if (vPos != m_vPos)
+	if (vPos != getPosition())
 	{
-		m_vPos = vPos;
-		UpdateTransform();
+		setPosition(vPos);
+		OnTransformUpdated();
 	}
 }
 
 void CLogicalEntity::SetRotation(float fRot)
 {
-	if (fRot != m_fRot)
+	if (fRot != getRotation())
 	{
-		m_fRot = fRot;
-		UpdateTransform();
+		setRotation(fRot);
+		OnTransformUpdated();
 	}
 }
 
-void CLogicalEntity::SetScale(const sf::Vector2f& vScale)
+void CLogicalEntity::SetScale(float fScale)
 {
-	if (vScale != m_vScale)
+	if (fScale != getScale().x)
 	{
-		m_vScale = vScale;
-		UpdateTransform();
+		setScale(sf::Vector2f(fScale, fScale));
+		OnTransformUpdated();
 	}
 }
 
 void CLogicalEntity::Update(sf::Time dt)
 {
-	m_vVel += m_vAccel * dt.asSeconds();
-	m_fAngSpeed += m_fAngAccel * dt.asSeconds();
 	SetPosition(GetPosition() + m_vVel * dt.asSeconds());
 	SetRotation(GetRotation() + m_fAngSpeed * dt.asSeconds());
+}
+
+sf::Vector2f CLogicalEntity::GetForwardDirection() const
+{
+	static sf::Vector2f ForwardVector(0.f, 1.f);
+	return MathHelpers::Normalize(getTransform().transformPoint(ForwardVector) - getPosition());
 }

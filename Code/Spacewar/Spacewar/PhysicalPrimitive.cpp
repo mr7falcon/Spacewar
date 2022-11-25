@@ -1,33 +1,19 @@
 #include "PhysicalPrimitive.h"
-
-static inline sf::Vector2f GetPos(const sf::Transform& t)
-{
-	return sf::Vector2f(t.getMatrix()[2], t.getMatrix()[5]);
-}
-
-static inline float Dot(const sf::Vector2f& v1, const sf::Vector2f& v2)
-{
-	return v1.x * v2.x + v1.y * v2.y;
-}
-
-static inline sf::Vector2f TransformVector(const sf::Vector2f& v, const sf::Transform& t)
-{
-	const float* matrix = t.getMatrix();
-	return sf::Vector2f(matrix[0] * v.x + matrix[1] * v.y, matrix[3] * v.x + matrix[4] * v.y);		// rotate without translation and scaling
-}
+#include "MathHelpers.h"
 
 void PhysicalPrimitive::Circle::Transform(const sf::Transform& transform)
 {
 	m_vOrg = transform.transformPoint(m_vOrg);
-	m_fRad *= transform.getMatrix()[6];				// scale by x
+	m_fRad *= MathHelpers::GetScaleAny(transform);
 }
 
 void PhysicalPrimitive::Capsule::Transform(const sf::Transform& transform)
 {
 	m_vOrg = transform.transformPoint(m_vOrg);
-	m_fRad *= transform.getMatrix()[6];				// scale by x
-	m_fHalfHeight *= transform.getMatrix()[7];		// scale by y
-	m_vDir = TransformVector(m_vDir, transform);
+	float scale = MathHelpers::GetScaleAny(transform);
+	m_fRad *= scale;
+	m_fHalfHeight *= scale;
+	m_vDir = MathHelpers::Normalize(transform.transformPoint(m_vDir) - m_vOrg);
 }
 
 #define INTERSECTION(T1, T2) Intersection_##T1##_##T2
@@ -44,7 +30,7 @@ IMPLEMENT_INTERSECTION(Default, Default)
 static inline bool SpheresIntersection(const sf::Vector2f& vOrg1, float fRad1, const sf::Vector2f& vOrg2, float fRad2)
 {
 	sf::Vector2f diff = vOrg1 - vOrg2;
-	float dist2 = Dot(diff, diff);
+	float dist2 = MathHelpers::DotProd(diff, diff);
 	float width = fRad1 + fRad2;
 	return dist2 <= width * width;
 }
@@ -57,7 +43,7 @@ IMPLEMENT_INTERSECTION(Circle, Circle)
 
 static inline sf::Vector2f FindClosestPointOnCapsuleAxis(const PhysicalPrimitive::Capsule* pCap, const sf::Vector2f& vPt)
 {
-	float projLen = Dot(pCap->m_vDir, vPt - pCap->m_vOrg);
+	float projLen = MathHelpers::DotProd(pCap->m_vDir, vPt - pCap->m_vOrg);
 	return pCap->m_vOrg + pCap->m_vDir * std::clamp(projLen, -pCap->m_fHalfHeight, pCap->m_fHalfHeight);
 }
 
@@ -73,10 +59,10 @@ IMPLEMENT_INTERSECTION(Capsule, Capsule)
 	sf::Vector2f a2 = c2->m_vOrg + ax2;
 	sf::Vector2f b2 = c2->m_vOrg - ax2;
 
-	float d2a1a2 = Dot(a1, a2);
-	float d2a1b2 = Dot(a1, b2);
-	float d2b1a2 = Dot(b1, a2);
-	float d2b1b2 = Dot(b1, b2);
+	float d2a1a2 = MathHelpers::DotProd(a1, a2);
+	float d2a1b2 = MathHelpers::DotProd(a1, b2);
+	float d2b1a2 = MathHelpers::DotProd(b1, a2);
+	float d2b1b2 = MathHelpers::DotProd(b1, b2);
 
 	sf::Vector2f best1 = (d2b1a2 < d2a1a2 || d2b1a2 < d2a1b2 || d2b1b2 < d2a1a2 || d2b1b2 < d2a1b2) ? b1 : a1;
 	sf::Vector2f best2 = FindClosestPointOnCapsuleAxis(c2, best1);

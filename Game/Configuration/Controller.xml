@@ -1,0 +1,14 @@
+<Schemas>
+	<Schema name="Schema1">
+		<MoveForward key="Up"/>
+		<RotatePositive key="Right"/>
+		<RotateNegative key="Left"/>
+		<Shoot key="Enter"/>
+	</Schema>
+	<Schema name="Schema2">
+		<MoveForward key="W"/>
+		<RotatePositive key="D"/>
+		<RotateNegative key="A"/>
+		<Shoot key="Space"/>
+	</Schema>
+</Schemas>

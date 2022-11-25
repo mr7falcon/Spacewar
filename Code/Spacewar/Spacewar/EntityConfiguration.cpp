@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <pugixml.hpp>
-
 #include "EntityConfiguration.h"
 #include "Game.h"
 
@@ -18,7 +16,7 @@ inline static PhysicalPrimitive::EPrimitiveType ParsePrimitiveType(const std::st
 	return PhysicalPrimitive::EPrimitiveType_Num;
 }
 
-inline static void ParsePhysics(pugi::xml_node& node, const std::string& name, CEntityConfiguration::SEntityClass& entityClass)
+void CEntityConfiguration::ParsePhysics(const pugi::xml_node& node, const std::string& name, CEntityConfiguration::SEntityClass& entityClass)
 {
 	entityClass.physicsType = ParsePrimitiveType(node.attribute("type").value());
 	if (entityClass.physicsType != PhysicalPrimitive::EPrimitiveType_Num)
@@ -59,6 +57,11 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 	}
 
 	auto root = doc.child("Entities");
+	if (!root)
+	{
+		std::cout << "Invalid root element in entities configuration" << std::endl;
+		return;
+	}
 
 	for (auto iter = root.begin(); iter != root.end(); ++iter)
 	{

@@ -4,7 +4,10 @@
 
 void CRenderSystem::Render(sf::RenderTarget& target)
 {
-	ForEachEntity([&](CRenderEntity& entity) { entity.Render(target); }, m_dNumActiveEntities);
+	for (int i = 0; i < m_dNumActiveEntities; ++i)
+	{
+		m_entities[i].Render(target);
+	}
 }
 
 void CRenderSystem::FixNumActiveEntities()

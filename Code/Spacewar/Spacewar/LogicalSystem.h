@@ -1,16 +1,29 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include "LogicalEntity.h"
+
+class CActorSystem;
+class CLevelSystem;
 
 class CLogicalSystem : public CEntitySystem<CLogicalEntity, false>
 {
 public:
 
-	CLogicalSystem() : CEntitySystem(64) {}
+	CLogicalSystem();
+	~CLogicalSystem();
 
 	SmartId CreateEntityFromClass(const std::string& name);
 
 	void Update(sf::Time dt);
+
+	CActorSystem* GetActorSystem() { return m_pActorSystem.get(); }
+	CLevelSystem* GetLevelSystem() { return m_pLevelSystem.get(); }
+
+private:
+
+	std::unique_ptr<CActorSystem> m_pActorSystem;
+	std::unique_ptr<CLevelSystem> m_pLevelSystem;
 };

@@ -7,6 +7,18 @@
 typedef int SmartId;
 static constexpr const int InvalidLink = -1;
 
+class CEntity
+{
+public:
+
+	SmartId GetId() const { return m_id; }
+	void SetId(SmartId sid) { m_id = sid; }
+
+private:
+
+	SmartId m_id = InvalidLink;
+};
+
 template <typename T, bool SafeRemove>
 class CEntitySystem
 {
@@ -20,13 +32,14 @@ public:
 
 	CEntitySystem(const CEntitySystem&) = delete;
 
+	virtual ~CEntitySystem() = default;
+
 	template <typename... V>
 	SmartId CreateEntity(V&&... args)
 	{
 		SmartId sid = InvalidLink;
 
-		auto fnd = std::find_if(m_smartLinks.begin(), m_smartLinks.end(),
-			[this](int l) { return l == InvalidLink; });
+		auto fnd = std::find(m_smartLinks.begin(), m_smartLinks.end(), InvalidLink);
 		if (fnd != m_smartLinks.end())
 		{
 			*fnd = m_entities.size();
@@ -38,7 +51,7 @@ public:
 			sid = (SmartId)(m_smartLinks.size() - 1);
 		}
 
-		m_entities.emplace_back(std::piecewise_construct, std::make_tuple(std::forward<V>(args)...), std::make_tuple(sid));
+		m_entities.emplace_back(std::forward<V>(args)...).SetId(sid);
 
 		return sid;
 	}
@@ -62,7 +75,7 @@ public:
 	{
 		if (sid != InvalidLink && m_smartLinks[sid] != InvalidLink)
 		{
-			return &m_entities[m_smartLinks[sid]].first;
+			return &m_entities[m_smartLinks[sid]];
 		}
 		return nullptr;
 	}
@@ -72,18 +85,13 @@ public:
 		return (int)m_entities.size();
 	}
 
-	inline void ForEachEntity(std::function<void(T&)> f, int dRange = InvalidLink)
+	inline void ForEachEntity(std::function<void(T&)> f)
 	{
-		if (dRange == InvalidLink)
+		for (int i = 0; i < m_entities.size(); ++i)
 		{
-			dRange = (int)m_entities.size();
-		}
-
-		for (int i = 0; i < dRange; ++i)
-		{
-			if (m_entities[i].second != InvalidLink)
+			if (m_entities[i].GetId() != InvalidLink)
 			{
-				f(m_entities[i].first);
+				f(m_entities[i]);
 			}
 		}
 	}
@@ -92,7 +100,7 @@ public:
 	{
 		for (int i = 0; i < m_entities.size(); ++i)
 		{
-			if (m_entities[i].second == InvalidLink)
+			if (m_entities[i].GetId() == InvalidLink)
 			{
 				DeleteEntity(i);
 			}
@@ -103,23 +111,23 @@ private:
 
 	inline void UnlinkEntity(int sid)
 	{
-		m_entities[m_smartLinks[sid]].second = InvalidLink;
+		m_entities[m_smartLinks[sid]].SetId(InvalidLink);
 		m_smartLinks[sid] = InvalidLink;
 	}
 
 	inline void DeleteEntity(int idx)
 	{
 		std::iter_swap(m_entities.begin() + idx, m_entities.end() - 1);
-		if (m_entities[idx].second != InvalidLink)
+		if (m_entities[idx].GetId() != InvalidLink)
 		{
-			m_smartLinks[m_entities[idx].second] = idx;
+			m_smartLinks[m_entities[idx].GetId()] = idx;
 		}
 		m_entities.pop_back();
 	}
 
 protected:
 
-	std::vector<std::pair<T, int>> m_entities;
+	std::vector<T> m_entities;
 	std::vector<int> m_smartLinks;
 
 };

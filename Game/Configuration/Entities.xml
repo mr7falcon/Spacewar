@@ -7,4 +7,8 @@
 		<Physics type="Circle" radius="5"/>
 		<Render texture="Resources/Textures/Projectiles/projectile1.png" scale="0.2,0.2"/>
 	</Entity>
+	<Entity name="Hole">
+		<Physics type="Circle" radius="15"/>
+		<Render texture="Resources/Textures/hole.png" scale="0.2,0.2"/>
+	</Entity>
 </Entities>

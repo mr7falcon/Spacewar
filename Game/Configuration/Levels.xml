@@ -1,0 +1,11 @@
+<Levels>
+	<Level name="Classic" size="1000,1000">
+		<Holes dynamicHoles="0">
+			<Hole position="500,500" gravity="5000" velocity="0,-5" rotationSpeed="30"/>
+		</Holes>
+		<PlayerSpawners dynamicPlayerSpawners="0">
+			<PlayerSpawner position="100,100" rotation="0"/>
+			<PlayerSpawner position="900,900" rotation="180"/>
+		</PlayerSpawners>
+	</Level>
+</Levels>

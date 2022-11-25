@@ -8,7 +8,9 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 
-class CRenderEntity
+#include "EntitySystem.h"
+
+class CRenderEntity : public CEntity
 {
 public:
 

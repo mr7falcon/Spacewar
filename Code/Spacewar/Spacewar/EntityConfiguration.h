@@ -4,6 +4,7 @@
 #include <map>
 
 #include <SFML/System/Vector2.hpp>
+#include <pugixml.hpp>
 
 #include "PhysicalPrimitive.h"
 #include "ResourceSystem.h"
@@ -43,6 +44,10 @@ public:
 	CEntityConfiguration(const CEntityConfiguration&) = delete;
 
 	const SEntityClass* GetEntityClass(const std::string& name) const;
+
+private:
+
+	void ParsePhysics(const pugi::xml_node& node, const std::string& name, SEntityClass& entityClass);
 
 private:
 
