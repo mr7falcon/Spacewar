@@ -26,7 +26,10 @@ void CGame::Initialize()
 	m_pRenderSystem = std::make_unique<CRenderSystem>();
 	m_pRenderProxy = std::make_unique<CRenderProxy>();
 
-	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Classic");
+	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Custom");
+	
+	float levelSize = m_pLogicalSystem->GetLevelSystem()->GetLevelSize();
+	m_view.reset(sf::FloatRect(0.f, 0.f, levelSize, levelSize));
 	
 	SmartId player1 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer();
 	if (CPlayer* pPlayer = static_cast<CPlayer*>(m_pLogicalSystem->GetActorSystem()->GetActor(player1)))
@@ -40,7 +43,13 @@ void CGame::Initialize()
 	}
 
 	m_window.create(sf::VideoMode(900, 900), "Spacewar");
+	m_window.setView(m_view);
 	m_window.setActive(false);
+}
+
+void CGame::Release()
+{
+	m_pLogicalSystem->GetActorSystem()->Release();
 }
 
 void CGame::Start()
@@ -89,6 +98,8 @@ void CGame::Start()
 	}
 
 	render.join();
+
+	Release();
 }
 
 void CGame::StartRender()
@@ -119,7 +130,11 @@ void CGame::StartRender()
 
 void CGame::RegisterWindowEventListener(IWindowEventListener* pEventListener)
 {
-	m_windowEventListeners.push_back(pEventListener);
+	auto fnd = std::find(m_windowEventListeners.begin(), m_windowEventListeners.end(), pEventListener);
+	if (fnd == m_windowEventListeners.end())
+	{
+		m_windowEventListeners.push_back(pEventListener);
+	}
 }
 
 void CGame::UnregisterWindowEventListener(IWindowEventListener* pEventListener)

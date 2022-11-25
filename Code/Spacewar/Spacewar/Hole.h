@@ -10,6 +10,8 @@ public:
 
 	void SetGravityForce(float fGravityForce) { m_fGravityForce = fGravityForce; }
 
+	virtual void OnCollision(SmartId sid) override;
+	virtual EActorType GetType() const override { return EActorType::Hole; }
 	virtual void Update(sf::Time dt) override;
 
 private:

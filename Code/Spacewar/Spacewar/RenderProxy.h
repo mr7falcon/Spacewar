@@ -14,7 +14,7 @@ public:
 	{
 		ERenderCommand_SetTransform,
 		ERenderCommand_SetTexture,
-		ERenderCommand_SetScale,
+		ERenderCommand_SetSize,
 	};
 
 	CRenderProxy() = default;
@@ -32,9 +32,9 @@ public:
 		{
 			m_memoryStreams[m_dWriteStream].Emplace<SetTextureCommand>(sid, std::forward<V>(args)...);
 		}
-		else if constexpr (cmd == ERenderCommand_SetScale)
+		else if constexpr (cmd == ERenderCommand_SetSize)
 		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetScaleCommand>(sid, std::forward<V>(args)...);
+			m_memoryStreams[m_dWriteStream].Emplace<SetSizeCommand>(sid, std::forward<V>(args)...);
 		}
 	}
 
@@ -74,16 +74,16 @@ private:
 		int textureId;
 	};
 
-	struct SetScaleCommand : public RenderCommand
+	struct SetSizeCommand : public RenderCommand
 	{
-		SetScaleCommand(SmartId _sid, sf::Vector2f&& _scale)
-			: RenderCommand(_sid), scale(_scale) {}
-		SetScaleCommand(SmartId _sid, const sf::Vector2f& _scale)
-			: RenderCommand(_sid), scale(_scale) {}
+		SetSizeCommand(SmartId _sid, sf::Vector2f&& _size)
+			: RenderCommand(_sid), size(_size) {}
+		SetSizeCommand(SmartId _sid, const sf::Vector2f& _size)
+			: RenderCommand(_sid), size(_size) {}
 
 		virtual void Execute() const override;
 
-		sf::Vector2f scale;
+		sf::Vector2f size;
 	};
 
 	static constexpr const size_t memory_buffer_initial_size = 1024;

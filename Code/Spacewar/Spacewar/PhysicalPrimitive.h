@@ -8,6 +8,7 @@ namespace PhysicalPrimitive
 	{
 		EPrimitiveType_Circle = 0,
 		EPrimitiveType_Capsule,
+		EPrimitiveType_Rectangle,
 		EPrimitiveType_Num,
 	};
 
@@ -39,10 +40,21 @@ namespace PhysicalPrimitive
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Capsule; }
 		virtual void Transform(const sf::Transform& transform) override;
 
-		sf::Vector2f m_vOrg;
 		sf::Vector2f m_vDir;
 		float m_fHalfHeight = 0.f;
 		float m_fRad = 0.f;
+	};
+
+	struct Rectangle : public Primitive
+	{
+		Rectangle(float fHalfWidth, float fHalfHeight)
+			: m_fHalfWidth(fHalfWidth), m_fHalfHeight(fHalfHeight) {}
+
+		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Rectangle; }
+		virtual void Transform(const sf::Transform& transform) override;
+
+		float m_fHalfWidth = 0.f;
+		float m_fHalfHeight = 0.f;
 	};
 }
 

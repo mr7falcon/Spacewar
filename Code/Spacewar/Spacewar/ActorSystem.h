@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 #include <memory>
 #include <functional>
 
@@ -17,14 +18,15 @@ public:
 	CActorSystem() = default;
 	CActorSystem(const CActorSystem&) = delete;
 	
-	template<typename T>
-	SmartId CreateActor()
+	template<typename T, typename... V>
+	SmartId CreateActor(V&&... args)
 	{
-		std::unique_ptr<CActor> pActor = std::make_unique<T>();
+		std::unique_ptr<CActor> pActor = std::make_unique<T>(std::forward<V>(args)...);
 		SmartId sid = pActor->GetEntity()->GetId();
 		m_actors[sid] = std::move(pActor);
 		return sid;
 	}
+	void RemoveActor(SmartId sid, bool immediate = false);
 
 	CActor* GetActor(SmartId sid);
 
@@ -32,8 +34,11 @@ public:
 	int GetNumPlayers() const;
 
 	void Update(sf::Time dt);
+	void CollectGarbage();
+	void Release();
 
 private:
 	
 	std::map<SmartId, std::unique_ptr<CActor>> m_actors;
+	std::vector<SmartId> m_removeDeferred;
 };

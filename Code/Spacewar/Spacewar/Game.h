@@ -6,6 +6,8 @@
 #include <vector>
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML\Graphics\View.hpp>
+#include <SFML/System/Time.hpp>
 
 class IWindowEventListener
 {
@@ -48,11 +50,14 @@ public:
 	void RegisterWindowEventListener(IWindowEventListener* pEventListener);
 	void UnregisterWindowEventListener(IWindowEventListener* pEventListener);
 
+	sf::Time GetCurrentTime() const { return m_gameClock.getElapsedTime(); }
+
 private:
 
 	CGame();
 
 	void Initialize();
+	void Release();
 
 	static void StartRender();
 
@@ -71,6 +76,8 @@ private:
 	bool m_bRenderComplete = true;
 
 	sf::RenderWindow m_window;
+	sf::View m_view;
+	sf::Clock m_gameClock;
 
 	std::vector<IWindowEventListener*> m_windowEventListeners;
 };

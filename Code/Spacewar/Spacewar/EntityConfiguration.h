@@ -35,7 +35,7 @@ public:
 	struct SEntityClass
 	{
 		int texture = InvalidResourceId;
-		sf::Vector2f vScale;
+		sf::Vector2f vSize;
 		PhysicalPrimitive::EPrimitiveType physicsType = PhysicalPrimitive::EPrimitiveType_Num;
 		std::unique_ptr<IPrimitiveConfig> pPhysics;
 	};

@@ -17,6 +17,9 @@ public:
 
 	SmartId CreateEntityFromClass(const std::string& name);
 
+	virtual void RemoveEntity(SmartId sid, bool immediate = false) override;
+	virtual void CollectGarbage() override;
+
 	void Update(sf::Time dt);
 
 	CActorSystem* GetActorSystem() { return m_pActorSystem.get(); }

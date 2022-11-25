@@ -20,14 +20,15 @@ CLogicalSystem::~CLogicalSystem() = default;
 void CLogicalSystem::Update(sf::Time dt)
 {
 	m_pActorSystem->Update(dt);
+	m_pLevelSystem->Update(dt);
 
-	sf::Vector2f levelSize = m_pLevelSystem->GetLevelSize();
-	auto checkLevelBoundaries = [](float coord, float maxCoord) -> float
+	float levelSize = m_pLevelSystem->GetLevelSize();
+	auto checkLevelBoundaries = [levelSize](float coord) -> float
 	{
 		if (coord < 0.f)
-			return maxCoord;
-		if (coord > maxCoord)
-			return 0.f;
+			return levelSize + coord;
+		if (coord > levelSize)
+			return coord - levelSize;
 		return coord;
 	};
 	
@@ -36,8 +37,8 @@ void CLogicalSystem::Update(sf::Time dt)
 			entity.Update(dt);
 
 			sf::Vector2f vPos = entity.GetPosition();
-			vPos.x = checkLevelBoundaries(vPos.x, levelSize.x);
-			vPos.y = checkLevelBoundaries(vPos.y, levelSize.y);
+			vPos.x = checkLevelBoundaries(vPos.x);
+			vPos.y = checkLevelBoundaries(vPos.y);
 			entity.SetPosition(vPos);
 		});
 }
@@ -52,8 +53,13 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 		{
 			if (pEntityClass->physicsType != PhysicalPrimitive::EPrimitiveType_Num)
 			{
-				SmartId physicalEntityId = CGame::Get().GetPhysicalSystem()->CreateEntityWithPrimitive(pEntityClass->physicsType, pEntityClass->pPhysics.get());
+				CPhysicalSystem* pPhysicalSystem = CGame::Get().GetPhysicalSystem();
+				SmartId physicalEntityId = pPhysicalSystem->CreateEntityWithPrimitive(pEntityClass->physicsType, pEntityClass->pPhysics.get());
 				pEntity->SetPhysics(physicalEntityId);
+				if (CPhysicalEntity* pPhysics = pPhysicalSystem->GetEntity(physicalEntityId))
+				{
+					pPhysics->SetParentEntityId(sid);
+				}
 			}
 
 			if (pEntityClass->texture >= 0)
@@ -62,11 +68,40 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 				pEntity->SetRender(renderEntityId);
 				CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
 				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, pEntityClass->texture);
-				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetScale>(renderEntityId, pEntityClass->vScale);
+				if (pEntityClass->vSize != sf::Vector2f())
+				{
+					pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetSize>(renderEntityId, pEntityClass->vSize);
+				}
 			}
 		}
 
 		return sid;
 	}
 	return InvalidLink;
+}
+
+void CLogicalSystem::RemoveEntity(SmartId sid, bool immediate)
+{
+	if (CLogicalEntity* pEntity = GetEntity(sid))
+	{
+		SmartId physicalEntityId = pEntity->GetPhysicalEntityId();
+		if (physicalEntityId != InvalidLink)
+		{
+			CGame::Get().GetPhysicalSystem()->RemoveEntity(physicalEntityId, immediate);
+		}
+
+		SmartId renderEntityId = pEntity->GetRenderEntityId();
+		if (renderEntityId != InvalidLink)
+		{
+			CGame::Get().GetRenderSystem()->RemoveEntity(renderEntityId, immediate);
+		}
+
+		CEntitySystem::RemoveEntity(sid, immediate);
+	}
+}
+
+void CLogicalSystem::CollectGarbage()
+{
+	m_pActorSystem->CollectGarbage();
+	CEntitySystem::CollectGarbage();
 }

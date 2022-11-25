@@ -21,7 +21,8 @@ CKeyboardController::CKeyboardController(const std::string& schema)
 	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->rotatePositive)] = EControllerEvent_RotatePositive_Released;
 	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->rotateNegative)] = EControllerEvent_RotateNegative_Pressed;
 	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->rotateNegative)] = EControllerEvent_RotateNegative_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->shoot)] = EControllerEvent_Shoot;
+	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->shoot)] = EControllerEvent_Shoot_Pressed;
+	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->shoot)] = EControllerEvent_Shoot_Released;
 
 	CGame::Get().RegisterWindowEventListener(this);
 }

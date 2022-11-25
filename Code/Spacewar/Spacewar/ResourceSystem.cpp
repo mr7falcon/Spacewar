@@ -4,7 +4,7 @@
 
 CResourceSystem::CResourceSystem(const std::filesystem::path& path)
 {
-	LoadResource<sf::Image>(path / "Textures", m_textures,
+	LoadResource<sf::Image>(path / TexturesDirectory, m_textures,
 		[](const std::string& path, sf::Image& texture) -> bool
 		{
 			return texture.loadFromFile(path);

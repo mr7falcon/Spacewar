@@ -137,6 +137,7 @@
     <ClCompile Include="..\..\pugixml\pugixml.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorSystem.cpp" />
+    <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="ConfigurationSystem.cpp" />
     <ClCompile Include="ControllerConfiguration.cpp" />
     <ClCompile Include="EntityConfiguration.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="PhysicalPrimitive.cpp" />
     <ClCompile Include="PhysicalSystem.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="RenderEntity.cpp" />
     <ClCompile Include="RenderProxy.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
@@ -161,6 +163,7 @@
     <ClInclude Include="..\..\pugixml\pugiconfig.hpp" />
     <ClInclude Include="..\..\pugixml\pugixml.hpp" />
     <ClInclude Include="ActorSystem.h" />
+    <ClInclude Include="Bonus.h" />
     <ClInclude Include="ConfigurationSystem.h" />
     <ClInclude Include="ControllerConfiguration.h" />
     <ClInclude Include="EntityConfiguration.h" />
@@ -180,6 +183,7 @@
     <ClInclude Include="PhysicalPrimitive.h" />
     <ClInclude Include="PhysicalSystem.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="RenderEntity.h" />
     <ClInclude Include="RenderProxy.h" />
     <ClInclude Include="RenderSystem.h" />

@@ -18,10 +18,13 @@ public:
 	CResourceSystem(const std::filesystem::path& path);
 	CResourceSystem(const CResourceSystem&) = delete;
 
-	int GetTextureId(const std::string& path) const { return GetResourceId(m_textures, path); }
+	int GetTextureId(const std::string& path) const { return GetResourceId(m_textures, std::filesystem::path(path)); }
 	const sf::Image* GetTexture(int id) const { return GetResource(m_textures, id); }
+	std::vector<int> GetTexturesInDirectory(const std::string& subDir) const { return GetResourcesInDirectory(m_textures, std::filesystem::path(TexturesDirectory) / subDir); }
 
 private:
+
+	static constexpr const char* TexturesDirectory = "Textures";
 
 	template <typename T>
 	struct SResources
@@ -57,10 +60,9 @@ private:
 	}
 	
 	template <typename T>
-	inline int GetResourceId(const SResources<T>& resources, const std::string& path) const
+	inline int GetResourceId(const SResources<T>& resources, std::filesystem::path path) const
 	{
-		std::filesystem::path tmp(path);
-		auto fnd = resources.m_resourcesMap.find(tmp.make_preferred().string());
+		auto fnd = resources.m_resourcesMap.find(path.make_preferred().string());
 		return fnd != resources.m_resourcesMap.end() ? fnd->second : InvalidResourceId;
 	}
 
@@ -72,6 +74,20 @@ private:
 			return &resources.m_resources[id];
 		}
 		return nullptr;
+	}
+
+	template <typename T>
+	std::vector<int> GetResourcesInDirectory(const SResources<T>& resources, std::filesystem::path dir) const
+	{
+		std::vector<int> res;
+		for (const auto& [path, id] : resources.m_resourcesMap)
+		{
+			if (path.find(dir.make_preferred().string()) != std::string::npos)
+			{
+				res.push_back(id);
+			}
+		}
+		return res;
 	}
 
 private:

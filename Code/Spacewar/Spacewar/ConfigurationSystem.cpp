@@ -36,4 +36,10 @@ void CConfigurationSystem::LoadPlayerConfiguration(const std::filesystem::path& 
 	m_playerConfiguration.fAccel = root.attribute("acceleration").as_float();
 	m_playerConfiguration.fAngSpeed = root.attribute("angularSpeed").as_float();
 	m_playerConfiguration.fProjSpeed = root.attribute("projectileSpeed").as_float();
+	m_playerConfiguration.vShootHelper = root.attribute("shootHelper").as_vector();
+	m_playerConfiguration.fShootCooldown = root.attribute("shootCooldown").as_float();
+	m_playerConfiguration.fProjectileLifetime = root.attribute("projectileLifetime").as_float();
+	m_playerConfiguration.dAmmoCount = root.attribute("ammoCount").as_int();
+	m_playerConfiguration.fFuel = root.attribute("fuel").as_float();
+	m_playerConfiguration.fConsumption = root.attribute("consumption").as_float();
 }

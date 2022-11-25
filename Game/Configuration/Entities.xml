@@ -1,14 +1,38 @@
 <Entities>
-	<Entity name="Spaceship">
-		<Physics type="Capsule" radius="25" halfheight="40" axis="0,1"/>
-		<Render texture="Resources/Textures/Spaceships/spaceship1.png" scale="0.2,0.2"/>
+	<Entity name="Spaceship" size="40,60">
+		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Render texture="Resources/Textures/Spaceships/spaceship1.png"/>
 	</Entity>
-	<Entity name="Projectile">
+	<Entity name="Projectile" size="10,30">
 		<Physics type="Circle" radius="5"/>
-		<Render texture="Resources/Textures/Projectiles/projectile1.png" scale="0.2,0.2"/>
+		<Render texture="Resources/Textures/Projectiles/projectile2.png"/>
 	</Entity>
-	<Entity name="Hole">
-		<Physics type="Circle" radius="15"/>
-		<Render texture="Resources/Textures/hole.png" scale="0.2,0.2"/>
+	<Entity name="Hole" size="70,70">
+		<Physics type="Circle" radius="25"/>
+		<Render texture="Resources/Textures/hole.png"/>
+	</Entity>
+	<Entity name="Bonus_ammo1" size="40,40"/>
+		<Physics type="Rectangle" halfWidth="20" halfHeight="20"/>
+		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	</Entity>
+	<Entity name="Bonus_ammo2" size="50,50"/>
+		<Physics type="Rectangle" halfWidth="25" halfHeight="25"/>
+		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	</Entity>
+	<Entity name="Bonus_ammo3" size="60,60"/>
+		<Physics type="Rectangle" halfWidth="30" halfHeight="30"/>
+		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	</Entity>
+	<Entity name="Bonus_fuel1" size="40,40"/>
+		<Physics type="Rectangle" halfWidth="20" halfHeight="20"/>
+		<Render texture="Resources/Textures/bonus_fuel1.png"/>
+	</Entity>
+	<Entity name="Bonus_fuel2" size="50,50"/>
+		<Physics type="Rectangle" halfWidth="25" halfHeight="25"/>
+		<Render texture="Resources/Textures/bonus_fuel1.png"/>
+	</Entity>
+	<Entity name="Bonus_fuel3" size="60,60"/>
+		<Physics type="Rectangle" halfWidth="30" halfHeight="30"/>
+		<Render texture="Resources/Textures/bonus_fuel1.png"/>
 	</Entity>
 </Entities>

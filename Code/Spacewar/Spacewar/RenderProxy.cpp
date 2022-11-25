@@ -21,8 +21,8 @@ void CRenderProxy::ExecuteCommands()
 		case ERenderCommand_SetTexture:
 			m_memoryStreams[m_dReadStream].Extract<SetTextureCommand>().Execute();
 			break;
-		case ERenderCommand_SetScale:
-			m_memoryStreams[m_dReadStream].Extract<SetScaleCommand>().Execute();
+		case ERenderCommand_SetSize:
+			m_memoryStreams[m_dReadStream].Extract<SetSizeCommand>().Execute();
 			break;
 		}
 	}
@@ -48,10 +48,10 @@ void CRenderProxy::SetTextureCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetScaleCommand::Execute() const
+void CRenderProxy::SetSizeCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
-		pRenderEntity->SetScale(scale);
+		pRenderEntity->SetSize(size);
 	}
 }

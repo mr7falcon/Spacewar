@@ -81,6 +81,12 @@
     <ClCompile Include="LevelConfiguration.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bonus.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -159,6 +165,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LevelConfiguration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bonus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

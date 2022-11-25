@@ -56,11 +56,11 @@ public:
 		return sid;
 	}
 
-	void RemoveEntity(SmartId sid, bool immediate = false)
+	virtual void RemoveEntity(SmartId sid, bool immediate = false)
 	{
 		if (sid < m_smartLinks.size())
 		{
-			if constexpr (SafeRemove || !immediate)
+			if (SafeRemove || !immediate)
 			{
 				UnlinkEntity(sid);
 			}
@@ -73,7 +73,7 @@ public:
 
 	inline T* GetEntity(SmartId sid)
 	{
-		if (sid != InvalidLink && m_smartLinks[sid] != InvalidLink)
+		if (sid >= 0 && sid < m_smartLinks.size() && m_smartLinks[sid] != InvalidLink)
 		{
 			return &m_entities[m_smartLinks[sid]];
 		}
@@ -96,7 +96,7 @@ public:
 		}
 	}
 
-	void CollectGarbage()
+	virtual void CollectGarbage()
 	{
 		for (int i = 0; i < m_entities.size(); ++i)
 		{

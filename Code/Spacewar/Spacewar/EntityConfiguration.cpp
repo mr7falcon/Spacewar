@@ -77,6 +77,8 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 
 			SEntityClass entityClass;
 
+			entityClass.vSize = iter->attribute("size").as_vector();
+
 			auto physics = iter->child("Physics");
 			if (physics)
 			{
@@ -91,7 +93,6 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 				{
 					std::cout << "Invalid texture " << render.attribute("texture").value() << " specified for entity " << name << std::endl;
 				}
-				entityClass.vScale = render.attribute("scale").as_vector();
 			}
 
 			m_entityClasses[std::move(name)] = std::move(entityClass);

@@ -11,11 +11,17 @@ class CConfigurationSystem
 {
 public:
 
-	struct SPlayerConfiguration
+	struct SPlayerConfiguration			// Move it in CPlayerConfiguration along with the other configurations to choose
 	{
 		float fAccel = 5.f;
 		float fAngSpeed = 5.f;
 		float fProjSpeed = 10.f;
+		sf::Vector2f vShootHelper;
+		float fShootCooldown = 1.f;
+		float fProjectileLifetime = 4.f;
+		int dAmmoCount = -1;
+		float fFuel = -1.f;
+		float fConsumption = 0.f;
 	};
 
 	CConfigurationSystem(const std::filesystem::path& path);

@@ -8,7 +8,8 @@ enum EControllerEvent : uint8_t
 	EControllerEvent_RotatePositive_Released,
 	EControllerEvent_RotateNegative_Pressed,
 	EControllerEvent_RotateNegative_Released,
-	EControllerEvent_Shoot,
+	EControllerEvent_Shoot_Pressed,
+	EControllerEvent_Shoot_Released,
 };
 
 class CPlayer;

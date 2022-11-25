@@ -18,7 +18,7 @@ public:
 
 	void SetTexture(const sf::Texture* pTexture);
 	void SetTransform(const sf::Transform& transform) { m_transform = transform; }
-	void SetScale(const sf::Vector2f& scale) { m_sprite.setScale(scale); }
+	void SetSize(const sf::Vector2f& vSize);
 
 	void Render(sf::RenderTarget& target) const;
 

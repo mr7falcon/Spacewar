@@ -27,4 +27,11 @@ namespace MathHelpers
 		sf::Vector2f col(matrix[0], matrix[4]);
 		return GetLength(col);
 	}
+
+	static inline sf::Vector2f RotateVector(const sf::Vector2f& v, float a)
+	{
+		float sina = sinf(a);
+		float cosa = cosf(a);
+		return sf::Vector2f(cosa * v.x - sina * v.y, sina * v.x + cosa * v.y);
+	}
 }

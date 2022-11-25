@@ -5,6 +5,9 @@
 
 #include "EntitySystem.h"
 
+class CPhysicalEntity;
+class CRenderEntity;
+
 class CLogicalEntity : public CEntity, private sf::Transformable
 {
 public:
@@ -27,6 +30,9 @@ public:
 	const sf::Vector2f& GetVelocity() const { return m_vVel; }
 	float GetAngularSpeed() const { return m_fAngSpeed; }
 	sf::Vector2f GetForwardDirection() const;
+
+	SmartId GetPhysicalEntityId() { return m_physicalEntityId; }
+	SmartId GetRenderEntityId() { return m_renderEntityId; }
 	
 	void Update(sf::Time dt);
 
