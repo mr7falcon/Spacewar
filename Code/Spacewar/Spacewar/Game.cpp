@@ -31,12 +31,12 @@ void CGame::Initialize()
 	float levelSize = m_pLogicalSystem->GetLevelSystem()->GetLevelSize();
 	m_view.reset(sf::FloatRect(0.f, 0.f, levelSize, levelSize));
 	
-	SmartId player1 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer();
+	SmartId player1 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer("player1");
 	if (CPlayer* pPlayer = static_cast<CPlayer*>(m_pLogicalSystem->GetActorSystem()->GetActor(player1)))
 	{
 		pPlayer->SetController(std::make_unique<CKeyboardController>("Schema1"));
 	}
-	SmartId player2 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer();
+	SmartId player2 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer("player2");
 	if (CPlayer* pPlayer = static_cast<CPlayer*>(m_pLogicalSystem->GetActorSystem()->GetActor(player2)))
 	{
 		pPlayer->SetController(std::make_unique<CKeyboardController>("Schema2"));

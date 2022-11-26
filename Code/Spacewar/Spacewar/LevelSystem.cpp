@@ -3,6 +3,7 @@
 
 #include "LevelSystem.h"
 #include "ConfigurationSystem.h"
+#include "PlayerConfiguration.h"
 #include "ResourceSystem.h"
 #include "Game.h"
 #include "LogicalSystem.h"
@@ -96,7 +97,7 @@ void CLevelSystem::SpawnStar(int textureId, const sf::Vector2f& vPos, const sf::
 	pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(renderEntityId, sf::Transform().translate(vPos).scale(vScale));
 }
 
-SmartId CLevelSystem::SpawnPlayer()
+SmartId CLevelSystem::SpawnPlayer(const std::string& config)
 {
 	if (!m_pLevelConfig)
 	{
@@ -112,7 +113,14 @@ SmartId CLevelSystem::SpawnPlayer()
 		return InvalidLink;
 	}
 
-	SmartId playerId = pActorSystem->CreateActor<CPlayer>();
+	const auto* pPlayerConfig = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetConfiguration(config);
+	if (!pPlayerConfig)
+	{
+		std::cout << "Failed to find player configuration " << config << std::endl;
+		return InvalidLink;
+	}
+
+	SmartId playerId = pActorSystem->CreateActor<CPlayer>(pPlayerConfig);
 
 	if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(playerId)))
 	{

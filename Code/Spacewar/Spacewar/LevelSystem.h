@@ -16,7 +16,7 @@ public:
 	CLevelSystem(const CLevelSystem&) = delete;
 
 	void CreateLevel(const std::string& config);
-	SmartId SpawnPlayer();
+	SmartId SpawnPlayer(const std::string& config);
 
 	void TeleportEntity(CLogicalEntity* pEntity, const sf::Vector2f& vOrg);
 

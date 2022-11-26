@@ -153,6 +153,7 @@
     <ClCompile Include="PhysicalPrimitive.cpp" />
     <ClCompile Include="PhysicalSystem.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerConfiguration.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="RenderEntity.cpp" />
     <ClCompile Include="RenderProxy.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="PhysicalPrimitive.h" />
     <ClInclude Include="PhysicalSystem.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerConfiguration.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="RenderEntity.h" />
     <ClInclude Include="RenderProxy.h" />

@@ -1,17 +1,19 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <SFML\System\Time.hpp>
 
 #include "Actor.h"
 #include "IController.h"
+#include "PlayerConfiguration.h"
 
 class CPlayer : public CActor
 {
 public:
 
-	CPlayer();
+	CPlayer(const CPlayerConfiguration::SPlayerConfiguration* pConfig);
 
 	void SetController(std::unique_ptr<IController> pController);
 	void OnControllerEvent(EControllerEvent evt);
@@ -33,12 +35,17 @@ private:
 
 private:
 
+	const CPlayerConfiguration::SPlayerConfiguration* m_pConfig = nullptr;
+
 	std::unique_ptr<IController> m_pController;
 
 	float m_fAccel = 0.f;
 	
 	bool m_bShooting = false;
-	sf::Time m_lastShootTime;
+	
+	int m_dShotsInBurst = 0;
+	float m_fBurstCooldown = 0.f;
+	float m_fShotsCooldown = 0.f;
 
 	int m_dAmmoCount = -1;
 	float m_fFuel = -1.f;

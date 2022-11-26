@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Bonus.h"
 #include "Game.h"
 #include "LogicalSystem.h"
@@ -28,9 +30,12 @@ void CBonus::OnCollision(SmartId sid)
 				pPlayer->SetFuel(pPlayer->GetFuel() + m_fVal);
 				break;
 			}
+
+			Destroy();
+
+			std::cout << "Bonus collected" << std::endl;
 		}
 	}
-	Destroy();
 }
 
 void CBonus::Update(sf::Time dt)
@@ -39,5 +44,7 @@ void CBonus::Update(sf::Time dt)
 	if (m_fLifetime < 0.f)
 	{
 		Destroy();
+
+		std::cout << "Bonus lifetime ended" << std::endl;
 	}
 }

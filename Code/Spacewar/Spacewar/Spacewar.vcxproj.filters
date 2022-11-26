@@ -87,6 +87,9 @@
     <ClCompile Include="Bonus.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerConfiguration.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -171,6 +174,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Bonus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerConfiguration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

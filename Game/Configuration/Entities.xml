@@ -1,5 +1,5 @@
 <Entities>
-	<Entity name="Spaceship" size="40,60">
+	<Entity name="Spaceship1" size="40,60">
 		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship1.png"/>
 	</Entity>

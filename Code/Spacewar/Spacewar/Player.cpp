@@ -9,14 +9,14 @@
 #include "PhysicalEntity.h"
 #include "Projectile.h"
 
-CPlayer::CPlayer()
-	: CActor("Spaceship")
+CPlayer::CPlayer(const CPlayerConfiguration::SPlayerConfiguration* pConfig)
+	: CActor(pConfig->entityName), m_pConfig(pConfig)
 {
 	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsConsumablesAllowed())
 	{
-		const CConfigurationSystem::SPlayerConfiguration& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration();
-		m_dAmmoCount = config.dAmmoCount;
-		m_fFuel = config.fFuel;
+		m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
+		m_dAmmoCount = m_pConfig->dAmmoCount;
+		m_fFuel = m_pConfig->fFuel;
 	}
 }
 
@@ -29,25 +29,24 @@ void CPlayer::SetController(std::unique_ptr<IController> pController)
 void CPlayer::OnControllerEvent(EControllerEvent evt)
 {
 	CLogicalEntity* pEntity = GetEntity();
-	const CConfigurationSystem::SPlayerConfiguration& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration();
-
+	
 	switch (evt)
 	{
 	case EControllerEvent_MoveForward_Pressed:
-		m_fAccel = config.fAccel;
+		m_fAccel = m_pConfig->fAccel;
 		break;
 	case EControllerEvent_MoveForward_Released:
 		m_fAccel = 0.f;
 		break;
 	case EControllerEvent_RotatePositive_Pressed:
-		pEntity->SetAngularSpeed(config.fAngSpeed);
+		pEntity->SetAngularSpeed(m_pConfig->fAngSpeed);
 		break;
 	case EControllerEvent_RotatePositive_Released:
 	case EControllerEvent_RotateNegative_Released:
 		pEntity->SetAngularSpeed(0.f);
 		break;
 	case EControllerEvent_RotateNegative_Pressed:
-		pEntity->SetAngularSpeed(-config.fAngSpeed);
+		pEntity->SetAngularSpeed(-m_pConfig->fAngSpeed);
 		break;
 	case EControllerEvent_Shoot_Pressed:
 		m_bShooting = true;
@@ -80,10 +79,16 @@ void CPlayer::Update(sf::Time dt)
 
 		if (m_fFuel > 0.f)
 		{
-			const CConfigurationSystem::SPlayerConfiguration& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration();
-			m_fFuel = std::max(0.f, m_fFuel - config.fConsumption * dt.asSeconds());
-			std::cout << "Fuel " << m_fFuel << std::endl;
+			m_fFuel = std::max(0.f, m_fFuel - m_pConfig->fConsumption * dt.asSeconds());
 		}
+	}
+
+	m_fShotsCooldown -= dt.asSeconds();
+	m_fBurstCooldown -= dt.asSeconds();
+
+	if (m_fBurstCooldown <= 0.f)
+	{
+		m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
 	}
 
 	if (m_bShooting && CanShoot())
@@ -94,9 +99,7 @@ void CPlayer::Update(sf::Time dt)
 
 bool CPlayer::CanShoot() const
 {
-	const CConfigurationSystem::SPlayerConfiguration& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration();
-	float elapsed = (CGame::Get().GetCurrentTime() - m_lastShootTime).asSeconds();
-	return m_dAmmoCount != 0 && elapsed > config.fShootCooldown;
+	return m_dShotsInBurst > 0 && m_fShotsCooldown <= 0.f;
 }
 
 void CPlayer::Shoot()
@@ -107,22 +110,23 @@ void CPlayer::Shoot()
 	if (CProjectile* pProjectile = static_cast<CProjectile*>(pActorSystem->GetActor(projectileId)))
 	{
 		CLogicalEntity* pEntity = GetEntity();
-		const CConfigurationSystem::SPlayerConfiguration& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration();
 		
-		pProjectile->SetLifetime(config.fProjectileLifetime);
+		pProjectile->SetLifetime(m_pConfig->fProjectileLifetime);
 
 		if (CLogicalEntity* pProjectileEntity = pProjectile->GetEntity())
 		{
-			pProjectileEntity->SetPosition(pEntity->GetTransform().transformPoint(config.vShootHelper));
+			pProjectileEntity->SetPosition(pEntity->GetTransform().transformPoint(m_pConfig->vShootHelper));
 			pProjectileEntity->SetRotation(pEntity->GetRotation());
-			pProjectileEntity->SetVelocity(pEntity->GetForwardDirection() * config.fProjSpeed);
+			pProjectileEntity->SetVelocity(pEntity->GetForwardDirection() * m_pConfig->fProjSpeed);
 		}
 	}
+
+	--m_dShotsInBurst;
+	m_fShotsCooldown = m_pConfig->fShootCooldown;
+	m_fBurstCooldown = m_pConfig->fBurstCooldown;
 	
 	if (m_dAmmoCount > 0)
 	{
 		--m_dAmmoCount;
-		std::cout << "Ammo count " << m_dAmmoCount << std::endl;
 	}
-	m_lastShootTime = CGame::Get().GetCurrentTime();
 }

@@ -100,25 +100,36 @@ IMPLEMENT_INTERSECTION(Capsule, Circle)
 
 inline static void CalculateNormals(const std::vector<sf::Vector2f>& vertices, std::vector<sf::Vector2f>& normals)
 {
-	for (const auto& vertex : vertices)
+	if (vertices.size() < 2)
 	{
-		sf::Vector2f norm = MathHelpers::Normalize(sf::Vector2f(vertex.y, -vertex.x));
+		return;
+	}
 
-		bool exist = false;
-
+	auto pushIfNotExist = [&](const sf::Vector2f& norm)
+	{
 		for (const auto& normal : normals)
 		{
 			if (normal == norm || normal == -norm)
 			{
-				exist = true;
+				return;
 			}
 		}
 
-		if (!exist)
-		{
-			normals.push_back(std::move(norm));
-		}
+		normals.push_back(norm);
+	};
+
+	auto findNorm = [pushIfNotExist](const sf::Vector2f& pt1, const sf::Vector2f& pt2)
+	{
+		sf::Vector2f dir(pt2 - pt1);
+		sf::Vector2f norm = MathHelpers::Normalize(sf::Vector2f(dir.y, -dir.x));
+		pushIfNotExist(norm);
+	};
+
+	for (int i = 1; i < vertices.size(); ++i)
+	{
+		findNorm(vertices[i - 1], vertices[1]);
 	}
+	findNorm(vertices[0], vertices[vertices.size() - 1]);
 }
 
 inline static void CalculateMinMaxProjects(const std::vector<sf::Vector2f>& vertices, const sf::Vector2f& normal, float& min, float& max)
