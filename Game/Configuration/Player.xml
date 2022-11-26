@@ -1,1 +1,1 @@
-<Player acceleration="30" angularSpeed="50" projectileSpeed="300" shootHelper="0,50" shootCooldown="0.3" projectileLifetime="3" ammoCount="50" fuel="1000" consumption="100"/>
+<Player acceleration="30" angularSpeed="50" projectileSpeed="300" shootHelper="0,50" shootCooldown="0.3" projectileLifetime="3" ammoCount="50" fuel="3000" consumption="100"/>

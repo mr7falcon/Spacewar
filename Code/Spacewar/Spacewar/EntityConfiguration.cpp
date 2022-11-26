@@ -13,6 +13,10 @@ inline static PhysicalPrimitive::EPrimitiveType ParsePrimitiveType(const std::st
 	{
 		return PhysicalPrimitive::EPrimitiveType_Capsule;
 	}
+	else if (type == "Polygon")
+	{
+		return PhysicalPrimitive::EPrimitiveType_Polygon;
+	}
 	return PhysicalPrimitive::EPrimitiveType_Num;
 }
 
@@ -35,6 +39,16 @@ void CEntityConfiguration::ParsePhysics(const pugi::xml_node& node, const std::s
 			float fHalfHeight = node.attribute("halfheight").as_float();
 			sf::Vector2f vAxis = node.attribute("axis").as_vector();
 			entityClass.pPhysics = std::make_unique<CEntityConfiguration::CapsuleConfig>(fRad, fHalfHeight, std::move(vAxis));
+		}
+		break;
+		case PhysicalPrimitive::EPrimitiveType_Polygon:
+		{
+			std::vector<sf::Vector2f> vertices;
+			for (auto iter = node.begin(); iter != node.end(); ++iter)
+			{
+				vertices.push_back(iter->attribute("coords").as_vector());
+			}
+			entityClass.pPhysics = std::make_unique<CEntityConfiguration::PolygonConfig>(std::move(vertices));
 		}
 		break;
 		}

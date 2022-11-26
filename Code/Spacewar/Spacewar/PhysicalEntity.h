@@ -18,10 +18,10 @@ class CPhysicalEntity : public CEntity
 public:
 
 	CPhysicalEntity() = default;
-	CPhysicalEntity(std::unique_ptr<PhysicalPrimitive::Primitive> pPrimitive)
+	CPhysicalEntity(std::unique_ptr<PhysicalPrimitive::IPrimitive> pPrimitive)
 		: m_pPrimitive(std::move(pPrimitive)) {}
 	
-	const PhysicalPrimitive::Primitive* GetPhysics() const { return m_pPrimitive.get(); }
+	const PhysicalPrimitive::IPrimitive* GetPhysics() const { return m_pPrimitive.get(); }
 
 	void OnTransformChanged(const sf::Transform& transform);
 	void OnCollision(SmartId sid);
@@ -34,7 +34,7 @@ public:
 
 private:
 	
-	std::unique_ptr<PhysicalPrimitive::Primitive> m_pPrimitive;
+	std::unique_ptr<PhysicalPrimitive::IPrimitive> m_pPrimitive;
 	sf::Transform m_transform;
 
 	std::vector<IPhysicalEventListener*> m_eventListeners;

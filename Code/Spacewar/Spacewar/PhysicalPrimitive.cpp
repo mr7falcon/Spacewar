@@ -9,22 +9,29 @@ void PhysicalPrimitive::Circle::Transform(const sf::Transform& transform)
 
 void PhysicalPrimitive::Capsule::Transform(const sf::Transform& transform)
 {
-	m_vOrg = transform.transformPoint(m_vOrg);
-	float scale = MathHelpers::GetScaleAny(transform);
-	m_fRad *= scale;
-	m_fHalfHeight *= scale;
-	m_vDir = MathHelpers::Normalize(transform.transformPoint(m_vDir) - m_vOrg);
+	m_vA = transform.transformPoint(m_vA);
+	m_vB = transform.transformPoint(m_vB);
+	m_fRad *= MathHelpers::GetScaleAny(transform);
 }
 
-void PhysicalPrimitive::Rectangle::Transform(const sf::Transform& transform)
+inline static void CheckMinMax(float& min, float& max)
 {
-	float scale = MathHelpers::GetScaleAny(transform);
-	m_fHalfWidth *= scale;
-	m_fHalfHeight *= scale;
+	if (max < min)
+	{
+		std::swap(min, max);
+	}
+}
+
+void PhysicalPrimitive::Polygon::Transform(const sf::Transform& transform)
+{
+	for (auto& vertex : m_vertices)
+	{
+		vertex = transform.transformPoint(vertex);
+	}
 }
 
 #define INTERSECTION(T1, T2) Intersection_##T1##_##T2
-#define IMPLEMENT_INTERSECTION(T1, T2) static bool INTERSECTION(T1, T2)(const PhysicalPrimitive::Primitive* p1, const PhysicalPrimitive::Primitive* p2)
+#define IMPLEMENT_INTERSECTION(T1, T2) static bool INTERSECTION(T1, T2)(const PhysicalPrimitive::IPrimitive* p1, const PhysicalPrimitive::IPrimitive* p2)
 #define CAST_ARGS(T1, N1, T2, N2)\
 	const PhysicalPrimitive::T1* N1 = static_cast<const PhysicalPrimitive::T1*>(p1);\
 	const PhysicalPrimitive::T2* N2 = static_cast<const PhysicalPrimitive::T2*>(p2)
@@ -34,55 +41,56 @@ IMPLEMENT_INTERSECTION(Default, Default)
 	return false;
 }
 
-static inline bool SpheresIntersection(const sf::Vector2f& vOrg1, float fRad1, const sf::Vector2f& vOrg2, float fRad2)
-{
-	sf::Vector2f diff = vOrg1 - vOrg2;
-	float dist2 = MathHelpers::DotProd(diff, diff);
-	float width = fRad1 + fRad2;
-	return dist2 <= width * width;
-}
-
 IMPLEMENT_INTERSECTION(Circle, Circle)
 {
 	CAST_ARGS(Circle, c1, Circle, c2);
-	return SpheresIntersection(c1->m_vOrg, c1->m_fRad, c2->m_vOrg, c2->m_fRad);
+	
+	sf::Vector2f diff = c1->m_vOrg - c2->m_vOrg;
+	float dist2 = MathHelpers::DotProd(diff, diff);
+	float width = c1->m_fRad + c2->m_fRad;
+	return dist2 <= width * width;
 }
 
 static inline sf::Vector2f FindClosestPointOnCapsuleAxis(const PhysicalPrimitive::Capsule* pCap, const sf::Vector2f& vPt)
 {
-	float projLen = MathHelpers::DotProd(pCap->m_vDir, vPt - pCap->m_vOrg);
-	return pCap->m_vOrg + pCap->m_vDir * std::clamp(projLen, -pCap->m_fHalfHeight, pCap->m_fHalfHeight);
+	sf::Vector2f vDir = pCap->m_vA - pCap->m_vB;
+	float len = MathHelpers::GetLength(vDir);
+	if (len > 0.f)
+	{
+		vDir /= len;
+		float projLen = MathHelpers::DotProd(vDir, vPt - pCap->m_vB);
+		return pCap->m_vB + vDir * std::clamp(projLen, 0.f, len);
+	}
+	return pCap->m_vB;
 }
 
 IMPLEMENT_INTERSECTION(Capsule, Capsule)
 {
 	CAST_ARGS(Capsule, c1, Capsule, c2);
 
-	sf::Vector2f ax1 = c1->m_vDir * c1->m_fHalfHeight;
-	sf::Vector2f a1 = c1->m_vOrg + ax1;
-	sf::Vector2f b1 = c1->m_vOrg - ax1;
+	float d2a1a2 = MathHelpers::DotProd(c1->m_vA, c2->m_vA);
+	float d2a1b2 = MathHelpers::DotProd(c1->m_vB, c2->m_vB);
+	float d2b1a2 = MathHelpers::DotProd(c1->m_vB, c2->m_vA);
+	float d2b1b2 = MathHelpers::DotProd(c1->m_vB, c2->m_vB);
 
-	sf::Vector2f ax2 = c2->m_vDir * c2->m_fHalfHeight;
-	sf::Vector2f a2 = c2->m_vOrg + ax2;
-	sf::Vector2f b2 = c2->m_vOrg - ax2;
-
-	float d2a1a2 = MathHelpers::DotProd(a1, a2);
-	float d2a1b2 = MathHelpers::DotProd(a1, b2);
-	float d2b1a2 = MathHelpers::DotProd(b1, a2);
-	float d2b1b2 = MathHelpers::DotProd(b1, b2);
-
-	sf::Vector2f best1 = (d2b1a2 < d2a1a2 || d2b1a2 < d2a1b2 || d2b1b2 < d2a1a2 || d2b1b2 < d2a1b2) ? b1 : a1;
+	sf::Vector2f best1 = (d2b1a2 < d2a1a2 || d2b1a2 < d2a1b2 || d2b1b2 < d2a1a2 || d2b1b2 < d2a1b2) ? c1->m_vB : c1->m_vA;
 	sf::Vector2f best2 = FindClosestPointOnCapsuleAxis(c2, best1);
 	best1 = FindClosestPointOnCapsuleAxis(c1, best2);
 
-	return SpheresIntersection(best1, c1->m_fRad, best2, c2->m_fRad);
+	PhysicalPrimitive::Circle c1c(best1, c1->m_fRad);
+	PhysicalPrimitive::Circle c2c(best2, c2->m_fRad);
+
+	return INTERSECTION(Circle, Circle)(&c1c, &c2c);
 }
 
 IMPLEMENT_INTERSECTION(Circle, Capsule)
 {
 	CAST_ARGS(Circle, c1, Capsule, c2);
 	sf::Vector2f proj = FindClosestPointOnCapsuleAxis(c2, c1->m_vOrg);
-	return SpheresIntersection(c1->m_vOrg, c1->m_fRad, proj, c2->m_fRad);
+
+	PhysicalPrimitive::Circle c2c(proj, c2->m_fRad);
+
+	return INTERSECTION(Circle, Circle)(c1, &c2c);
 }
 
 IMPLEMENT_INTERSECTION(Capsule, Circle)
@@ -90,61 +98,131 @@ IMPLEMENT_INTERSECTION(Capsule, Circle)
 	return INTERSECTION(Circle, Capsule)(p2, p1);
 }
 
-IMPLEMENT_INTERSECTION(Rectangle, Rectangle)
+inline static void CalculateNormals(const std::vector<sf::Vector2f>& vertices, std::vector<sf::Vector2f>& normals)
 {
-	CAST_ARGS(Rectangle, r1, Rectangle, r2);
-	
-	sf::Vector2f min1(r1->m_vOrg.x - r1->m_fHalfWidth, r1->m_vOrg.y - r1->m_fHalfHeight);
-	sf::Vector2f max1(r1->m_vOrg.x + r1->m_fHalfWidth, r1->m_vOrg.y + r1->m_fHalfHeight);
-	sf::Vector2f min2(r2->m_vOrg.x - r2->m_fHalfWidth, r2->m_vOrg.y - r2->m_fHalfHeight);
-	sf::Vector2f max2(r2->m_vOrg.x + r2->m_fHalfWidth, r2->m_vOrg.y + r2->m_fHalfHeight);
-
-	if (min1.x > max2.x || min2.x > max1.x || min1.y > max2.y || min2.y > max1.y)
+	for (const auto& vertex : vertices)
 	{
-		return false;
+		sf::Vector2f norm = MathHelpers::Normalize(sf::Vector2f(vertex.y, -vertex.x));
+
+		bool exist = false;
+
+		for (const auto& normal : normals)
+		{
+			if (normal == norm || normal == -norm)
+			{
+				exist = true;
+			}
+		}
+
+		if (!exist)
+		{
+			normals.push_back(std::move(norm));
+		}
+	}
+}
+
+inline static void CalculateMinMaxProjects(const std::vector<sf::Vector2f>& vertices, const sf::Vector2f& normal, float& min, float& max)
+{
+	min = FLT_MAX;
+	max = FLT_MIN;
+
+	for (const auto& vertex : vertices)
+	{
+		float proj = MathHelpers::DotProd(normal, vertex);
+		
+		if (proj < min)
+		{
+			min = proj;
+		}
+		
+		if (proj > max)
+		{
+			max = proj;
+		}
+	}
+}
+
+IMPLEMENT_INTERSECTION(Polygon, Polygon)
+{
+	CAST_ARGS(Polygon, pg1, Polygon, pg2);
+	
+	std::vector<sf::Vector2f> normals;
+	CalculateNormals(pg1->m_vertices, normals);
+	CalculateNormals(pg2->m_vertices, normals);
+
+	for (const auto& normal : normals)
+	{
+		float min1, min2, max1, max2;
+		CalculateMinMaxProjects(pg1->m_vertices, normal, min1, max1);
+		CalculateMinMaxProjects(pg2->m_vertices, normal, min2, max2);
+		
+		if (min1 > max2 || min2 > max1)
+		{
+			return false;
+		}
 	}
 
 	return true;
 }
 
-IMPLEMENT_INTERSECTION(Rectangle, Circle)
+IMPLEMENT_INTERSECTION(Polygon, Circle)
 {
-	CAST_ARGS(Rectangle, r, Circle, c);
+	CAST_ARGS(Polygon, pg, Circle, c);
 
-	sf::Vector2f dist(fabs(r->m_vOrg.x - c->m_vOrg.x), fabs(r->m_vOrg.y - c->m_vOrg.y));
-	
-	if (dist.x > r->m_fHalfWidth + c->m_fRad || dist.y > r->m_fHalfHeight + c->m_fRad)
+	std::vector<sf::Vector2f> normals;
+	CalculateNormals(pg->m_vertices, normals);
+
+	for (const auto& normal : normals)
 	{
-		return false;
+		float min1, max1;
+		CalculateMinMaxProjects(pg->m_vertices, normal, min1, max1);
+		
+		float centerProj = MathHelpers::DotProd(normal, c->m_vOrg);
+		float min2 = centerProj - c->m_fRad;
+		float max2 = centerProj + c->m_fRad;
+
+		if (min1 > max2 || min2 > max1)
+		{
+			return false;
+		}
 	}
 
-	if (dist.x <= r->m_fHalfWidth || dist.y <= r->m_fHalfHeight)
-	{
-		return true;
-	}
-
-	sf::Vector2f diag(dist.x - r->m_fHalfWidth, dist.y - r->m_fHalfHeight);
-	return MathHelpers::DotProd(diag, diag) <= c->m_fRad * c->m_fRad;
+	return true;
 }
 
-IMPLEMENT_INTERSECTION(Rectangle, Capsule)
+IMPLEMENT_INTERSECTION(Polygon, Capsule)
 {
+	CAST_ARGS(Polygon, pg, Capsule, c);
 
+	sf::Vector2f capsuleAxis = MathHelpers::Normalize(c->m_vA - c->m_vB);
+	sf::Vector2f capsuleNorm(capsuleAxis.y, -capsuleAxis.x);
+
+	std::vector<sf::Vector2f> capsuleVertices;
+	capsuleVertices.push_back(c->m_vB + c->m_fRad * capsuleNorm);
+	capsuleVertices.push_back(c->m_vB + c->m_fRad * -capsuleNorm);
+	capsuleVertices.push_back(c->m_vA + c->m_fRad * capsuleNorm);
+	capsuleVertices.push_back(c->m_vA + c->m_fRad * -capsuleNorm);
+
+	PhysicalPrimitive::Polygon cpg(capsuleVertices);
+	PhysicalPrimitive::Circle cc1(c->m_vA, c->m_fRad);
+	PhysicalPrimitive::Circle cc2(c->m_vB, c->m_fRad);
+
+	return INTERSECTION(Polygon, Circle)(pg, &cc1) || INTERSECTION(Polygon, Circle)(pg, &cc2) || INTERSECTION(Polygon, Polygon)(pg, &cpg);
 }
 
-IMPLEMENT_INTERSECTION(Circle, Rectangle)
+IMPLEMENT_INTERSECTION(Circle, Polygon)
 {
-	return INTERSECTION(Rectangle, Circle)(p2, p1);
+	return INTERSECTION(Polygon, Circle)(p2, p1);
 }
 
-IMPLEMENT_INTERSECTION(Capsule, Rectangle)
+IMPLEMENT_INTERSECTION(Capsule, Polygon)
 {
-	return INTERSECTION(Rectangle, Capsule)(p2, p1);
+	return INTERSECTION(Polygon, Capsule)(p2, p1);
 }
 
 Intersection g_intersectionsTable[PhysicalPrimitive::EPrimitiveType_Num][PhysicalPrimitive::EPrimitiveType_Num] =
 {
-	Intersection_Circle_Circle, Intersection_Circle_Capsule, Intersection_Circle_Rectangle,
-	Intersection_Capsule_Circle, Intersection_Capsule_Capsule, Intersection_Capsule_Rectangle,
-	Intersection_Rectangle_Circle, Intersection_Rectangle_Capsule, Intersection_Rectangle_Rectangle
+	Intersection_Circle_Circle, Intersection_Circle_Capsule, Intersection_Circle_Polygon,
+	Intersection_Capsule_Circle, Intersection_Capsule_Capsule, Intersection_Capsule_Polygon,
+	Intersection_Polygon_Circle, Intersection_Polygon_Capsule, Intersection_Polygon_Polygon
 };

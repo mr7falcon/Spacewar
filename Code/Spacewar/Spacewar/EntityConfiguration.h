@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <map>
+#include <vector>
 
 #include <SFML/System/Vector2.hpp>
 #include <pugixml.hpp>
@@ -30,6 +31,14 @@ public:
 		float fRad = 0.f;
 		float fHalfHeight = 0.f;
 		sf::Vector2f vAxis;
+	};
+
+	struct PolygonConfig : public IPrimitiveConfig
+	{
+		PolygonConfig(std::vector<sf::Vector2f>&& _vertices)
+			: vertices(_vertices) {}
+
+		std::vector<sf::Vector2f> vertices;
 	};
 
 	struct SEntityClass

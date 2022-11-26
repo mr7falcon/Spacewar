@@ -22,12 +22,12 @@
 			<PlayerSpawner position="200,800" rotation="180"/>
 		</PlayerSpawners>
 		<Bonuses cooldownMin="10" cooldownMax="20">
-			<Bonus type="ammo" value="10" lifetime="10" entity="Bonus_ammo1"/>
-			<Bonus type="ammo" value="25" lifetime="7" entity="Bonus_ammo2"/>
-			<Bonus type="ammo" value="50" lifetime="5" entity="Bonus_ammo3"/>
-			<Bonus type="fuel" value="200" lifetime="10" entity="Bonus_fuel1"/>
-			<Bonus type="fuel" value="500" lifetime="7" entity="Bonus_fuel2"/>
-			<Bonus type="fuel" value="1000" lifetime="5" entity="Bonus_fuel3"/>
+			<Bonus type="ammo" value="10" lifetime="20" entity="Bonus_ammo1"/>
+			<Bonus type="ammo" value="25" lifetime="15" entity="Bonus_ammo2"/>
+			<Bonus type="ammo" value="50" lifetime="10" entity="Bonus_ammo3"/>
+			<Bonus type="fuel" value="200" lifetime="20" entity="Bonus_fuel1"/>
+			<Bonus type="fuel" value="500" lifetime="15" entity="Bonus_fuel2"/>
+			<Bonus type="fuel" value="1000" lifetime="10" entity="Bonus_fuel3"/>
 		</Bonuses>
 	</Level>
 </Levels>

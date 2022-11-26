@@ -11,28 +11,58 @@
 		<Physics type="Circle" radius="25"/>
 		<Render texture="Resources/Textures/hole.png"/>
 	</Entity>
-	<Entity name="Bonus_ammo1" size="40,40"/>
-		<Physics type="Rectangle" halfWidth="20" halfHeight="20"/>
-		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	<Entity name="Bonus_ammo1" size="40,40">
+		<Physics type="Polygon">
+			<Vertex coords="-20,-20"/>
+			<Vertex coords="-20,20"/>
+			<Vertex coords="20,-20"/>
+			<Vertex coords="20,20"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_ammo1.png"/>
 	</Entity>
-	<Entity name="Bonus_ammo2" size="50,50"/>
-		<Physics type="Rectangle" halfWidth="25" halfHeight="25"/>
-		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	<Entity name="Bonus_ammo2" size="50,50">
+		<Physics type="Polygon">
+			<Vertex coords="-25,-25"/>
+			<Vertex coords="-25,25"/>
+			<Vertex coords="25,-25"/>
+			<Vertex coords="25,25"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_ammo1.png"/>
 	</Entity>
-	<Entity name="Bonus_ammo3" size="60,60"/>
-		<Physics type="Rectangle" halfWidth="30" halfHeight="30"/>
-		<Render texture="Resources/Textures/bonus_ammo1.png"/>
+	<Entity name="Bonus_ammo3" size="60,60">
+		<Physics type="Polygon">
+			<Vertex coords="-30,-30"/>
+			<Vertex coords="-30,30"/>
+			<Vertex coords="30,-30"/>
+			<Vertex coords="30,30"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_ammo1.png"/>
 	</Entity>
-	<Entity name="Bonus_fuel1" size="40,40"/>
-		<Physics type="Rectangle" halfWidth="20" halfHeight="20"/>
-		<Render texture="Resources/Textures/bonus_fuel1.png"/>
+	<Entity name="Bonus_fuel1" size="40,40">
+		<Physics type="Polygon">
+			<Vertex coords="-20,-20"/>
+			<Vertex coords="-20,20"/>
+			<Vertex coords="20,-20"/>
+			<Vertex coords="20,20"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_fuel1.png"/>
 	</Entity>
-	<Entity name="Bonus_fuel2" size="50,50"/>
-		<Physics type="Rectangle" halfWidth="25" halfHeight="25"/>
-		<Render texture="Resources/Textures/bonus_fuel1.png"/>
+	<Entity name="Bonus_fuel2" size="50,50">
+		<Physics type="Polygon">
+			<Vertex coords="-25,-25"/>
+			<Vertex coords="-25,25"/>
+			<Vertex coords="25,-25"/>
+			<Vertex coords="25,25"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_fuel1.png"/>
 	</Entity>
-	<Entity name="Bonus_fuel3" size="60,60"/>
-		<Physics type="Rectangle" halfWidth="30" halfHeight="30"/>
-		<Render texture="Resources/Textures/bonus_fuel1.png"/>
+	<Entity name="Bonus_fuel3" size="60,60">
+		<Physics type="Polygon">
+			<Vertex coords="-20,-20"/>
+			<Vertex coords="-20,20"/>
+			<Vertex coords="20,-20"/>
+			<Vertex coords="20,20"/>
+		</Physics>
+		<Render texture="Resources/Textures/Bonuses/bonus_fuel1.png"/>
 	</Entity>
 </Entities>

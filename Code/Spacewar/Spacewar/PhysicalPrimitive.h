@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <SFML/Graphics/Transform.hpp>
 
 namespace PhysicalPrimitive
@@ -8,56 +10,52 @@ namespace PhysicalPrimitive
 	{
 		EPrimitiveType_Circle = 0,
 		EPrimitiveType_Capsule,
-		EPrimitiveType_Rectangle,
+		EPrimitiveType_Polygon,
 		EPrimitiveType_Num,
 	};
 
-	struct Primitive
+	struct IPrimitive
 	{
-		Primitive(const sf::Vector2f& vOrg = sf::Vector2f()) : m_vOrg(vOrg) {}
-
 		virtual EPrimitiveType GetType() const = 0;
 		virtual void Transform(const sf::Transform& transform) = 0;
-
-		sf::Vector2f m_vOrg;
 	};
 
-	struct Circle : public Primitive
+	struct Circle : public IPrimitive
 	{
+		Circle(const sf::Vector2f& vOrg, float fRad) : m_vOrg(vOrg), m_fRad(fRad) {}
 		Circle(float fRad) : m_fRad(fRad) {}
 
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Circle; }
 		virtual void Transform(const sf::Transform& transform) override;
 
+		sf::Vector2f m_vOrg;
 		float m_fRad = 0.f;
 	};
 
-	struct Capsule : public Primitive
+	struct Capsule : public IPrimitive
 	{
-		Capsule(const sf::Vector2f& vDir, float fHalfHeight, float fRad)
-			: m_vDir(vDir), m_fHalfHeight(fHalfHeight), m_fRad(fRad) {}
+		Capsule(const sf::Vector2f& vA, const sf::Vector2f& vB, float fRad)
+			: m_vA(vA), m_vB(vB), m_fRad(fRad) {}
 
 		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Capsule; }
 		virtual void Transform(const sf::Transform& transform) override;
 
-		sf::Vector2f m_vDir;
-		float m_fHalfHeight = 0.f;
+		sf::Vector2f m_vA;
+		sf::Vector2f m_vB;
 		float m_fRad = 0.f;
 	};
 
-	struct Rectangle : public Primitive
+	struct Polygon : public IPrimitive
 	{
-		Rectangle(float fHalfWidth, float fHalfHeight)
-			: m_fHalfWidth(fHalfWidth), m_fHalfHeight(fHalfHeight) {}
+		Polygon(const std::vector<sf::Vector2f>& vertices) : m_vertices(vertices) {}
 
-		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Rectangle; }
+		virtual EPrimitiveType GetType() const override { return EPrimitiveType_Polygon; }
 		virtual void Transform(const sf::Transform& transform) override;
 
-		float m_fHalfWidth = 0.f;
-		float m_fHalfHeight = 0.f;
+		std::vector<sf::Vector2f> m_vertices;
 	};
 }
 
-typedef bool(*Intersection)(const PhysicalPrimitive::Primitive*, const PhysicalPrimitive::Primitive*);
+typedef bool(*Intersection)(const PhysicalPrimitive::IPrimitive*, const PhysicalPrimitive::IPrimitive*);
 
 extern Intersection g_intersectionsTable[PhysicalPrimitive::EPrimitiveType_Num][PhysicalPrimitive::EPrimitiveType_Num];
