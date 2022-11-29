@@ -19,6 +19,7 @@ public:
 
 	virtual void RemoveEntity(SmartId sid, bool immediate = false) override;
 	virtual void CollectGarbage() override;
+	virtual void Clear() override;
 
 	void Update(sf::Time dt);
 

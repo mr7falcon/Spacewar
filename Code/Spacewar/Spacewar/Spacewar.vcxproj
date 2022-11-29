@@ -159,6 +159,7 @@
     <ClCompile Include="RenderProxy.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="ResourceSystem.cpp" />
+    <ClCompile Include="UISystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\pugixml\pugiconfig.hpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Actor.h" />
     <ClInclude Include="IController.h" />
     <ClInclude Include="KeyboardController.h" />
+    <ClInclude Include="Layout.h" />
     <ClInclude Include="LevelConfiguration.h" />
     <ClInclude Include="LevelSystem.h" />
     <ClInclude Include="LogicalEntity.h" />
@@ -190,6 +192,7 @@
     <ClInclude Include="RenderProxy.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="ResourceSystem.h" />
+    <ClInclude Include="UISystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

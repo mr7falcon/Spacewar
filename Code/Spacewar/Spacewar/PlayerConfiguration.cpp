@@ -48,7 +48,7 @@ CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
 			config.fFuel = iter->attribute("fuel").as_float();
 			config.fConsumption = iter->attribute("consumption").as_float();
 
-			m_configurations[std::move(name)] = std::move(config);
+			m_configurations.emplace(std::move(name), std::move(config));
 		}
 	}
 }
@@ -57,4 +57,45 @@ const CPlayerConfiguration::SPlayerConfiguration* CPlayerConfiguration::GetConfi
 {
 	auto fnd = m_configurations.find(name);
 	return fnd != m_configurations.end() ? &fnd->second : nullptr;
+}
+
+static std::string ReturnDefault = "";
+
+const std::string& CPlayerConfiguration::GetDefaultConfiguration() const
+{
+	return m_configurations.empty() ? ReturnDefault : m_configurations.begin()->first;
+}
+
+const std::string& CPlayerConfiguration::GetNextConfiguration(const std::string& current) const
+{
+	auto fnd = m_configurations.find(current);
+	if (fnd != m_configurations.end())
+	{
+		if (++fnd != m_configurations.end())
+		{
+			return fnd->first;
+		}
+		else
+		{
+			return m_configurations.begin()->first;
+		}
+	}
+	return ReturnDefault;
+}
+
+const std::string& CPlayerConfiguration::GetPreviousConfiguration(const std::string& current) const
+{
+	auto fnd = std::map<std::string, SPlayerConfiguration>::const_reverse_iterator(m_configurations.find(current));
+	if (fnd != m_configurations.rend())
+	{
+		if (++fnd != m_configurations.rend())
+		{
+			return fnd->first;
+		}
+		else
+		{
+			return m_configurations.rbegin()->first;
+		}
+	}
+	return ReturnDefault;
 }

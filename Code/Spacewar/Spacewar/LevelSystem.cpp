@@ -9,7 +9,9 @@
 #include "LogicalSystem.h"
 #include "RenderSystem.h"
 #include "RenderProxy.h"
+#include "PhysicalSystem.h"
 #include "ActorSystem.h"
+#include "UISystem.h"
 #include "Player.h"
 #include "Hole.h"
 #include "MathHelpers.h"
@@ -28,12 +30,29 @@ int CLevelSystem::RandInt(int min, int max)
 
 void CLevelSystem::CreateLevel(const std::string& config)
 {
+	SavePlayersInfo();
+
+	if (m_pLevelConfig)
+	{
+		ClearLevel();
+	}
+
 	m_pLevelConfig = CGame::Get().GetConfigurationSystem()->GetLevelConfiguration()->GetConfiguration(config);
 	if (!m_pLevelConfig)
 	{
 		std::cout << "Invalid level configuration " << config << std::endl;
 		return;
 	}
+
+	m_playerSpawners.resize(m_pLevelConfig->playerSpawners.size());
+	for (int i = 0; i < m_playerSpawners.size(); ++i)
+	{
+		m_playerSpawners[i] = InvalidLink;
+	}
+
+	RecoverPlayers();
+
+	ReloadGlobalLayout();
 
 	m_randomEngine.seed((unsigned int)time(nullptr));
 
@@ -48,6 +67,36 @@ void CLevelSystem::CreateLevel(const std::string& config)
 	{
 		ScheduleBonus();
 	}
+
+	CGame::Get().Pause(false);
+}
+
+void CLevelSystem::ClearLevel()
+{
+	CGame::Get().GetLogicalSystem()->Clear();
+	CGame::Get().GetPhysicalSystem()->Clear();
+	CGame::Get().GetRenderSystem()->Clear();
+	CGame::Get().GetUISystem()->ResetLayout();
+}
+
+void CLevelSystem::SavePlayersInfo()
+{
+	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([this](CPlayer* pPlayer)
+		{
+			SPlayerInfo info;
+			info.config = pPlayer->GetConfigName();
+			info.controller = pPlayer->GetController();
+			m_savedPlayers.push_back(std::move(info));
+		});
+}
+
+void CLevelSystem::RecoverPlayers()
+{
+	for (const SPlayerInfo& playerInfo : m_savedPlayers)
+	{
+		SmartId sid = SpawnPlayer(playerInfo.config, playerInfo.controller);
+	}
+	m_savedPlayers.clear();
 }
 
 void CLevelSystem::GenerateStars()
@@ -91,13 +140,16 @@ void CLevelSystem::GenerateStars()
 
 void CLevelSystem::SpawnStar(int textureId, const sf::Vector2f& vPos, const sf::Vector2f& vScale)
 {
-	SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity();
-	CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
-	pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, textureId);
-	pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(renderEntityId, sf::Transform().translate(vPos).scale(vScale));
+	CRenderSystem* pRenderSystem = CGame::Get().GetRenderSystem();
+	SmartId renderEntityId = pRenderSystem->CreateEntity(CRenderEntity::Sprite);
+	if (CRenderEntity* pEntity = pRenderSystem->GetEntity(renderEntityId))
+	{
+		pEntity->SetTransform(sf::Transform().translate(vPos).scale(vScale));
+		CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, textureId);
+	}
 }
 
-SmartId CLevelSystem::SpawnPlayer(const std::string& config)
+SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_ptr<IController>& pController)
 {
 	if (!m_pLevelConfig)
 	{
@@ -106,33 +158,73 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& config)
 
 	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
 
-	int numPlayers = pActorSystem->GetNumPlayers();
-	if (numPlayers >= m_pLevelConfig->playerSpawners.size())
+	auto fnd = std::find(m_playerSpawners.begin(), m_playerSpawners.end(), InvalidLink);
+	if (fnd == m_playerSpawners.end())
 	{
 		std::cout << "Maximum player count for this level reached" << std::endl;
 		return InvalidLink;
 	}
 
-	const auto* pPlayerConfig = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetConfiguration(config);
+	size_t spawnerId = fnd - m_playerSpawners.begin();
+	const CLevelConfiguration::SPlayerSpawnerConfiguration& config = m_pLevelConfig->playerSpawners[spawnerId];
+
+	const auto* pPlayerConfig = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetConfiguration(player);
 	if (!pPlayerConfig)
 	{
-		std::cout << "Failed to find player configuration " << config << std::endl;
+		std::cout << "Failed to find player configuration " << player << std::endl;
 		return InvalidLink;
 	}
 
-	SmartId playerId = pActorSystem->CreateActor<CPlayer>(pPlayerConfig);
+	SmartId playerId = pActorSystem->CreateActor<CPlayer>(player, pPlayerConfig);
 
 	if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(playerId)))
 	{
 		if (CLogicalEntity* pPlayerEntity = pPlayer->GetEntity())
 		{
-			const CLevelConfiguration::SPlayerSpawnerConfiguration& config = m_pLevelConfig->playerSpawners[numPlayers];
 			pPlayerEntity->SetPosition(config.vPos);
 			pPlayerEntity->SetRotation(config.fRot);
 		}
+		pPlayer->SetController(pController);
 	}
+
+	m_playerSpawners[spawnerId] = playerId;
+
+	CGame::Get().GetUISystem()->LoadPlayerLayout(config.layout, playerId);
 	
 	return playerId;
+}
+
+void CLevelSystem::FreePlayerSpawner(SmartId sid)
+{
+	auto fnd = std::find(m_playerSpawners.begin(), m_playerSpawners.end(), sid);
+	if (fnd != m_playerSpawners.end())
+	{
+		*fnd = InvalidLink;
+	}
+}
+
+void CLevelSystem::ReloadPlayersLayouts()
+{
+	if (!m_pLevelConfig)
+	{
+		return;
+	}
+
+	for (int i = 0; i < m_playerSpawners.size(); ++i)
+	{
+		if (m_playerSpawners[i] != InvalidLink)
+		{
+			CGame::Get().GetUISystem()->LoadPlayerLayout(m_pLevelConfig->playerSpawners[i].layout, m_playerSpawners[i]);
+		}
+	}
+}
+
+void CLevelSystem::ReloadGlobalLayout()
+{
+	if (m_pLevelConfig)
+	{
+		CGame::Get().GetUISystem()->LoadGlobalLayout(m_pLevelConfig->layout);
+	}
 }
 
 void CLevelSystem::SpawnHole(const CLevelConfiguration::SHoleConfiguration& config)

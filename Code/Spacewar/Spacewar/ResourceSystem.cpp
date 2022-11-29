@@ -9,4 +9,10 @@ CResourceSystem::CResourceSystem(const std::filesystem::path& path)
 		{
 			return texture.loadFromFile(path);
 		});
+
+	LoadResource<sf::Font>(path / FontsDirectory, m_fonts,
+		[](const std::string& path, sf::Font& font) -> bool
+		{
+			return font.loadFromFile(path);
+		});
 }

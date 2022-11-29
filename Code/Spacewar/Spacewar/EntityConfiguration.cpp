@@ -109,7 +109,7 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 				}
 			}
 
-			m_entityClasses[std::move(name)] = std::move(entityClass);
+			m_entityClasses.emplace(std::move(name), std::move(entityClass));
 		}
 	}
 }

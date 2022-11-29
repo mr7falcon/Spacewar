@@ -1,0 +1,16 @@
+<Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="50" activeItem="ClassicLevel">
+	<Text id="Title" value="Select level" font="Resources/Fonts/Happiness.ttf" color="White" size="50" style="Bold" position="500,100" rotation="0"/>
+	<Text id="ClassicLevel" value="Classic" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,300" rotation="0">
+		<Binding key="Enter" function="$StartLevel" argument="Classic"/>
+		<Binding key="Down" function="$SetActiveItem" argument="CustomLevel"/>
+	</Text>
+	<Text id="CustomLevel" value="Custom" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,400" rotation="0">
+		<Binding key="Enter" function="$StartLevel" argument="Custom"/>
+		<Binding key="Up" function="$SetActiveItem" argument="ClassicLevel"/>
+		<Binding key="Down" function="$SetActiveItem" argument="BackButton"/>
+	</Text>
+	<Text id="BackButton" value="Back" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,500" rotation="0">
+		<Binding key="Enter" function="ReloadLayout"/>
+		<Binding key="Up" function="$SetActiveItem" argument="CustomLevel"/>
+	</Text>
+</Layout>

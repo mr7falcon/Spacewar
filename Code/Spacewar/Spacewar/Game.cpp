@@ -12,7 +12,9 @@
 #include "ConfigurationSystem.h"
 #include "KeyboardController.h"
 #include "ActorSystem.h"
+#include "UISystem.h"
 #include "Player.h"
+#include "UISystem.h"
 
 CGame::CGame() = default;
 CGame::~CGame() = default;
@@ -25,31 +27,16 @@ void CGame::Initialize()
 	m_pPhysicalSystem = std::make_unique<CPhysicalSystem>();
 	m_pRenderSystem = std::make_unique<CRenderSystem>();
 	m_pRenderProxy = std::make_unique<CRenderProxy>();
+	m_pUISystem = std::make_unique<CUISystem>("UI");
 
-	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Custom");
+	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
 	
 	float levelSize = m_pLogicalSystem->GetLevelSystem()->GetLevelSize();
 	m_view.reset(sf::FloatRect(0.f, 0.f, levelSize, levelSize));
 	
-	SmartId player1 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer("player1");
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(m_pLogicalSystem->GetActorSystem()->GetActor(player1)))
-	{
-		pPlayer->SetController(std::make_unique<CKeyboardController>("Schema1"));
-	}
-	SmartId player2 = m_pLogicalSystem->GetLevelSystem()->SpawnPlayer("player2");
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(m_pLogicalSystem->GetActorSystem()->GetActor(player2)))
-	{
-		pPlayer->SetController(std::make_unique<CKeyboardController>("Schema2"));
-	}
-
 	m_window.create(sf::VideoMode(900, 900), "Spacewar");
 	m_window.setView(m_view);
 	m_window.setActive(false);
-}
-
-void CGame::Release()
-{
-	m_pLogicalSystem->GetActorSystem()->Release();
 }
 
 void CGame::Start()
@@ -68,19 +55,32 @@ void CGame::Start()
 			if (event.type == sf::Event::Closed)
 				m_window.close();
 
-			for (IWindowEventListener* pWeaponEventListener : m_windowEventListeners)
+			for (auto iter = m_windowEventListeners.begin(); iter != m_windowEventListeners.end();)
 			{
-				pWeaponEventListener->OnWindowEvent(event);
+				if (*iter == nullptr)
+				{
+					iter = m_windowEventListeners.erase(iter);
+				}
+				else
+				{
+					(*iter)->OnWindowEvent(event);
+					++iter;
+				}
 			}
 		}
 
-		m_pPhysicalSystem->ProcessCollisions();
-		m_pLogicalSystem->Update(frameClock.getElapsedTime());
+		if (!m_bPaused)
+		{
+			m_pPhysicalSystem->ProcessCollisions();
+			m_pLogicalSystem->Update(frameClock.getElapsedTime());
 
-		frameClock.restart();
+			frameClock.restart();
+		}
 
 		m_pLogicalSystem->CollectGarbage();
 		m_pPhysicalSystem->CollectGarbage();
+
+		m_pUISystem->Update();
 
 		{
 			std::unique_lock<std::mutex> lock(m_renderLock);
@@ -97,9 +97,10 @@ void CGame::Start()
 		m_renderSync.notify_one();
 	}
 
-	render.join();
+	m_pLogicalSystem->GetLevelSystem()->ClearLevel();
+	m_pUISystem->Release();
 
-	Release();
+	render.join();
 }
 
 void CGame::StartRender()
@@ -133,7 +134,7 @@ void CGame::RegisterWindowEventListener(IWindowEventListener* pEventListener)
 	auto fnd = std::find(m_windowEventListeners.begin(), m_windowEventListeners.end(), pEventListener);
 	if (fnd == m_windowEventListeners.end())
 	{
-		m_windowEventListeners.push_back(pEventListener);
+		m_windowEventListeners.push_front(pEventListener);
 	}
 }
 
@@ -142,6 +143,6 @@ void CGame::UnregisterWindowEventListener(IWindowEventListener* pEventListener)
 	auto fnd = std::find(m_windowEventListeners.begin(), m_windowEventListeners.end(), pEventListener);
 	if (fnd != m_windowEventListeners.end())
 	{
-		m_windowEventListeners.erase(fnd);
+		*fnd = nullptr;
 	}
 }

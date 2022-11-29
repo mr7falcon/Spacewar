@@ -1,14 +1,18 @@
 <Schemas>
 	<Schema name="Schema1">
 		<MoveForward key="Up"/>
+		<MoveBack key="Down"/>
 		<RotatePositive key="Right"/>
 		<RotateNegative key="Left"/>
 		<Shoot key="Enter"/>
+		<Escape key="Escape"/>
 	</Schema>
 	<Schema name="Schema2">
 		<MoveForward key="W"/>
+		<MoveBack key="S"/>
 		<RotatePositive key="D"/>
 		<RotateNegative key="A"/>
 		<Shoot key="Space"/>
+		<Escape key="Escape"/>
 	</Schema>
 </Schemas>

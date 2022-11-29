@@ -37,6 +37,8 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 			SConfiguration config;
 
 			config.fSize = iter->attribute("size").as_float();
+			config.layout = iter->attribute("layout").value();
+			config.bGameLevel = iter->attribute("gameLevel").as_bool();
 			config.bAllowConsumables = iter->attribute("allowConsumables").as_bool();
 
 			auto holes = iter->child("Holes");
@@ -66,7 +68,7 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 				config.bonuses = ParseBonuses(bonuses);
 			}
 
-			m_configurations[std::move(name)] = std::move(config);
+			m_configurations.emplace(std::move(name), std::move(config));
 		}
 	}
 }
@@ -98,6 +100,7 @@ CLevelConfiguration::SPlayerSpawnerConfiguration CLevelConfiguration::ParsePlaye
 	SPlayerSpawnerConfiguration config;
 	config.vPos = node.attribute("position").as_vector();
 	config.fRot = node.attribute("rotation").as_float();
+	config.layout = node.attribute("layout").value();
 	return config;
 }
 

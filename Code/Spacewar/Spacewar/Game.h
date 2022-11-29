@@ -3,7 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
-#include <vector>
+#include <list>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML\Graphics\View.hpp>
@@ -22,6 +22,7 @@ class CRenderSystem;
 class CRenderProxy;
 class CResourceSystem;
 class CConfigurationSystem;
+class CUISystem;
 
 class CGame
 {
@@ -37,6 +38,7 @@ public:
 	}
 
 	void Start();
+	void Pause(bool pause) { m_bPaused = pause; }
 
 public:
 
@@ -46,6 +48,7 @@ public:
 	CRenderProxy* GetRenderProxy() { return m_pRenderProxy.get(); }
 	const CResourceSystem* GetResourceSystem() const { return m_pResourceSystem.get(); }
 	const CConfigurationSystem* GetConfigurationSystem() const { return m_pConfigurationSystem.get(); }
+	CUISystem* GetUISystem() const { return m_pUISystem.get(); }
 
 	void RegisterWindowEventListener(IWindowEventListener* pEventListener);
 	void UnregisterWindowEventListener(IWindowEventListener* pEventListener);
@@ -57,8 +60,7 @@ private:
 	CGame();
 
 	void Initialize();
-	void Release();
-
+	
 	static void StartRender();
 
 private:
@@ -69,6 +71,7 @@ private:
 	std::unique_ptr<CRenderProxy> m_pRenderProxy;
 	std::unique_ptr<CResourceSystem> m_pResourceSystem;
 	std::unique_ptr<CConfigurationSystem> m_pConfigurationSystem;
+	std::unique_ptr<CUISystem> m_pUISystem;
 
 	std::mutex m_renderLock;
 	std::condition_variable m_renderSync;
@@ -79,5 +82,7 @@ private:
 	sf::View m_view;
 	sf::Clock m_gameClock;
 
-	std::vector<IWindowEventListener*> m_windowEventListeners;
+	std::list<IWindowEventListener*> m_windowEventListeners;
+
+	bool m_bPaused = false;
 };

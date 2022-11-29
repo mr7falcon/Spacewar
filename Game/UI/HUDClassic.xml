@@ -1,0 +1,10 @@
+<Layout activeColor="White" activeCharacterSize="40" activeItem="Title">
+	<Text id="Title" value="Classic" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,100" rotation="0">
+		<Binding key="Esc" function="PauseGame"/>
+		<Binding key="Esc" function="$ChangeLayout" argument="Pause.xml"/>
+	</Text>
+	<PlayerLayout id="Player1" path="PlayerHUDClassic.xml" position="100,800"/>
+	<PlayerLayout id="Player2" path="PlayerHUDClassic.xml" position="800,800"/>
+	<PlayerLayout id="Player3" path="PlayerHUDClassic.xml" position="100,100"/>
+	<PlayerLayout id="Player4" path="PlayerHUDClassic.xml" position="800,100"/>
+</Layout>

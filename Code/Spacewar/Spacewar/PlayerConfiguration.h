@@ -31,6 +31,10 @@ public:
 
 	const SPlayerConfiguration* GetConfiguration(const std::string& name) const;
 
+	const std::string& GetDefaultConfiguration() const;
+	const std::string& GetNextConfiguration(const std::string& current) const;
+	const std::string& GetPreviousConfiguration(const std::string& current) const;
+
 private:
 
 	std::map<std::string, SPlayerConfiguration> m_configurations;

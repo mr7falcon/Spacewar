@@ -64,7 +64,7 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 
 			if (pEntityClass->texture >= 0)
 			{
-				SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity();
+				SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity(CRenderEntity::Sprite);
 				pEntity->SetRender(renderEntityId);
 				CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
 				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, pEntityClass->texture);
@@ -104,4 +104,10 @@ void CLogicalSystem::CollectGarbage()
 {
 	m_pActorSystem->CollectGarbage();
 	CEntitySystem::CollectGarbage();
+}
+
+void CLogicalSystem::Clear()
+{
+	m_pActorSystem->Release();
+	CEntitySystem::Clear();
 }

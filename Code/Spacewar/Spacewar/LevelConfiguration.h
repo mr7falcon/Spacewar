@@ -42,6 +42,7 @@ public:
 	{
 		sf::Vector2f vPos;
 		float fRot = 0.f;
+		std::string layout;
 	};
 
 	struct SBonusConfiguration
@@ -62,6 +63,8 @@ public:
 	struct SConfiguration
 	{
 		float fSize = 0.f;
+		std::string layout;
+		bool bGameLevel = false;
 		bool bAllowConsumables = false;
 		SStarsConfiguration stars;
 		SHolesConfiguration holes;

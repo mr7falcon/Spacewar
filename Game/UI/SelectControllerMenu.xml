@@ -1,0 +1,31 @@
+<Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="50" activeItem="Keyboard1">
+	<Text id="Title" value="Select controller" font="Resources/Fonts/Happiness.ttf" color="White" size="50" style="Bold" position="500,100" rotation="0"/>
+	<Text id="Keyboard1" value="Keyboard schema 1" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,300" rotation="0">
+		<Binding key="Enter" function="$SpawnPlayer" argument="Schema1"/>
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Down" function="$SetActiveItem" argument="Keyboard2"/>
+	</Text>
+	<Text id="Keyboard2" value="Keyboard schema 2" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,400" rotation="0">
+		<Binding key="Enter" function="$SpawnPlayer" argument="Schema2"/>
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Down" function="$SetActiveItem" argument="Gamepad1"/>
+		<Binding key="Up" function="$SetActiveItem" argument="Keyboard1"/>
+	</Text>
+	<Text id="Gamepad1" value="Gamepad 1" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,500" rotation="0">
+		<Binding key="Enter" function="$SpawnPlayer" argument="Gamepad1"/>
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Down" function="$SetActiveItem" argument="Gamepad2"/>
+		<Binding key="Up" function="$SetActiveItem" argument="Keyboard2"/>
+	</Text>
+	<Text id="Gamepad2" value="Gamepad 2" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,600" rotation="0">
+		<Binding key="Enter" function="$SpawnPlayer" argument="Gamepad2"/>
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Down" function="$SetActiveItem" argument="Network"/>
+		<Binding key="Up" function="$SetActiveItem" argument="Gamepad1"/>
+	</Text>
+	<Text id="Network" value="Network" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,700" rotation="0">
+		<Binding key="Enter" function="$SpawnPlayer" argument="Network"/>
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Up" function="$SetActiveItem" argument="Gamepad2"/>
+	</Text>
+</Layout>

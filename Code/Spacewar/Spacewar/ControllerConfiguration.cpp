@@ -3,6 +3,7 @@
 #include <pugixml.hpp>
 
 #include "ControllerConfiguration.h"
+#include "KeyboardController.h"
 
 inline static sf::Keyboard::Key ParseKey(const std::string& key)
 {
@@ -250,11 +251,13 @@ CControllerConfiguration::CControllerConfiguration(const std::filesystem::path& 
 			SConfiguration config;
 			
 			config.moveForward = getKey(*iter, "MoveForward");
+			config.moveBack = getKey(*iter, "MoveBack");
 			config.rotatePositive = getKey(*iter, "RotatePositive");
 			config.rotateNegative = getKey(*iter, "RotateNegative");
 			config.shoot = getKey(*iter, "Shoot");
+			config.escape = getKey(*iter, "Escape");
 
-			m_configurations[std::move(name)] = std::move(config);
+			m_configurations.emplace(std::move(name), std::move(config));
 		}
 	}
 }
@@ -263,4 +266,23 @@ const CControllerConfiguration::SConfiguration* CControllerConfiguration::GetCon
 {
 	auto fnd = m_configurations.find(name);
 	return fnd != m_configurations.end() ? &fnd->second : nullptr;
+}
+
+std::shared_ptr<IController> CControllerConfiguration::CreateController(const std::string& config) const
+{
+	const auto* pKeyboardSchema = GetConfiguration(config);
+	if (pKeyboardSchema)
+	{
+		return std::make_shared<CKeyboardController>(pKeyboardSchema);
+	}
+	return nullptr;
+}
+
+std::shared_ptr<IController> CControllerConfiguration::CreateDefaultController() const
+{
+	if (!m_configurations.empty())
+	{
+		return std::make_shared<CKeyboardController>(&m_configurations.begin()->second);
+	}
+	return nullptr;
 }

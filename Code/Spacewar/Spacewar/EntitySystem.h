@@ -58,7 +58,7 @@ public:
 
 	virtual void RemoveEntity(SmartId sid, bool immediate = false)
 	{
-		if (sid < m_smartLinks.size())
+		if (sid < m_smartLinks.size() && m_smartLinks[sid] != InvalidLink)
 		{
 			if (SafeRemove || !immediate)
 			{
@@ -68,6 +68,22 @@ public:
 			{
 				DeleteEntity(m_smartLinks[sid]);
 			}
+		}
+	}
+
+	virtual void Clear()
+	{
+		for (SmartId i = 0; i < m_smartLinks.size(); ++i)
+		{
+			if (m_smartLinks[i] != InvalidLink)
+			{
+				UnlinkEntity(i);
+			}
+		}
+
+		if constexpr (!SafeRemove)
+		{
+			m_entities.clear();
 		}
 	}
 
@@ -109,7 +125,7 @@ public:
 
 private:
 
-	inline void UnlinkEntity(int sid)
+	inline void UnlinkEntity(SmartId sid)
 	{
 		m_entities[m_smartLinks[sid]].SetId(InvalidLink);
 		m_smartLinks[sid] = InvalidLink;

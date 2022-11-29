@@ -32,8 +32,6 @@ void CBonus::OnCollision(SmartId sid)
 			}
 
 			Destroy();
-
-			std::cout << "Bonus collected" << std::endl;
 		}
 	}
 }
@@ -44,7 +42,5 @@ void CBonus::Update(sf::Time dt)
 	if (m_fLifetime < 0.f)
 	{
 		Destroy();
-
-		std::cout << "Bonus lifetime ended" << std::endl;
 	}
 }

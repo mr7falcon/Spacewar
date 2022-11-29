@@ -32,6 +32,8 @@ public:
 
 	void ForEachPlayer(std::function<void(CPlayer*)> f);
 	int GetNumPlayers() const;
+	SmartId GetFirstPlayerId() const;
+	SmartId GetLastPlayerId() const;
 
 	void Update(sf::Time dt);
 	void CollectGarbage();

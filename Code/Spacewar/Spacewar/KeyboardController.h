@@ -13,7 +13,7 @@ class CKeyboardController : public IController, public IWindowEventListener
 {
 public:
 
-	CKeyboardController(const std::string& schema);
+	CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig);
 	~CKeyboardController();
 
 	virtual void OnWindowEvent(const sf::Event& evt) override;

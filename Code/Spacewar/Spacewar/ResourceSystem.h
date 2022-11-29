@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <SFML\Graphics\Image.hpp>
+#include <SFML\Graphics\Font.hpp>
 
 static constexpr int InvalidResourceId = -1;
 
@@ -18,13 +19,17 @@ public:
 	CResourceSystem(const std::filesystem::path& path);
 	CResourceSystem(const CResourceSystem&) = delete;
 
-	int GetTextureId(const std::string& path) const { return GetResourceId(m_textures, std::filesystem::path(path)); }
+	int GetTextureId(const std::string& path) const { return GetResourceId(m_textures, path); }
 	const sf::Image* GetTexture(int id) const { return GetResource(m_textures, id); }
 	std::vector<int> GetTexturesInDirectory(const std::string& subDir) const { return GetResourcesInDirectory(m_textures, std::filesystem::path(TexturesDirectory) / subDir); }
+
+	int GetFontId(const std::string& path) const { return GetResourceId(m_fonts, path); }
+	const sf::Font* GetFont(int id) const { return GetResource(m_fonts, id); }
 
 private:
 
 	static constexpr const char* TexturesDirectory = "Textures";
+	static constexpr const char* FontsDirectory = "Fonts";
 
 	template <typename T>
 	struct SResources
@@ -93,4 +98,5 @@ private:
 private:
 
 	SResources<sf::Image> m_textures;
+	SResources<sf::Font> m_fonts;
 };

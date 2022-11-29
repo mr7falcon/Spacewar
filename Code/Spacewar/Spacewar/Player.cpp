@@ -9,8 +9,8 @@
 #include "PhysicalEntity.h"
 #include "Projectile.h"
 
-CPlayer::CPlayer(const CPlayerConfiguration::SPlayerConfiguration* pConfig)
-	: CActor(pConfig->entityName), m_pConfig(pConfig)
+CPlayer::CPlayer(const std::string& configName, const CPlayerConfiguration::SPlayerConfiguration* pConfig)
+	: CActor(pConfig->entityName), m_configName(configName), m_pConfig(pConfig)
 {
 	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsConsumablesAllowed())
 	{
@@ -20,14 +20,35 @@ CPlayer::CPlayer(const CPlayerConfiguration::SPlayerConfiguration* pConfig)
 	}
 }
 
-void CPlayer::SetController(std::unique_ptr<IController> pController)
+CPlayer::~CPlayer()
 {
-	m_pController = std::move(pController);
-	m_pController->SetControlledPlayer(this);
+	if (m_pController)
+	{
+		m_pController->UnregisterEventListener(this);
+	}
+	CGame::Get().GetLogicalSystem()->GetLevelSystem()->FreePlayerSpawner(m_entityId);
+}
+
+void CPlayer::SetController(const std::shared_ptr<IController>& pController)
+{
+	if (m_pController)
+	{
+		m_pController->UnregisterEventListener(this);
+	}
+	m_pController = pController;
+	if (m_pController)
+	{
+		m_pController->RegisterEventListener(this);
+	}
 }
 
 void CPlayer::OnControllerEvent(EControllerEvent evt)
 {
+	if (!CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
+	{
+		return;
+	}
+
 	CLogicalEntity* pEntity = GetEntity();
 	
 	switch (evt)
@@ -49,10 +70,10 @@ void CPlayer::OnControllerEvent(EControllerEvent evt)
 		pEntity->SetAngularSpeed(-m_pConfig->fAngSpeed);
 		break;
 	case EControllerEvent_Shoot_Pressed:
-		m_bShooting = true;
+		SetShooting(true);
 		break;
 	case EControllerEvent_Shoot_Released:
-		m_bShooting = false;
+		SetShooting(false);
 		break;
 	}
 }
@@ -61,7 +82,7 @@ void CPlayer::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType::Player || pActor->GetType() == EActorType::Projectile)
+		if (pActor->GetType() == EActorType::Projectile && static_cast<CProjectile*>(pActor)->GetOwnerId() != m_entityId)
 		{
 			Destroy();
 		}
@@ -112,6 +133,7 @@ void CPlayer::Shoot()
 		CLogicalEntity* pEntity = GetEntity();
 		
 		pProjectile->SetLifetime(m_pConfig->fProjectileLifetime);
+		pProjectile->SetOwnerId(m_entityId);
 
 		if (CLogicalEntity* pProjectileEntity = pProjectile->GetEntity())
 		{

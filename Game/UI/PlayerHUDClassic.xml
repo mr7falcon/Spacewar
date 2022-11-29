@@ -1,0 +1,4 @@
+<Layout>
+	<Text id="Score" value="Score:" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,0" rotation="0"/>
+	<Text id="Value" value="#GetPlayerScore" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,0" rotation="0"/>
+</Layout>

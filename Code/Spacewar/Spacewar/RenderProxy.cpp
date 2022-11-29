@@ -1,4 +1,5 @@
 #include "RenderProxy.h"
+#include "ResourceSystem.h"
 
 void CRenderProxy::SwitchStreams()
 {
@@ -23,6 +24,21 @@ void CRenderProxy::ExecuteCommands()
 			break;
 		case ERenderCommand_SetSize:
 			m_memoryStreams[m_dReadStream].Extract<SetSizeCommand>().Execute();
+			break;
+		case ERenderCommand_SetColor:
+			m_memoryStreams[m_dReadStream].Extract<SetColorCommand>().Execute();
+			break;
+		case ERenderCommand_SetText:
+			m_memoryStreams[m_dReadStream].Extract<SetTextCommand>().Execute();
+			break;
+		case ERenderCommand_SetStyle:
+			m_memoryStreams[m_dReadStream].Extract<SetStyleCommand>().Execute();
+			break;
+		case ERenderCommand_SetCharacterSize:
+			m_memoryStreams[m_dReadStream].Extract<SetCharacterSizeCommand>().Execute();
+			break;
+		case ERenderCommand_SetFont:
+			m_memoryStreams[m_dReadStream].Extract<SetFontCommand>().Execute();
 			break;
 		}
 	}
@@ -53,5 +69,48 @@ void CRenderProxy::SetSizeCommand::Execute() const
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
 		pRenderEntity->SetSize(size);
+	}
+}
+
+void CRenderProxy::SetColorCommand::Execute() const
+{
+	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
+	{
+		pRenderEntity->SetColor(color);
+	}
+}
+
+void CRenderProxy::SetTextCommand::Execute() const
+{
+	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
+	{
+		pRenderEntity->SetText(text);
+	}
+}
+
+void CRenderProxy::SetStyleCommand::Execute() const
+{
+	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
+	{
+		pRenderEntity->SetStyle(style);
+	}
+}
+
+void CRenderProxy::SetCharacterSizeCommand::Execute() const
+{
+	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
+	{
+		pRenderEntity->SetCharacterSize(size);
+	}
+}
+
+void CRenderProxy::SetFontCommand::Execute() const
+{
+	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
+	{
+		if (const sf::Font* pFont = CGame::Get().GetResourceSystem()->GetFont(fontId))
+		{
+			pRenderEntity->SetFont(*pFont);
+		}
 	}
 }

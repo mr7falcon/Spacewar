@@ -9,24 +9,31 @@
 #include "IController.h"
 #include "PlayerConfiguration.h"
 
-class CPlayer : public CActor
+class CPlayer : public CActor, public IControllerEventListener
 {
 public:
 
-	CPlayer(const CPlayerConfiguration::SPlayerConfiguration* pConfig);
+	CPlayer(const std::string& configName, const CPlayerConfiguration::SPlayerConfiguration* pConfig);
+	~CPlayer();
 
-	void SetController(std::unique_ptr<IController> pController);
-	void OnControllerEvent(EControllerEvent evt);
+	void SetController(const std::shared_ptr<IController>& pController);
+	const std::shared_ptr<IController>& GetController() const { return m_pController; }
+	
+	virtual void OnControllerEvent(EControllerEvent evt) override;
 
 	virtual void OnCollision(SmartId sid) override;
 	virtual EActorType GetType() const override { return EActorType::Player; }
 	virtual void Update(sf::Time dt) override;
+
+	void SetShooting(bool bShoot) { m_bShooting = bShoot; }
 
 	int GetAmmoCount() const { return m_dAmmoCount; }
 	float GetFuel() const { return m_fFuel; }
 
 	void SetAmmoCount(int dAmmoCount) { m_dAmmoCount = dAmmoCount; }
 	void SetFuel(float fFuel) { m_fFuel = fFuel; }
+
+	const std::string& GetConfigName() const { return m_configName; }
 
 private:
 
@@ -35,9 +42,10 @@ private:
 
 private:
 
+	const std::string m_configName;
 	const CPlayerConfiguration::SPlayerConfiguration* m_pConfig = nullptr;
 
-	std::unique_ptr<IController> m_pController;
+	std::shared_ptr<IController> m_pController;
 
 	float m_fAccel = 0.f;
 	

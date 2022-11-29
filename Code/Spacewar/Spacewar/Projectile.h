@@ -13,8 +13,11 @@ public:
 	virtual void Update(sf::Time dt) override;
 
 	void SetLifetime(float fLifetime) { m_fLifetime = fLifetime; }
+	void SetOwnerId(SmartId sid) { m_owner = sid; }
+	SmartId GetOwnerId() const { return m_owner; }
 
 private:
 
 	float m_fLifetime = 0.f;
+	SmartId m_owner = InvalidLink;
 };

@@ -43,6 +43,30 @@ int CActorSystem::GetNumPlayers() const
 	return count;
 }
 
+SmartId CActorSystem::GetFirstPlayerId() const
+{
+	for (auto iter = m_actors.begin(); iter != m_actors.end(); ++iter)
+	{
+		if (iter->second->GetType() == EActorType::Player)
+		{
+			return iter->first;
+		}
+	}
+	return InvalidLink;
+}
+
+SmartId CActorSystem::GetLastPlayerId() const
+{
+	for (auto iter = m_actors.rbegin(); iter != m_actors.rend(); ++iter)
+	{
+		if (iter->second->GetType() == EActorType::Player)
+		{
+			return iter->first;
+		}
+	}
+	return InvalidLink;
+}
+
 void CActorSystem::Update(sf::Time dt)
 {
 	for (const auto& [sid, pActor] : m_actors)

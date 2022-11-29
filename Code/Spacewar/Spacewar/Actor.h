@@ -30,7 +30,7 @@ public:
 
 	void Destroy();
 
-private:
+protected:
 
 	SmartId m_entityId = InvalidLink;
 };

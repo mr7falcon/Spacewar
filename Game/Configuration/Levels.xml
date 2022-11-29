@@ -1,25 +1,26 @@
 <Levels>
-	<Level name="Classic" size="1000" allowConsumables="0">
+	<Level name="Classic" layout="HUDClassic.xml" size="1000" gameLevel="1" allowConsumables="0">
 		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
-		<Holes dynamicHoles="0" minTeleportRange="100" rotationSpeed="30">
-			<Hole position="500,500" gravity="15000"/>
+		<Holes minTeleportRange="100" rotationSpeed="30">
+			<Hole position="500,500" gravity="12000"/>
 		</Holes>
 		<PlayerSpawners>
-			<PlayerSpawner position="200,200" rotation="0"/>
-			<PlayerSpawner position="800,800" rotation="180"/>
-			<PlayerSpawner position="800,200" rotation="0"/>
-			<PlayerSpawner position="200,800" rotation="180"/>
+			<PlayerSpawner position="200,200" rotation="0" layout="Player1"/>
+			<PlayerSpawner position="800,800" rotation="180" layout="Player2"/>
+			<PlayerSpawner position="800,200" rotation="0" layout="Player3"/>
+			<PlayerSpawner position="200,800" rotation="180" layout="Player4"/>
 		</PlayerSpawners>
 	</Level>
-	<Level name="Custom" size="1000" allowConsumables="1">
+	<Level name="Custom" layout="HUDCustom.xml" size="1000" gameLevel="1" allowConsumables="1">
 		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
-		<Holes dynamicHoles="3" cooldownMin="5" cooldownMax="15" lifetimeMin="5" lifetimeMax="20" minTeleportRange="100" movingProbability="0.5" minSpeed="10" maxSpeed="100" rotationSpeed="30">
+		<Holes minTeleportRange="100" rotationSpeed="30">
+			<Hole position="500,500" gravity="12000"/>
 		</Holes>
 		<PlayerSpawners>
-			<PlayerSpawner position="200,200" rotation="0"/>
-			<PlayerSpawner position="800,800" rotation="180"/>
-			<PlayerSpawner position="800,200" rotation="0"/>
-			<PlayerSpawner position="200,800" rotation="180"/>
+			<PlayerSpawner position="200,200" rotation="0" layout="Player1"/>
+			<PlayerSpawner position="800,800" rotation="180" layout="Player2"/>
+			<PlayerSpawner position="800,200" rotation="0" layout="Player3"/>
+			<PlayerSpawner position="200,800" rotation="180" layout="Player4"/>
 		</PlayerSpawners>
 		<Bonuses cooldownMin="10" cooldownMax="20">
 			<Bonus type="ammo" value="10" lifetime="20" entity="Bonus_ammo1"/>
@@ -29,5 +30,14 @@
 			<Bonus type="fuel" value="500" lifetime="15" entity="Bonus_fuel2"/>
 			<Bonus type="fuel" value="1000" lifetime="10" entity="Bonus_fuel3"/>
 		</Bonuses>
+	</Level>
+	<Level name="Menu" layout="MainMenu.xml" gameLevel="0" size="1000" allowConsumables="0">
+		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
+		<PlayerSpawners>
+			<PlayerSpawner position="400,800" rotation="180" layout="Player1"/>
+			<PlayerSpawner position="600,800" rotation="180" layout="Player2"/>
+			<PlayerSpawner position="200,800" rotation="180" layout="Player3"/>
+			<PlayerSpawner position="800,800" rotation="180" layout="Player4"/>
+		</PlayerSpawners>
 	</Level>
 </Levels>
