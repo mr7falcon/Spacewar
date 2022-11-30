@@ -82,6 +82,7 @@ private:
 		EServerMessage_Disconnect,
 		EServerMessage_CreateActor,
 		EServerMessage_RemoveActor,
+		EServerMessage_LocalPlayer,
 		EServerMessage_Serialize,
 		EServerMessage_StartLevel,
 		EServerMessage_SetPause,
@@ -99,7 +100,8 @@ private:
 
 	bool SendConnectionResult(int dClientId, EConnectionResult result);
 	bool SendControllerInput(EControllerEvent event);
-	bool SendPlayers();
+	bool SendPlayers(int dClientId);
+	bool SendLocalPlayer(int dClientId, SmartId sid);
 
 	void ProcessServerMessages();
 	void ProcessClientMessages();
@@ -110,6 +112,7 @@ private:
 	bool ProcessChangePlayerPreset(int dClientId, sf::Packet& packet);
 	bool ProcessCreateActor(sf::Packet& packet);
 	bool ProcessRemoveActor(sf::Packet& packet);
+	bool ProcessLocalPlayer(sf::Packet& packet);
 	bool ProcessStartLevel(sf::Packet& packet);
 	bool ProcessSerialize(sf::Packet& packet);
 	bool ProcessPause(sf::Packet& packet);

@@ -256,7 +256,6 @@ void CLevelSystem::SpawnHole(const CLevelConfiguration::SHoleConfiguration& conf
 		if (CLogicalEntity* pHoleEntity = pHole->GetEntity())
 		{
 			pHoleEntity->SetPosition(config.vPos);
-			pHoleEntity->SetVelocity(config.vVel);
 			if (m_pLevelConfig)
 			{
 				pHoleEntity->SetAngularSpeed(m_pLevelConfig->holes.fAngSpeed);
@@ -314,6 +313,11 @@ void CLevelSystem::Update(sf::Time dt)
 
 void CLevelSystem::TeleportEntity(CLogicalEntity* pEntity, const sf::Vector2f& vOrg)
 {
+	if (!CGame::Get().IsServer())
+	{
+		return;
+	}
+
 	if (!m_pLevelConfig)
 	{
 		return;
@@ -323,9 +327,11 @@ void CLevelSystem::TeleportEntity(CLogicalEntity* pEntity, const sf::Vector2f& v
 	sf::Vector2f vPos = vOrg + sf::Vector2f(m_pLevelConfig->holes.fMinTeleportRange + availableSpaceSize * RandFloat(), m_pLevelConfig->holes.fMinTeleportRange + availableSpaceSize * RandFloat());
 	pEntity->SetPosition(vPos);
 
-	const sf::Vector2f& vVel = pEntity->GetVelocity();
 	float fRot = pEntity->GetRotation();
 	float fNewRot = 360.f * RandFloat();
 	pEntity->SetRotation(fNewRot);
-	pEntity->SetVelocity(MathHelpers::RotateVector(vVel, fNewRot - fRot));
+
+	sf::Vector2f vDir = pEntity->GetForwardDirection();
+	float fSpeed = m_pLevelConfig->holes.fMinAppearingSpeed + (m_pLevelConfig->holes.fMaxAppearingSpeed - m_pLevelConfig->holes.fMinAppearingSpeed) * RandFloat();
+	pEntity->SetVelocity(MathHelpers::RotateVector(vDir, fNewRot - fRot) * fSpeed);
 }

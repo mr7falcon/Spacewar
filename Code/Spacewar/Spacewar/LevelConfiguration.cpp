@@ -76,9 +76,10 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 CLevelConfiguration::SHolesConfiguration CLevelConfiguration::ParseHoles(const pugi::xml_node& node)
 {
 	SHolesConfiguration config;
-	config.dNumDynamicHoles = node.attribute("dynamicHoles").as_int();
 	config.fMinTeleportRange = node.attribute("minTeleportRange").as_float();
 	config.fAngSpeed = node.attribute("rotationSpeed").as_float();
+	config.fMinAppearingSpeed = node.attribute("minAppearingSpeed").as_float();
+	config.fMaxAppearingSpeed = node.attribute("maxAppearingSpeed").as_float();
 	for (auto iter = node.begin(); iter != node.end(); ++iter)
 	{
 		config.staticHoles.push_back(ParseHole(*iter));
@@ -91,7 +92,6 @@ CLevelConfiguration::SHoleConfiguration CLevelConfiguration::ParseHole(const pug
 	SHoleConfiguration config;
 	config.vPos = node.attribute("position").as_vector();
 	config.fGravity = node.attribute("gravity").as_float();
-	config.vVel = node.attribute("velocity").as_vector();
 	return config;
 }
 

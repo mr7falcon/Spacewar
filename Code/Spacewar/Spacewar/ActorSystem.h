@@ -28,16 +28,16 @@ public:
 	SmartId CreateActor(V&&... args)
 	{
 		std::unique_ptr<CActor> pActor = std::make_unique<T>(std::forward<V>(args)...);
-		
 		SmartId sid = pActor->GetEntityId();
-		CGame::Get().GetNetworkSystem()->SendCreateActor(sid, pActor->GetType(), std::forward<V>(args)...);
+		m_actors[sid] = std::move(pActor);
+
+		CGame::Get().GetNetworkSystem()->SendCreateActor(sid, m_actors[sid]->GetType(), std::forward<V>(args)...);
 
 		if constexpr (is_player<T>::value)
 		{
-			static_cast<CPlayer*>(pActor.get())->SetShooting(m_bPlayersShooting);
+			static_cast<CPlayer*>(m_actors[sid].get())->SetShooting(m_bPlayersShooting);
 		}
-		
-		m_actors[sid] = std::move(pActor);
+
 		return sid;
 	}
 

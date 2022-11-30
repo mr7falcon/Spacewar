@@ -27,14 +27,14 @@ public:
 	{
 		sf::Vector2f vPos;
 		float fGravity = 0.f;
-		sf::Vector2f vVel;
 	};
 
 	struct SHolesConfiguration
 	{
-		int dNumDynamicHoles = 0;
 		float fMinTeleportRange = 0.f;
 		float fAngSpeed = 0.f;
+		float fMinAppearingSpeed = 0.f;
+		float fMaxAppearingSpeed = 0.f;
 		std::vector<SHoleConfiguration> staticHoles;
 	};
 

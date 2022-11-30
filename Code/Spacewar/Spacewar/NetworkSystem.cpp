@@ -190,6 +190,9 @@ void CNetworkSystem::ProcessClientMessages()
 		case EServerMessage_RemoveActor:
 			res = ProcessRemoveActor(packet);
 			break;
+		case EServerMessage_LocalPlayer:
+			res = ProcessLocalPlayer(packet);
+			break;
 		case EServerMessage_Serialize:
 			res = ProcessSerialize(packet);
 			break;
@@ -227,7 +230,7 @@ bool CNetworkSystem::ProcessConnection(const SSocket& socket)
 	EConnectionResult res = BindToPlayer(dClientId) ? EConnectionResult_Success : EConnectionResult_OutOfSockets;
 	if (SendConnectionResult(dClientId, res))
 	{
-		return SendPlayers();
+		return SendPlayers(dClientId);
 	}
 
 	return false;
@@ -310,8 +313,8 @@ bool CNetworkSystem::ProcessChangePlayerPreset(int dClientId, sf::Packet& packet
 		std::string preset;
 		packet >> preset;
 
-		CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(preset, pController);
-		return true;
+		SmartId sid = CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(preset, pController);
+		return SendLocalPlayer(dClientId, sid);
 	}
 
 	return false;
@@ -362,6 +365,21 @@ bool CNetworkSystem::ProcessRemoveActor(sf::Packet& packet)
 	}
 
 	return true;
+}
+
+bool CNetworkSystem::ProcessLocalPlayer(sf::Packet& packet)
+{
+	SmartId sid;
+	packet >> sid;
+
+	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	{
+		pPlayer->SetController(m_pVirtualController);
+		CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadPlayersLayouts();
+		return true;
+	}
+	
+	return false;
 }
 
 bool CNetworkSystem::ProcessStartLevel(sf::Packet& packet)
@@ -487,15 +505,31 @@ bool CNetworkSystem::SerializeActors()
 	return true;
 }
 
-bool CNetworkSystem::SendPlayers()
+bool CNetworkSystem::SendPlayers(int dClientId)
 {
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([this](CPlayer* pPlayer)
+	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([&](CPlayer* pPlayer)
 		{
 			SendCreateActor(pPlayer->GetEntityId(), EActorType_Player, pPlayer->GetConfigName(), nullptr);
+
+			if (const auto& pController = pPlayer->GetController())
+			{
+				if (pController->GetType() == IController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == dClientId)
+				{
+					SendLocalPlayer(dClientId, pPlayer->GetEntityId());
+				}
+			}
+
 			return true;
 		});
 
 	return true;
+}
+
+bool CNetworkSystem::SendLocalPlayer(int dClientId, SmartId sid)
+{
+	sf::Packet packet;
+	packet << EServerMessage_LocalPlayer << sid;
+	return SendMessageToClient(packet, dClientId);
 }
 
 bool CNetworkSystem::SendStartLevel(const std::string& level)
