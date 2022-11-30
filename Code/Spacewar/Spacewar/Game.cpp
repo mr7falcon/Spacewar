@@ -15,6 +15,7 @@
 #include "UISystem.h"
 #include "Player.h"
 #include "UISystem.h"
+#include "NetworkSystem.h"
 
 CGame::CGame() = default;
 CGame::~CGame() = default;
@@ -28,6 +29,7 @@ void CGame::Initialize()
 	m_pRenderSystem = std::make_unique<CRenderSystem>();
 	m_pRenderProxy = std::make_unique<CRenderProxy>();
 	m_pUISystem = std::make_unique<CUISystem>("UI");
+	m_pNetworkSystem = std::make_unique<CNetworkSystem>();
 
 	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
 	
@@ -44,6 +46,8 @@ void CGame::Start()
 	Initialize();
 
 	std::thread render(StartRender);
+
+	m_pNetworkSystem->StartServer();
 
 	sf::Clock frameClock;
 
@@ -69,19 +73,23 @@ void CGame::Start()
 			}
 		}
 
+		m_pNetworkSystem->ProcessMessages();
+
 		if (!m_bPaused)
 		{
 			m_pPhysicalSystem->ProcessCollisions();
 			m_pLogicalSystem->Update(frameClock.getElapsedTime());
-
-			frameClock.restart();
 		}
+
+		frameClock.restart();
 
 		m_pLogicalSystem->CollectGarbage();
 		m_pPhysicalSystem->CollectGarbage();
 
 		m_pUISystem->Update();
 
+		m_pNetworkSystem->SerializeActors();
+		
 		{
 			std::unique_lock<std::mutex> lock(m_renderLock);
 			m_renderSync.wait(lock, [this]() { return m_bRenderComplete; });
@@ -99,6 +107,7 @@ void CGame::Start()
 
 	m_pLogicalSystem->GetLevelSystem()->ClearLevel();
 	m_pUISystem->Release();
+	m_pNetworkSystem->SetVirtualController(nullptr);
 
 	render.join();
 }
@@ -145,4 +154,13 @@ void CGame::UnregisterWindowEventListener(IWindowEventListener* pEventListener)
 	{
 		*fnd = nullptr;
 	}
+}
+
+void CGame::Pause(bool bPause)
+{
+	if (m_bServer && bPause != m_bPaused)
+	{
+		m_pNetworkSystem->SendPause(bPause);
+	}
+	m_bPaused = bPause;
 }

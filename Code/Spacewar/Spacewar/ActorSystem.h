@@ -7,9 +7,15 @@
 
 #include <SFML/System/Time.hpp>
 
-#include "Actor.h"
+#include "Hole.h"
+#include "Projectile.h"
+#include "Bonus.h"
+#include "Player.h"
 
-class CPlayer;
+template <typename>
+struct is_player : std::false_type {};
+template <>
+struct is_player<CPlayer> : std::true_type {};
 
 class CActorSystem
 {
@@ -22,15 +28,41 @@ public:
 	SmartId CreateActor(V&&... args)
 	{
 		std::unique_ptr<CActor> pActor = std::make_unique<T>(std::forward<V>(args)...);
-		SmartId sid = pActor->GetEntity()->GetId();
+		
+		SmartId sid = pActor->GetEntityId();
+		CGame::Get().GetNetworkSystem()->SendCreateActor(sid, pActor->GetType(), std::forward<V>(args)...);
+
+		if constexpr (is_player<T>::value)
+		{
+			static_cast<CPlayer*>(pActor.get())->SetShooting(m_bPlayersShooting);
+		}
+		
 		m_actors[sid] = std::move(pActor);
 		return sid;
 	}
+
+	template<typename... V>
+	SmartId CreateActor(EActorType type, V&&... args)
+	{
+		switch (type)
+		{
+		case EActorType_Hole:
+			return CreateActor<CHole>(std::forward<V>(args)...);
+		case EActorType_Bonus:
+			return CreateActor<CBonus>(std::forward<V>(args)...);
+		case EActorType_Projectile:
+			return CreateActor<CProjectile>(std::forward<V>(args)...);
+		}
+		return InvalidLink;
+	}
+
 	void RemoveActor(SmartId sid, bool immediate = false);
+
+	void SetPlayersShooting(bool bShooting);
 
 	CActor* GetActor(SmartId sid);
 
-	void ForEachPlayer(std::function<void(CPlayer*)> f);
+	void ForEachPlayer(std::function<bool(CPlayer*)> f);
 	int GetNumPlayers() const;
 	SmartId GetFirstPlayerId() const;
 	SmartId GetLastPlayerId() const;
@@ -38,9 +70,12 @@ public:
 	void Update(sf::Time dt);
 	void CollectGarbage();
 	void Release();
+	void Serialize(sf::Packet& packet, bool bReading);
 
 private:
 	
 	std::map<SmartId, std::unique_ptr<CActor>> m_actors;
 	std::vector<SmartId> m_removeDeferred;
+
+	bool m_bPlayersShooting = false;
 };

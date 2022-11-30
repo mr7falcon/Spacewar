@@ -23,6 +23,7 @@ class CRenderProxy;
 class CResourceSystem;
 class CConfigurationSystem;
 class CUISystem;
+class CNetworkSystem;
 
 class CGame
 {
@@ -38,7 +39,9 @@ public:
 	}
 
 	void Start();
-	void Pause(bool pause) { m_bPaused = pause; }
+	void Pause(bool pause);
+	bool IsServer() const { return m_bServer; }
+	void SetServer(bool bServer) { m_bServer = bServer; }
 
 public:
 
@@ -49,6 +52,7 @@ public:
 	const CResourceSystem* GetResourceSystem() const { return m_pResourceSystem.get(); }
 	const CConfigurationSystem* GetConfigurationSystem() const { return m_pConfigurationSystem.get(); }
 	CUISystem* GetUISystem() const { return m_pUISystem.get(); }
+	CNetworkSystem* GetNetworkSystem() const { return m_pNetworkSystem.get(); }
 
 	void RegisterWindowEventListener(IWindowEventListener* pEventListener);
 	void UnregisterWindowEventListener(IWindowEventListener* pEventListener);
@@ -72,6 +76,7 @@ private:
 	std::unique_ptr<CResourceSystem> m_pResourceSystem;
 	std::unique_ptr<CConfigurationSystem> m_pConfigurationSystem;
 	std::unique_ptr<CUISystem> m_pUISystem;
+	std::unique_ptr<CNetworkSystem> m_pNetworkSystem;
 
 	std::mutex m_renderLock;
 	std::condition_variable m_renderSync;
@@ -85,4 +90,5 @@ private:
 	std::list<IWindowEventListener*> m_windowEventListeners;
 
 	bool m_bPaused = false;
+	bool m_bServer = true;
 };

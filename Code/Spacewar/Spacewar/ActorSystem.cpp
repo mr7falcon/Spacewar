@@ -1,5 +1,4 @@
 #include "ActorSystem.h"
-#include "Player.h"
 
 void CActorSystem::RemoveActor(SmartId sid, bool immediate)
 {
@@ -11,6 +10,7 @@ void CActorSystem::RemoveActor(SmartId sid, bool immediate)
 	{
 		m_removeDeferred.push_back(sid);
 	}
+	CGame::Get().GetNetworkSystem()->SendRemoveActor(sid);
 }
 
 CActor* CActorSystem::GetActor(SmartId sid)
@@ -19,13 +19,16 @@ CActor* CActorSystem::GetActor(SmartId sid)
 	return fnd != m_actors.end() ? fnd->second.get() : nullptr;
 }
 
-void CActorSystem::ForEachPlayer(std::function<void(CPlayer*)> f)
+void CActorSystem::ForEachPlayer(std::function<bool(CPlayer*)> f)
 {
 	for (const auto& [sid, pActor] : m_actors)
 	{
-		if (pActor->GetType() == EActorType::Player)
+		if (pActor->GetType() == EActorType_Player)
 		{
-			f(static_cast<CPlayer*>(pActor.get()));
+			if (!f(static_cast<CPlayer*>(pActor.get())))
+			{
+				break;
+			}
 		}
 	}
 }
@@ -35,7 +38,7 @@ int CActorSystem::GetNumPlayers() const
 	int count = 0;
 	for (const auto& [sid, pActor] : m_actors)
 	{
-		if (pActor->GetType() == EActorType::Player)
+		if (pActor->GetType() == EActorType_Player)
 		{
 			++count;
 		}
@@ -47,7 +50,7 @@ SmartId CActorSystem::GetFirstPlayerId() const
 {
 	for (auto iter = m_actors.begin(); iter != m_actors.end(); ++iter)
 	{
-		if (iter->second->GetType() == EActorType::Player)
+		if (iter->second->GetType() == EActorType_Player)
 		{
 			return iter->first;
 		}
@@ -59,7 +62,7 @@ SmartId CActorSystem::GetLastPlayerId() const
 {
 	for (auto iter = m_actors.rbegin(); iter != m_actors.rend(); ++iter)
 	{
-		if (iter->second->GetType() == EActorType::Player)
+		if (iter->second->GetType() == EActorType_Player)
 		{
 			return iter->first;
 		}
@@ -88,4 +91,42 @@ void CActorSystem::Release()
 {
 	m_removeDeferred.clear();
 	m_actors.clear();
+}
+
+void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
+{
+	if (!bReading)
+	{
+		for (auto& [sid, pActor] : m_actors)
+		{
+			if (pActor->NeedSerialize())
+			{
+				packet << sid;
+				pActor->Serialize(packet, bReading);
+			}
+		}
+	}
+	else
+	{
+		while (!packet.endOfPacket())
+		{
+			SmartId sid;
+			packet >> sid;
+
+			if (CActor* pActor = GetActor(sid))
+			{
+				pActor->Serialize(packet, bReading);
+			}
+		}
+	}
+}
+
+void CActorSystem::SetPlayersShooting(bool bShooting)
+{
+	ForEachPlayer([bShooting](CPlayer* pPlayer) 
+		{ 
+			pPlayer->SetShooting(bShooting);
+			return true;
+		});
+	m_bPlayersShooting = bShooting;
 }

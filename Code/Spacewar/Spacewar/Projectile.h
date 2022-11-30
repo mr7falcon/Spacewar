@@ -6,14 +6,14 @@ class CProjectile : public CActor
 {
 public:
 
-	CProjectile();
+	CProjectile(const std::string& entity);
 
 	virtual void OnCollision(SmartId sid) override;
-	virtual EActorType GetType() const override { return EActorType::Projectile; }
+	virtual EActorType GetType() const override { return EActorType_Projectile; }
 	virtual void Update(sf::Time dt) override;
 
-	void SetLifetime(float fLifetime) { m_fLifetime = fLifetime; }
-	void SetOwnerId(SmartId sid) { m_owner = sid; }
+	void SetLifetime(float fLifetime);
+	void SetOwnerId(SmartId sid);
 	SmartId GetOwnerId() const { return m_owner; }
 
 private:

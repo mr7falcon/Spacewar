@@ -4,6 +4,7 @@
 
 #include "ControllerConfiguration.h"
 #include "KeyboardController.h"
+#include "NetworkSystem.h"
 
 inline static sf::Keyboard::Key ParseKey(const std::string& key)
 {
@@ -274,6 +275,10 @@ std::shared_ptr<IController> CControllerConfiguration::CreateController(const st
 	if (pKeyboardSchema)
 	{
 		return std::make_shared<CKeyboardController>(pKeyboardSchema);
+	}
+	else if (config == "Network")
+	{
+		return CGame::Get().GetNetworkSystem()->CreateNetworkController();
 	}
 	return nullptr;
 }

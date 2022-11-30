@@ -6,13 +6,14 @@ class CHole : public CActor
 {
 public:
 
-	CHole();
+	CHole(const std::string& entity);
 
-	void SetGravityForce(float fGravityForce) { m_fGravityForce = fGravityForce; }
+	void SetGravityForce(float fGravityForce);
 
 	virtual void OnCollision(SmartId sid) override;
-	virtual EActorType GetType() const override { return EActorType::Hole; }
+	virtual EActorType GetType() const override { return EActorType_Hole; }
 	virtual void Update(sf::Time dt) override;
+	virtual void Serialize(sf::Packet& packet, bool bReading) override;
 
 private:
 

@@ -35,7 +35,16 @@ class IController			// make template class for item providers
 {
 public:
 
+	enum EControllerType
+	{
+		Keyboard,
+		Gamepad,
+		Network
+	};
+
 	virtual ~IController() = default;
+
+	virtual EControllerType GetType() const = 0;
 
 	void RegisterEventListener(IControllerEventListener* pEventListener)
 	{

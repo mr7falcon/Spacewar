@@ -149,6 +149,7 @@
     <ClCompile Include="LogicalEntity.cpp" />
     <ClCompile Include="LogicalSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NetworkSystem.cpp" />
     <ClCompile Include="PhysicalEntity.cpp" />
     <ClCompile Include="PhysicalPrimitive.cpp" />
     <ClCompile Include="PhysicalSystem.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="LogicalSystem.h" />
     <ClInclude Include="MathHelpers.h" />
     <ClInclude Include="MemoryStream.h" />
+    <ClInclude Include="NetworkSystem.h" />
     <ClInclude Include="PhysicalEntity.h" />
     <ClInclude Include="PhysicalPrimitive.h" />
     <ClInclude Include="PhysicalSystem.h" />

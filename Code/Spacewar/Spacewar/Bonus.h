@@ -16,11 +16,11 @@ public:
 	CBonus(const std::string& entity);
 
 	virtual void OnCollision(SmartId sid) override;
-	virtual EActorType GetType() const override { return EActorType::Bonus; }
+	virtual EActorType GetType() const override { return EActorType_Bonus; }
 	virtual void Update(sf::Time dt) override;
 
 	void SetBonus(EBonusType type, float fVal);
-	void SetLifetime(float fLifetime) { m_fLifetime = fLifetime; }
+	void SetLifetime(float fLifetime);
 
 private:
 

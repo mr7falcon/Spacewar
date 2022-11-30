@@ -1,9 +1,7 @@
 <Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="30" activeItem="PlayerConfig">
 	<Text id="PlayerConfig" value="#GetPlayerConfigName" font="Resources/Fonts/Happiness.ttf" color="White" size="20" style="" position="0,0" rotation="0">
 		<Binding key="Right" function="#NextPlayerConfig"/>
-		<Binding key="Right" function="#StartShoot"/>
 		<Binding key="Left" function="#PreviousPlayerConfig"/>
-		<Binding key="Left" function="#StartShoot"/>
 	</Text>
 	<Icon id="LeftArrow" value="Resources/Textures/UI/arrow.png" size="100,50" position="-50,100" rotation="0"/>
 	<Icon id="RightArrow" value="Resources/Textures/UI/arrow.png" size="100,50" position="50,100" rotation="180"/>

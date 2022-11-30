@@ -19,7 +19,7 @@ public:
 
 	void CreateLevel(const std::string& config);
 	void ClearLevel();
-	SmartId SpawnPlayer(const std::string& config, const std::shared_ptr<IController>& pController);
+	SmartId SpawnPlayer(const std::string& config, const std::shared_ptr<IController>& pController = nullptr);
 	void FreePlayerSpawner(SmartId sid);
 
 	void ReloadPlayersLayouts();

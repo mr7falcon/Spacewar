@@ -8,15 +8,15 @@
 #include "Player.h"
 #include "MathHelpers.h"
 
-CHole::CHole()
-	: CActor("Hole")
+CHole::CHole(const std::string& entity)
+	: CActor(entity)
 {}
 
 void CHole::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType::Player)
+		if (pActor->GetType() == EActorType_Player)
 		{
 			CGame::Get().GetLogicalSystem()->GetLevelSystem()->TeleportEntity(pActor->GetEntity(), GetEntity()->GetPosition());
 		}
@@ -39,5 +39,23 @@ void CHole::Update(sf::Time dt)
 					pPlayerEntity->SetVelocity(pPlayerEntity->GetVelocity() + dir);
 				}
 			}
+			return true;
 		});
+}
+
+void CHole::Serialize(sf::Packet& packet, bool bReading)
+{
+	CActor::Serialize(packet, bReading);
+
+	float fGravity = m_fGravityForce;
+
+	SerializeParameters(packet, bReading, fGravity);
+
+	m_fGravityForce = fGravity;
+}
+
+void CHole::SetGravityForce(float fGravity)
+{
+	m_fGravityForce = fGravity;
+	SetNeedSerialize();
 }

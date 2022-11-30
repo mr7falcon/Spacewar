@@ -10,6 +10,7 @@
 #include "RenderSystem.h"
 #include "RenderProxy.h"
 #include "PhysicalSystem.h"
+#include "NetworkSystem.h"
 #include "ActorSystem.h"
 #include "UISystem.h"
 #include "Player.h"
@@ -30,7 +31,12 @@ int CLevelSystem::RandInt(int min, int max)
 
 void CLevelSystem::CreateLevel(const std::string& config)
 {
-	SavePlayersInfo();
+	CGame::Get().Pause(false);
+
+	if (CGame::Get().IsServer() && !IsInGame())
+	{
+		SavePlayersInfo();
+	}
 
 	if (m_pLevelConfig)
 	{
@@ -44,19 +50,26 @@ void CLevelSystem::CreateLevel(const std::string& config)
 		return;
 	}
 
+	CGame::Get().GetNetworkSystem()->SendStartLevel(config);
+
 	m_playerSpawners.resize(m_pLevelConfig->playerSpawners.size());
 	for (int i = 0; i < m_playerSpawners.size(); ++i)
 	{
 		m_playerSpawners[i] = InvalidLink;
 	}
 
-	RecoverPlayers();
-
 	ReloadGlobalLayout();
 
 	m_randomEngine.seed((unsigned int)time(nullptr));
 
 	GenerateStars();
+	
+	if (!CGame::Get().IsServer())
+	{
+		return;
+	}
+
+	RecoverPlayers();
 	
 	for (const auto& hole : m_pLevelConfig->holes.staticHoles)
 	{
@@ -68,7 +81,6 @@ void CLevelSystem::CreateLevel(const std::string& config)
 		ScheduleBonus();
 	}
 
-	CGame::Get().Pause(false);
 }
 
 void CLevelSystem::ClearLevel()
@@ -87,6 +99,7 @@ void CLevelSystem::SavePlayersInfo()
 			info.config = pPlayer->GetConfigName();
 			info.controller = pPlayer->GetController();
 			m_savedPlayers.push_back(std::move(info));
+			return true;
 		});
 }
 
@@ -96,7 +109,11 @@ void CLevelSystem::RecoverPlayers()
 	{
 		SmartId sid = SpawnPlayer(playerInfo.config, playerInfo.controller);
 	}
-	m_savedPlayers.clear();
+
+	if (!IsInGame())
+	{
+		m_savedPlayers.clear();
+	}
 }
 
 void CLevelSystem::GenerateStars()
@@ -230,7 +247,7 @@ void CLevelSystem::ReloadGlobalLayout()
 void CLevelSystem::SpawnHole(const CLevelConfiguration::SHoleConfiguration& config)
 {
 	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-	SmartId holeId = pActorSystem->CreateActor<CHole>();
+	SmartId holeId = pActorSystem->CreateActor<CHole>("Hole");
 	
 	if (CHole* pHole = static_cast<CHole*>(pActorSystem->GetActor(holeId)))
 	{

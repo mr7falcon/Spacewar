@@ -36,6 +36,7 @@ CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
 			SPlayerConfiguration config;
 
 			config.entityName = iter->attribute("entity").value();
+			config.projectileEntityName = iter->attribute("projectileEntity").value();
 			config.fAccel = iter->attribute("acceleration").as_float();
 			config.fAngSpeed = iter->attribute("angularSpeed").as_float();
 			config.fProjSpeed = iter->attribute("projectileSpeed").as_float();

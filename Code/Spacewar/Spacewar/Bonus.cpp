@@ -14,11 +14,16 @@ void CBonus::SetBonus(EBonusType type, float fVal)
 	m_fVal = fVal;
 }
 
+void CBonus::SetLifetime(float fLifetime)
+{
+	m_fLifetime = fLifetime;
+}
+
 void CBonus::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType::Player)
+		if (pActor->GetType() == EActorType_Player)
 		{
 			CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
 			switch (m_type)

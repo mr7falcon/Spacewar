@@ -5,6 +5,7 @@
 #include "LogicalSystem.h"
 #include "LevelSystem.h"
 #include "ActorSystem.h"
+#include "NetworkSystem.h"
 #include "Layout.h"
 #include "Player.h"
 #include "ConfigurationSystem.h"
@@ -54,17 +55,24 @@ static std::string GetPreviousPlayerConfig(SmartId sid)
 
 static void ChangePlayerConfig(SmartId sid, const std::string& config)
 {
-	std::shared_ptr<IController> pController;
-
-	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(sid)))
+	if (!CGame::Get().IsServer())
 	{
-		pController = pPlayer->GetController();
+		CGame::Get().GetNetworkSystem()->SendChangePlayerPreset(config);
 	}
-	pActorSystem->RemoveActor(sid, true);
+	else
+	{
+		std::shared_ptr<IController> pController;
 
-	CLevelSystem* pLevelSystem = CGame::Get().GetLogicalSystem()->GetLevelSystem();
-	sid = pLevelSystem->SpawnPlayer(config, pController);
+		CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
+		if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(sid)))
+		{
+			pController = pPlayer->GetController();
+		}
+		pActorSystem->RemoveActor(sid, true);
+
+		CLevelSystem* pLevelSystem = CGame::Get().GetLogicalSystem()->GetLevelSystem();
+		pLevelSystem->SpawnPlayer(config, pController);
+	}
 }
 
 static void NextPlayerConfig(SmartId sid)
@@ -81,9 +89,16 @@ static void PreviousPlayerConfig(SmartId sid)
 
 static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
 {
-	const std::string& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetDefaultConfiguration();
 	auto pController = CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateController(controller);
-	CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(config, pController);
+	if (!CGame::Get().IsServer())
+	{
+		CGame::Get().GetNetworkSystem()->SetVirtualController(pController);
+	}
+	else
+	{
+		const std::string& config = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetDefaultConfiguration();
+		CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(config, pController);
+	}
 }
 
 static void RemovePlayer()
@@ -98,26 +113,12 @@ static void RemovePlayer()
 
 static void StartShootAll()
 {
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([](CPlayer* pPlayer)
-		{
-			pPlayer->SetShooting(true);
-		});
-}
-
-static void StartShoot(SmartId playerId)
-{
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
-	{
-		pPlayer->SetShooting(true);
-	}
+	CGame::Get().GetLogicalSystem()->GetActorSystem()->SetPlayersShooting(true);
 }
 
 static void StopShootAll()
 {
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([](CPlayer* pPlayer)
-		{
-			pPlayer->SetShooting(false);
-		});
+	CGame::Get().GetLogicalSystem()->GetActorSystem()->SetPlayersShooting(false);
 }
 
 static void PauseGame()
@@ -158,6 +159,12 @@ static void ReloadLayout()
 	CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadGlobalLayout();
 }
 
+static void Connect()
+{
+	CGame::Get().GetNetworkSystem()->Connect("127.0.0.1");
+	CGame::Get().GetNetworkSystem()->SetVirtualController(CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController());
+}
+
 #define REGISTER_FUNCTION(F) m_functions[#F] = F
 
 CUISystem::CUISystem(const std::filesystem::path& path)
@@ -174,7 +181,6 @@ CUISystem::CUISystem(const std::filesystem::path& path)
 	REGISTER_FUNCTION(SpawnPlayer);
 	REGISTER_FUNCTION(RemovePlayer);
 	REGISTER_FUNCTION(StartShootAll);
-	REGISTER_FUNCTION(StartShoot);
 	REGISTER_FUNCTION(StopShootAll);
 	REGISTER_FUNCTION(PauseGame);
 	REGISTER_FUNCTION(ResumeGame);
@@ -182,6 +188,7 @@ CUISystem::CUISystem(const std::filesystem::path& path)
 	REGISTER_FUNCTION(GetPlayerAmmo);
 	REGISTER_FUNCTION(GetPlayerFuel);
 	REGISTER_FUNCTION(ReloadLayout);
+	REGISTER_FUNCTION(Connect);
 
 	m_pController = CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController();
 }

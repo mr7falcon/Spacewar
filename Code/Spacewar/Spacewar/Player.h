@@ -22,18 +22,20 @@ public:
 	virtual void OnControllerEvent(EControllerEvent evt) override;
 
 	virtual void OnCollision(SmartId sid) override;
-	virtual EActorType GetType() const override { return EActorType::Player; }
+	virtual EActorType GetType() const override { return EActorType_Player; }
 	virtual void Update(sf::Time dt) override;
+	virtual void Serialize(sf::Packet& packet, bool bReading) override;
 
-	void SetShooting(bool bShoot) { m_bShooting = bShoot; }
+	void SetShooting(bool bShoot);
 
 	int GetAmmoCount() const { return m_dAmmoCount; }
 	float GetFuel() const { return m_fFuel; }
 
-	void SetAmmoCount(int dAmmoCount) { m_dAmmoCount = dAmmoCount; }
-	void SetFuel(float fFuel) { m_fFuel = fFuel; }
+	void SetAmmoCount(int dAmmoCount);
+	void SetFuel(float fFuel);
 
 	const std::string& GetConfigName() const { return m_configName; }
+	bool IsLocal() const { return m_pController ? m_pController->GetType() != IController::Network : false; }
 
 private:
 

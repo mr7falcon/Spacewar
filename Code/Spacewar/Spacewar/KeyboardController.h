@@ -16,6 +16,8 @@ public:
 	CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig);
 	~CKeyboardController();
 
+	virtual EControllerType GetType() const override { return Keyboard; }
+
 	virtual void OnWindowEvent(const sf::Event& evt) override;
 
 private:

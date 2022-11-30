@@ -2,6 +2,7 @@
 #include "LogicalSystem.h"
 #include "PhysicalSystem.h"
 #include "ActorSystem.h"
+#include "LevelSystem.h"
 #include "Game.h"
 
 CActor::CActor(const std::string& entityName)
@@ -11,6 +12,11 @@ CActor::CActor(const std::string& entityName)
 	{
 		pPhysics->RegisterEventListener(this);
 	}
+
+	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
+	{
+		SetNeedSerialize();
+	}
 }
 
 CActor::~CActor()
@@ -19,7 +25,7 @@ CActor::~CActor()
 	{
 		pPhysics->UnregisterEventListener(this);
 	}
-	CGame::Get().GetLogicalSystem()->RemoveEntity(GetEntity()->GetId());
+	CGame::Get().GetLogicalSystem()->RemoveEntity(m_entityId);
 }
 
 CLogicalEntity* CActor::GetEntity()
@@ -29,5 +35,37 @@ CLogicalEntity* CActor::GetEntity()
 
 void CActor::Destroy()
 {
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(m_entityId);
+	if (!CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame() || CGame::Get().IsServer())
+	{
+		CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(m_entityId);
+	}
+}
+
+void CActor::SetNeedSerialize()
+{
+	if (CGame::Get().IsServer())
+	{
+		m_bNeedSerialize = true;
+	}
+}
+
+void CActor::Serialize(sf::Packet& packet, bool bReading)
+{
+	CLogicalEntity* pEntity = GetEntity();
+
+	sf::Vector2f vPos = pEntity->GetPosition();
+	float fRot = pEntity->GetRotation();
+	float fScale = pEntity->GetScale();
+	sf::Vector2f vVel = pEntity->GetVelocity();
+	float fAngSpeed = pEntity->GetAngularSpeed();
+	
+	SerializeParameters(packet, bReading, vPos, fRot, fScale, vVel, fAngSpeed);
+
+	pEntity->SetPosition(vPos);
+	pEntity->SetRotation(fRot);
+	pEntity->SetScale(fScale);
+	pEntity->SetVelocity(vVel);
+	pEntity->SetAngularSpeed(fAngSpeed);
+
+	m_bNeedSerialize = false;
 }

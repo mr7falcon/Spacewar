@@ -18,5 +18,10 @@
 	<Text id="RemovePlayerButton" value="Remove Player" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,600" rotation="0">
 		<Binding key="Enter" function="RemovePlayer"/>
 		<Binding key="Up" function="$SetActiveItem" argument="AddPlayerButton"/>
+		<Binding key="Down" function="$SetActiveItem" argument="ConnectButton"/>
+	</Text>
+	<Text id="ConnectButton" value="Connect" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,700" rotation="0">
+		<Binding key="Enter" function="Connect"/>
+		<Binding key="Up" function="$SetActiveItem" argument="RemovePlayerButton"/>
 	</Text>
 </Layout>

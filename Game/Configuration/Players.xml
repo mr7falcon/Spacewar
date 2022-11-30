@@ -1,4 +1,4 @@
 <Players>
-	<Player name="player1" entity="Spaceship1" acceleration="30" angularSpeed="50" projectileSpeed="300" shootHelper="0,50" shootCooldown="0" shotsInBurst="1" burstCooldown="0.4" projectileLifetime="3" ammoCount="50" fuel="3000" consumption="100"/>
-	<Player name="player2" entity="Spaceship1" acceleration="50" angularSpeed="80" projectileSpeed="300" shootHelper="0,50" shootCooldown="0.1" shotsInBurst="3" burstCooldown="3" projectileLifetime="2" ammoCount="50" fuel="4000" consumption="100"/>
+	<Player name="player1" entity="Spaceship1" projectileEntity="Projectile1" acceleration="30" angularSpeed="50" projectileSpeed="300" shootHelper="0,50" shootCooldown="0" shotsInBurst="1" burstCooldown="0.4" projectileLifetime="2" ammoCount="50" fuel="3000" consumption="100"/>
+	<Player name="player2" entity="Spaceship2" projectileEntity="Projectile2" acceleration="50" angularSpeed="80" projectileSpeed="300" shootHelper="0,50" shootCooldown="0.1" shotsInBurst="3" burstCooldown="3" projectileLifetime="2" ammoCount="50" fuel="4000" consumption="100"/>
 </Players>

@@ -3,13 +3,13 @@
 #include "LogicalSystem.h"
 #include "ActorSystem.h"
 
-CProjectile::CProjectile() : CActor("Projectile") {}
+CProjectile::CProjectile(const std::string& entity) : CActor(entity) {}
 
 void CProjectile::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType::Player)
+		if (pActor->GetType() == EActorType_Player)
 		{
 			Destroy();
 		}
@@ -23,4 +23,14 @@ void CProjectile::Update(sf::Time dt)
 	{
 		Destroy();
 	}
+}
+
+void CProjectile::SetLifetime(float fLifetime)
+{
+	m_fLifetime = fLifetime;
+}
+
+void CProjectile::SetOwnerId(SmartId sid)
+{
+	m_owner = sid;
 }
