@@ -369,10 +369,10 @@ bool CNetworkSystem::ProcessRemoveActor(sf::Packet& packet)
 
 bool CNetworkSystem::ProcessLocalPlayer(sf::Packet& packet)
 {
-	SmartId sid;
+	SmartIdWrapper sid;
 	packet >> sid;
 
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid.sid)))
 	{
 		pPlayer->SetController(m_pVirtualController);
 		CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadPlayersLayouts();
@@ -468,7 +468,7 @@ bool CNetworkSystem::SendCreateActor(SmartId sid, uint8_t type, const std::strin
 	}
 
 	sf::Packet packet;
-	packet << EServerMessage_CreateActor << sid << type << config;
+	packet << EServerMessage_CreateActor << (sf::Uint32)sid << type << config;
 	
 	BroadcastMessage(packet);
 	return true;
@@ -482,7 +482,7 @@ bool CNetworkSystem::SendRemoveActor(SmartId sid)
 	}
 
 	sf::Packet packet;
-	packet << EServerMessage_RemoveActor << sid;
+	packet << EServerMessage_RemoveActor << (sf::Uint32)sid;
 
 	BroadcastMessage(packet);
 	return true;
@@ -528,7 +528,8 @@ bool CNetworkSystem::SendPlayers(int dClientId)
 bool CNetworkSystem::SendLocalPlayer(int dClientId, SmartId sid)
 {
 	sf::Packet packet;
-	packet << EServerMessage_LocalPlayer << sid;
+	SmartIdWrapper wrapper(sid);
+	packet << EServerMessage_LocalPlayer << wrapper;
 	return SendMessageToClient(packet, dClientId);
 }
 

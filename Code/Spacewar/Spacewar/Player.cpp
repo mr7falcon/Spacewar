@@ -118,6 +118,10 @@ void CPlayer::OnCollision(SmartId sid)
 		{
 			Destroy();
 		}
+		else if (pActor->GetType() == EActorType_Hole)
+		{
+			SetNeedSerialize();
+		}
 	}
 }
 

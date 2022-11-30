@@ -101,7 +101,8 @@ void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 		{
 			if (pActor->NeedSerialize())
 			{
-				packet << sid;
+				SmartIdWrapper wrapper(sid);
+				packet << wrapper;
 				pActor->Serialize(packet, bReading);
 			}
 		}
@@ -110,10 +111,10 @@ void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 	{
 		while (!packet.endOfPacket())
 		{
-			SmartId sid;
-			packet >> sid;
+			SmartIdWrapper wrapper;
+			packet >> wrapper;
 
-			if (CActor* pActor = GetActor(sid))
+			if (CActor* pActor = GetActor(wrapper.sid))
 			{
 				pActor->Serialize(packet, bReading);
 			}

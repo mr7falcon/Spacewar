@@ -305,7 +305,7 @@ void CLevelSystem::Update(sf::Time dt)
 	}
 
 	m_fNextBonusCooldown -= dt.asSeconds();
-	if (m_pLevelConfig->bAllowConsumables && m_fNextBonusCooldown <= 0.f)
+	if (CGame::Get().IsServer() && m_pLevelConfig->bAllowConsumables && m_fNextBonusCooldown <= 0.f)
 	{
 		SpawnBonus(m_pLevelConfig->bonuses.bonuses[RandInt(0, (int)(m_pLevelConfig->bonuses.bonuses.size() - 1))]);
 	}

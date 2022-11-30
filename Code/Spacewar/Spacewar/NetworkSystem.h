@@ -150,22 +150,28 @@ inline sf::Packet& operator>>(sf::Packet& packet, sf::Vector2f& vec)
 	return packet >> vec.x >> vec.y;
 }
 
-inline void SerializeParameters(sf::Packet& packet, bool bReading) {}
-
-template <typename... V>
-inline void SerializeParameters(sf::Packet& packet, bool bReading, SmartId& sid, V&... rest)
+struct SmartIdWrapper
 {
-	if (bReading)
-	{
-		sf::Uint32 outerId;
-		packet >> outerId;
-		sid = (SmartId)CGame::Get().GetNetworkSystem()->OuterToInner(sid);
-	}
-	else
-	{
-		packet << (sf::Uint32)sid;
-	}
+	SmartIdWrapper() = default;
+	SmartIdWrapper(SmartId _sid) : sid(_sid) {}
+	
+	SmartId sid = InvalidLink;
+};
+
+inline sf::Packet& operator<<(sf::Packet& packet, SmartIdWrapper& wrapper)
+{
+	return packet << (sf::Uint32)wrapper.sid;
 }
+
+inline sf::Packet& operator>>(sf::Packet& packet, SmartIdWrapper& wrapper)
+{
+	sf::Uint32 outerId;
+	packet >> outerId;
+	wrapper.sid = CGame::Get().GetNetworkSystem()->OuterToInner(outerId);
+	return packet;
+}
+
+inline void SerializeParameters(sf::Packet& packet, bool bReading) {}
 
 template<typename T, typename... V>
 inline void SerializeParameters(sf::Packet& packet, bool bReading, T& first, V&... rest)
