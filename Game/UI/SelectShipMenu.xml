@@ -1,6 +1,6 @@
 <Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="50" activeItem="ApplyButton">
 	<Text id="ApplyButton" value="Apply" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="" position="500,900" rotation="0">
-		<Binding key="Enter" function="StopShootAll"/>
+		<Binding key="Enter" function="!StopShootAll"/>
 		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
 	</Text>
 	<PlayerLayout id="Player1" path="PlayerShipSelection.xml" position="400,500"/>

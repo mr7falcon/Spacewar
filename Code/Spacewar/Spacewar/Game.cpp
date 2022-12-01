@@ -2,6 +2,10 @@
 
 #include <SFML/Window/Event.hpp>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #include "Game.h"
 #include "RenderSystem.h"
 #include "PhysicalSystem.h"
@@ -22,6 +26,11 @@ CGame::~CGame() = default;
 
 void CGame::Initialize()
 {
+#if !defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	SetCurrentDirectory(L"../Game/");
+#endif
+
 	m_pResourceSystem = std::make_unique<CResourceSystem>("Resources");
 	m_pConfigurationSystem = std::make_unique<CConfigurationSystem>("Configuration");
 	m_pLogicalSystem = std::make_unique<CLogicalSystem>();

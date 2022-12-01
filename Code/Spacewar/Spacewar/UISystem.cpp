@@ -13,7 +13,10 @@
 
 static void StartLevel(ILayout* pCaller, const std::string& name)
 {
-	CGame::Get().GetLogicalSystem()->GetLevelSystem()->CreateLevel(name);
+	if (CGame::Get().IsServer())
+	{
+		CGame::Get().GetLogicalSystem()->GetLevelSystem()->CreateLevel(name);
+	}
 }
 
 static void ChangeLayout(ILayout* pCaller, const std::string& path)
@@ -93,6 +96,15 @@ static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
 	if (!CGame::Get().IsServer())
 	{
 		CGame::Get().GetNetworkSystem()->SetVirtualController(pController);
+		CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([pController](CPlayer* pPlayer)
+			{
+				if (pPlayer->GetController())
+				{
+					pPlayer->SetController(pController);
+				}
+				return true;
+			});
+		CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadPlayersLayouts();
 	}
 	else
 	{
@@ -101,7 +113,7 @@ static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
 	}
 }
 
-static void RemovePlayer()
+static void RemovePlayer(ILayout* pCaller)
 {
 	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
 	SmartId sid = pActorSystem->GetLastPlayerId();
@@ -111,22 +123,22 @@ static void RemovePlayer()
 	}
 }
 
-static void StartShootAll()
+static void StartShootAll(ILayout* pCaller)
 {
 	CGame::Get().GetLogicalSystem()->GetActorSystem()->SetPlayersShooting(true);
 }
 
-static void StopShootAll()
+static void StopShootAll(ILayout* pCaller)
 {
 	CGame::Get().GetLogicalSystem()->GetActorSystem()->SetPlayersShooting(false);
 }
 
-static void PauseGame()
+static void PauseGame(ILayout* pCaller)
 {
 	CGame::Get().Pause(true);
 }
 
-static void ResumeGame()
+static void ResumeGame(ILayout* pCaller)
 {
 	CGame::Get().Pause(false);
 }
@@ -154,15 +166,56 @@ static std::string GetPlayerFuel(SmartId sid)
 	return "0";
 }
 
-static void ReloadLayout()
+static void ReloadLayout(ILayout* pCaller)
 {
 	CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadGlobalLayout();
 }
 
-static void Connect()
+static void Connect(ILayout* pCaller)
 {
-	CGame::Get().GetNetworkSystem()->Connect("127.0.0.1");
+	CGame::Get().GetNetworkSystem()->Connect(pCaller->GetText());
 	CGame::Get().GetNetworkSystem()->SetVirtualController(CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController());
+}
+
+static void Disconnect(ILayout* pCaller)
+{
+	CGame::Get().GetNetworkSystem()->Disconnect();
+}
+
+static std::string GetConnectionStatus(ILayout* pCaller)
+{
+	auto status = CGame::Get().GetNetworkSystem()->GetConnectionState();
+	switch (status)
+	{
+	case CNetworkSystem::Connected:
+		return "Connected";
+	case CNetworkSystem::Disconnected:
+		return "Disconnected";
+	case CNetworkSystem::Rejected:
+		return "Host rejected connection";
+	case CNetworkSystem::Failed:
+		return "Failed to connect to host";
+	case CNetworkSystem::InProcess:
+		return "In progress";
+	case CNetworkSystem::Server:
+		return "Server";
+	}
+	return "";
+}
+
+static void EnableText(ILayout* pCaller)
+{
+	pCaller->SetWriteText(true);
+}
+
+static void DisableText(ILayout* pCaller)
+{
+	pCaller->SetWriteText(false);
+}
+
+static std::string GetText(ILayout* pCaller)
+{
+	return pCaller->GetText();
 }
 
 #define REGISTER_FUNCTION(F) m_functions[#F] = F
@@ -189,6 +242,11 @@ CUISystem::CUISystem(const std::filesystem::path& path)
 	REGISTER_FUNCTION(GetPlayerFuel);
 	REGISTER_FUNCTION(ReloadLayout);
 	REGISTER_FUNCTION(Connect);
+	REGISTER_FUNCTION(Disconnect);
+	REGISTER_FUNCTION(GetConnectionStatus);
+	REGISTER_FUNCTION(EnableText);
+	REGISTER_FUNCTION(DisableText);
+	REGISTER_FUNCTION(GetText);
 
 	m_pController = CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController();
 }

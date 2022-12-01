@@ -29,6 +29,7 @@ class IControllerEventListener
 public:
 
 	virtual void OnControllerEvent(EControllerEvent evt) = 0;
+	virtual void OnTextEntered(char chr) {}
 };
 
 class IController			// make template class for item providers

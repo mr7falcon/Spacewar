@@ -27,8 +27,11 @@ public:
 	virtual void SetController(const std::weak_ptr<IController>& pController) = 0;
 	virtual bool IsLoaded() const = 0;
 	virtual void Update() = 0;
-	virtual void OnControllerEvent(EControllerEvent evt) = 0;
+	virtual void OnControllerEvent(EControllerEvent evt) override = 0;
+	virtual void OnTextEntered(char chr) override = 0;
 	virtual void ActivateItem(const std::string& id) = 0;
+	virtual void SetWriteText(bool bWrite) = 0;
+	virtual const std::string& GetText() const = 0;
 };
 
 template <typename... V>
@@ -81,6 +84,8 @@ public:
 		m_activeStyle.color = CConfigurationSystem::ParseColor(root.attribute("activeColor").value());
 		m_activeStyle.style = ParseStyle(root.attribute("activeStyle").value());
 		m_activeStyle.size = root.attribute("activeCharacterSize").as_uint();
+
+		m_bWriteText = root.attribute("enableText").as_bool();
 
 		for (auto iter = root.begin(); iter != root.end(); ++iter)
 		{
@@ -162,7 +167,7 @@ public:
 		{
 			for (const auto& [sid, bind] : m_updateBindings)
 			{
-				std::string value = CGame::Get().GetUISystem()->InvokeFunction<std::string, V...>(bind, *m_pArguments);
+				std::string value = InvokeFunction<std::string>(bind);
 				CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetText>(sid, value);
 			}
 		}
@@ -185,20 +190,23 @@ public:
 			{
 				if (bind.evt == evt)
 				{
-					std::string func = bind.function;
-					if (func[0] == '#' && m_pArguments)
-					{
-						CGame::Get().GetUISystem()->InvokeFunction<void, V...>(func.substr(1), *m_pArguments);
-					}
-					else if (func[0] == '$' && bind.argument)
-					{
-						CGame::Get().GetUISystem()->InvokeFunction<void, ILayout*, std::string>(func.substr(1), std::make_tuple(this, *bind.argument));
-					}
-					else
-					{
-						CGame::Get().GetUISystem()->InvokeFunction<void>(func, std::tuple());
-					}
+					InvokeFunction<void>(bind.function, bind.argument);
 				}
+			}
+		}
+	}
+
+	virtual void OnTextEntered(char chr) override
+	{
+		if (m_bWriteText)
+		{
+			if (chr == '\b' && !m_text.empty())
+			{
+				m_text.pop_back();
+			}
+			else
+			{
+				m_text += chr;
 			}
 		}
 	}
@@ -249,6 +257,20 @@ public:
 		}
 	}
 
+	virtual void SetWriteText(bool bWrite) override
+	{
+		if (m_bWriteText != bWrite)
+		{
+			m_text.clear();
+		}
+		m_bWriteText = bWrite;
+	}
+
+	virtual const std::string& GetText() const override
+	{
+		return m_text;
+	}
+
 private:
 
 	static uint32_t ParseStyle(const std::string& str)
@@ -294,9 +316,9 @@ private:
 			if (CRenderEntity* pEntity = pRenderSystem->GetEntity(sid))
 			{
 				std::string value = node.attribute("value").value();
-				if (value[0] == '#')
+				if (IsFunction(value))
 				{
-					m_updateBindings[sid] = value.substr(1);
+					m_updateBindings[sid] = std::move(value);
 				}
 				else
 				{
@@ -423,6 +445,29 @@ private:
 		}
 	}
 
+	template <typename R>
+	inline R InvokeFunction(const std::string& func, const std::optional<std::string>& argument = std::nullopt)
+	{
+		if (func[0] == '#' && m_pArguments)
+		{
+			return CGame::Get().GetUISystem()->InvokeFunction<R, V...>(func.substr(1), *m_pArguments);
+		}
+		else if (func[0] == '$' && argument)
+		{
+			return CGame::Get().GetUISystem()->InvokeFunction<R, ILayout*, std::string>(func.substr(1), std::make_tuple(this, *argument));
+		}
+		else if (func[0] == '!')
+		{
+			return CGame::Get().GetUISystem()->InvokeFunction<R, ILayout*>(func.substr(1), this);
+		}
+		return R();
+	}
+
+	inline bool IsFunction(const std::string& val)
+	{
+		return !val.empty() && !isalpha(val[0]);
+	}
+
 private:
 
 	std::string m_path;
@@ -446,4 +491,7 @@ private:
 	std::map<SmartId, std::string> m_updateBindings;
 
 	std::map<std::string, std::unique_ptr<ILayout>> m_subLayouts;
+
+	bool m_bWriteText = false;
+	std::string m_text;
 };

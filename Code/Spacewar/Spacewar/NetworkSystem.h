@@ -9,6 +9,7 @@
 #include <SFML/Network/UdpSocket.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Network/IpAddress.hpp>
+#include <SFML/System/Time.hpp>
 
 #include "IController.h"
 #include "EntitySystem.h"
@@ -18,6 +19,8 @@
 class CNetworkController : public IController
 {
 public:
+
+	~CNetworkController();
 
 	virtual EControllerType GetType() const override { return Network; }
 	
@@ -35,12 +38,23 @@ class CNetworkSystem : public IControllerEventListener
 {
 public:
 
+	enum EConnectionState : uint8_t
+	{
+		Disconnected,
+		Connected,
+		Server,
+		InProcess,
+		Failed,
+		Rejected,
+	};
+
 	CNetworkSystem();
 	CNetworkSystem(const CNetworkSystem&) = delete;
 
 	bool StartServer();
 	bool Connect(const std::string& host);
 	bool Disconnect();
+	EConnectionState GetConnectionState() const { return m_state; }
 	void ProcessMessages();
 
 	bool SendChangePlayerPreset(const std::string& preset);
@@ -53,6 +67,7 @@ public:
 	virtual void OnControllerEvent(EControllerEvent evt) override;
 
 	std::shared_ptr<CNetworkController> CreateNetworkController();
+	void OnNetworkControllerRemoved();
 	void SetVirtualController(const std::shared_ptr<IController>& pController);
 
 	SmartId OuterToInner(SmartId outerId);
@@ -102,6 +117,7 @@ private:
 	bool SendControllerInput(EControllerEvent event);
 	bool SendPlayers(int dClientId);
 	bool SendLocalPlayer(int dClientId, SmartId sid);
+	bool SendDisconnect();
 
 	void ProcessServerMessages();
 	void ProcessClientMessages();
@@ -135,9 +151,13 @@ private:
 
 	std::map<int, SSocket> m_remoteClients;
 	sf::UdpSocket m_server;
-	std::vector<std::shared_ptr<CNetworkController>> m_controllers;
+	std::vector<std::weak_ptr<CNetworkController>> m_controllers;
 
 	std::map<SmartId, SmartId> m_actorBindings;
+
+	EConnectionState m_state = Disconnected;
+
+	sf::Clock m_connectionClock;
 };
 
 inline sf::Packet& operator<<(sf::Packet& packet, const sf::Vector2f& vec)

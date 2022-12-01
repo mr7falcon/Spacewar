@@ -95,10 +95,16 @@ void CLevelSystem::SavePlayersInfo()
 {
 	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([this](CPlayer* pPlayer)
 		{
-			SPlayerInfo info;
-			info.config = pPlayer->GetConfigName();
-			info.controller = pPlayer->GetController();
-			m_savedPlayers.push_back(std::move(info));
+			if (const auto& pController = pPlayer->GetController())
+			{
+				if (pController->GetType() != IController::Network || static_cast<CNetworkController*>(pController.get())->GetClientId() != -1)
+				{
+					SPlayerInfo info;
+					info.config = pPlayer->GetConfigName();
+					info.controller = pPlayer->GetController();
+					m_savedPlayers.push_back(std::move(info));
+				}
+			}
 			return true;
 		});
 }

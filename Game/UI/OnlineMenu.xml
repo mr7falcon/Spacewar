@@ -1,0 +1,20 @@
+<Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="50" activeItem="ConnectButton" enableText="1">
+	<Text id="Title" value="Online" font="Resources/Fonts/Happiness.ttf" color="White" size="50" style="Bold" position="500,100" rotation="0"/>
+	<Text id="Host" value="Host" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="Bold" position="400,300" rotation="0"/>
+	<Text id="HostValue" value="!GetText" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="Bold" position="600,300" rotation="0"/>
+	<Text id="ConnectButton" value="Connect" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="Bold" position="500,500" rotation="0">
+		<Binding key="Enter" function="!Connect"/>
+		<Binding key="Down" function="$SetActiveItem" argument="DisconnectButton"/>
+	</Text>
+	<Text id="DisconnectButton" value="Disconnect" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="Bold" position="500,600" rotation="0">
+		<Binding key="Enter" function="!Disconnect"/>
+		<Binding key="Up" function="$SetActiveItem" argument="ConnectButton"/>
+		<Binding key="Down" function="$SetActiveItem" argument="BackButton"/>
+	</Text>
+	<Text id="BackButton" value="Back" font="Resources/Fonts/Happiness.ttf" color="White" size="40" style="Bold" position="500,700" rotation="0">
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Up" function="$SetActiveItem" argument="DisconnectButton"/>
+	</Text>
+	<Text id="Status" value="Connection Status" font="Resources/Fonts/Happiness.ttf" color="White" size="30" style="Bold" position="200,900" rotation="0"/>
+	<Text id="StatusValue" value="!GetConnectionStatus" font="Resources/Fonts/Happiness.ttf" color="White" size="30" style="Bold" position="700,900" rotation="0"/>
+</Layout>

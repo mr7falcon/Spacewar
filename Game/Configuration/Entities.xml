@@ -7,6 +7,14 @@
 		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship2.png"/>
 	</Entity>
+	<Entity name="Spaceship3" size="40,60">
+		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Render texture="Resources/Textures/Spaceships/st3.png"/>
+	</Entity>
+	<Entity name="Spaceship4" size="40,60">
+		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Render texture="Resources/Textures/Spaceships/st4.png"/>
+	</Entity>
 	<Entity name="Projectile1" size="10,30">
 		<Physics type="Capsule" radius="5" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Projectiles/projectile2.png"/>

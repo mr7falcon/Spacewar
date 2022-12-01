@@ -48,4 +48,20 @@ void CKeyboardController::OnWindowEvent(const sf::Event& evt)
 			}
 		}
 	}
+
+	if (evt.type == sf::Event::TextEntered)
+	{
+		for (auto iter = m_listeners.begin(); iter != m_listeners.end();)				// Make this function common-generic
+		{
+			if (*iter == nullptr)
+			{
+				iter = m_listeners.erase(iter);
+			}
+			else
+			{
+				(*iter)->OnTextEntered(evt.text.unicode);
+				++iter;
+			}
+		}
+	}
 }

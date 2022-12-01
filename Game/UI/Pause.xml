@@ -1,8 +1,8 @@
 <Layout activeColor="Blue" activeCharacterSize="50" activeItem="ResumeButton">
 	<Text id="Title" value="Pause" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,200" rotation="0"/>
 	<Text id="ResumeButton" value="Resume" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,400" rotation="0">
-		<Binding key="Enter" function="ResumeGame"/>
-		<Binding key="Enter" function="ReloadLayout"/>
+		<Binding key="Enter" function="!ResumeGame"/>
+		<Binding key="Enter" function="!ReloadLayout"/>
 		<Binding key="Down" function="$SetActiveItem" argument="QuitButton"/>
 	</Text>
 	<Text id="QuitButton" value="Quit" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,500" rotation="0">

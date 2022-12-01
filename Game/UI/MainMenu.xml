@@ -1,11 +1,11 @@
 <Layout activeColor="Blue" activeStyle="Underlined" activeCharacterSize="50" activeItem="PlayButton">
-	<Text id="GameName" value="Spacewar" font="Resources/Fonts/Happiness.ttf" color="White" size="50" style="Bold" position="500,100" rotation="0"/>
+	<Text id="Title" value="Spacewar" font="Resources/Fonts/Happiness.ttf" color="White" size="50" style="Bold" position="500,100" rotation="0"/>
 	<Text id="PlayButton" value="Play" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,300" rotation="0">
 		<Binding key="Enter" function="$ChangeLayout" argument="SelectLevelMenu.xml"/>
 		<Binding key="Down" function="$SetActiveItem" argument="ChangeShipButton"/>
 	</Text>
 	<Text id="ChangeShipButton" value="Change Ship" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,400" rotation="0">
-		<Binding key="Enter" function="StartShootAll"/>
+		<Binding key="Enter" function="!StartShootAll"/>
 		<Binding key="Enter" function="$ChangeLayout" argument="SelectShipMenu.xml"/>
 		<Binding key="Up" function="$SetActiveItem" argument="PlayButton"/>
 		<Binding key="Down" function="$SetActiveItem" argument="AddPlayerButton"/>
@@ -16,12 +16,12 @@
 		<Binding key="Down" function="$SetActiveItem" argument="RemovePlayerButton"/>
 	</Text>
 	<Text id="RemovePlayerButton" value="Remove Player" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,600" rotation="0">
-		<Binding key="Enter" function="RemovePlayer"/>
+		<Binding key="Enter" function="!RemovePlayer"/>
 		<Binding key="Up" function="$SetActiveItem" argument="AddPlayerButton"/>
 		<Binding key="Down" function="$SetActiveItem" argument="ConnectButton"/>
 	</Text>
-	<Text id="ConnectButton" value="Connect" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,700" rotation="0">
-		<Binding key="Enter" function="Connect"/>
+	<Text id="ConnectButton" value="Online" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,700" rotation="0">
+		<Binding key="Enter" function="$ChangeLayout" argument="OnlineMenu.xml"/>
 		<Binding key="Up" function="$SetActiveItem" argument="RemovePlayerButton"/>
 	</Text>
 </Layout>

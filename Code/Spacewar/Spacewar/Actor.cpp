@@ -7,7 +7,7 @@
 
 CActor::CActor(const std::string& entityName)
 {
-	m_entityId = CGame::Get().GetLogicalSystem()->CreateEntityFromClass(entityName);
+	m_entityId = CGame::Get().GetLogicalSystem()->CreateEntityFromClass(entityName);				// Make error if we cannot find these entities
 	if (CPhysicalEntity* pPhysics = CGame::Get().GetPhysicalSystem()->GetEntity(GetEntity()->GetPhysicalEntityId()))
 	{
 		pPhysics->RegisterEventListener(this);
