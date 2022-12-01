@@ -103,19 +103,23 @@ static constexpr unsigned short ServerPort = 7777;
 
 bool CNetworkSystem::Connect(const std::string& host)
 {
-	m_serverAddress = host;
-	m_client.bind(sf::Socket::AnyPort);
-	m_state = InProcess;
-	m_connectionClock.restart();
-	if (!m_remoteClients.empty())
+	if (m_state != Connected && m_state != InProcess)
 	{
-		SendDisconnect();
-		m_remoteClients.clear();
-	}
+		m_serverAddress = host;
+		m_client.bind(sf::Socket::AnyPort);
+		m_state = InProcess;
+		m_connectionClock.restart();
+		if (!m_remoteClients.empty())
+		{
+			SendDisconnect();
+			m_remoteClients.clear();
+		}
 
-	sf::Packet packet;
-	packet << EClientMessage_Connect;
-	return SendMessageToServer(packet);
+		sf::Packet packet;
+		packet << EClientMessage_Connect;
+		return SendMessageToServer(packet);
+	}
+	return true;
 }
 
 bool CNetworkSystem::Disconnect()

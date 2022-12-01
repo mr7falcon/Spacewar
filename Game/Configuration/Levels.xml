@@ -14,7 +14,7 @@
 	<Level name="Custom" layout="HUDCustom.xml" size="1000" gameLevel="1" allowConsumables="1">
 		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
 		<Holes minTeleportRange="100" rotationSpeed="30" minAppearingSpeed="20" maxAppearingSpeed="70">
-			<Hole position="500,500" gravity="10000"/>
+			<Hole position="500,500" gravity="0"/>
 		</Holes>
 		<PlayerSpawners>
 			<PlayerSpawner position="200,200" rotation="0" layout="Player1"/>
