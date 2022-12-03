@@ -25,6 +25,7 @@ class CConfigurationSystem;
 class CUISystem;
 class CNetworkSystem;
 class CNetworkProxy;
+class CSoundSystem;
 
 class CGame
 {
@@ -43,6 +44,7 @@ public:
 	void Pause(bool pause);
 	bool IsServer() const { return m_bServer; }
 	void SetServer(bool bServer) { m_bServer = bServer; }
+	bool IsActive() { return m_window.hasFocus(); }
 
 public:
 
@@ -55,6 +57,7 @@ public:
 	CUISystem* GetUISystem() { return m_pUISystem.get(); }
 	CNetworkSystem* GetNetworkSystem() { return m_pNetworkSystem.get(); }
 	CNetworkProxy* GetNetworkProxy() { return m_pNetworkProxy.get(); }
+	CSoundSystem* GetSoundSystem() { return m_pSoundSystem.get(); }
 
 	void RegisterWindowEventListener(const std::weak_ptr<IWindowEventListener>& pEventListener);
 
@@ -80,6 +83,7 @@ private:
 	std::unique_ptr<CUISystem> m_pUISystem;
 	std::unique_ptr<CNetworkSystem> m_pNetworkSystem;
 	std::unique_ptr<CNetworkProxy> m_pNetworkProxy;
+	std::unique_ptr<CSoundSystem> m_pSoundSystem;
 
 	std::mutex m_renderLock;
 	std::condition_variable m_renderSync;

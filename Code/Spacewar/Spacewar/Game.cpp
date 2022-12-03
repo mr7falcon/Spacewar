@@ -21,6 +21,7 @@
 #include "UISystem.h"
 #include "NetworkSystem.h"
 #include "NetworkProxy.h"
+#include "SoundSystem.h"
 
 CGame::CGame() = default;
 CGame::~CGame() = default;
@@ -41,13 +42,18 @@ void CGame::Initialize()
 	m_pUISystem = std::make_unique<CUISystem>("UI");
 	m_pNetworkSystem = std::make_unique<CNetworkSystem>();
 	m_pNetworkProxy = std::make_unique<CNetworkProxy>();
+	m_pSoundSystem = std::make_unique<CSoundSystem>();
 
 	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
 	
 	float levelSize = m_pLogicalSystem->GetLevelSystem()->GetLevelSize();
 	m_view.reset(sf::FloatRect(0.f, 0.f, levelSize, levelSize));
+
+	const CConfigurationSystem::SWindowConfiguration& config = m_pConfigurationSystem->GetWindowConfiguration();
 	
-	m_window.create(sf::VideoMode(900, 900), "Spacewar");
+	m_window.create(sf::VideoMode(config.resX, config.resY), "Spacewar");
+	m_window.setVerticalSyncEnabled(config.bVerticalSynq);
+	m_window.setFramerateLimit(config.frameLitimit);
 	m_window.setView(m_view);
 	m_window.setActive(false);
 }
@@ -113,6 +119,8 @@ void CGame::Start()
 
 		m_pLogicalSystem->CollectGarbage();
 		m_pPhysicalSystem->CollectGarbage();
+
+		m_pSoundSystem->Update();
 
 		m_pUISystem->Update();
 

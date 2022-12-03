@@ -148,6 +148,10 @@ static void ResumeGame(ILayout* pCaller)
 
 static std::string GetPlayerScore(SmartId sid)
 {
+	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	{
+		return std::to_string(pPlayer->GetScore());
+	}
 	return "0";
 }
 
@@ -309,14 +313,12 @@ void CUISystem::ReloadPlayerLayout(const std::string& id, SmartId playerId)
 
 	if (playerId != InvalidLink)
 	{
-		if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
+		if (CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem())
 		{
-			pPlayerLayout->SetController(pPlayer->GetController());
+			if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
+			{
+				pPlayerLayout->SetController(pPlayer->GetController());
+			}
 		}
 	}
-}
-
-void CUISystem::ResetLayout()
-{
-	m_pLayout.reset();
 }

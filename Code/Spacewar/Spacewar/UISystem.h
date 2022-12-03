@@ -24,8 +24,7 @@ public:
 
 	void LoadGlobalLayout(const std::string& path);
 	void ReloadPlayerLayout(const std::string& id, SmartId playerId);
-	void ResetLayout();
-
+	
 	template <typename R, typename... V>
 	R InvokeFunction(const std::string& name, const std::tuple<V...>& args)
 	{

@@ -66,6 +66,7 @@ public:
 		std::string layout;
 		bool bGameLevel = false;
 		bool bAllowConsumables = false;
+		float fReviveDelay = 0.f;
 		SStarsConfiguration stars;
 		SHolesConfiguration holes;
 		std::vector<SPlayerSpawnerConfiguration> playerSpawners;

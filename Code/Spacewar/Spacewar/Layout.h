@@ -170,6 +170,11 @@ public:
 
 	virtual void Update() override
 	{
+		if (auto pController = m_pController.lock())
+		{
+			pController->Update();
+		}
+
 		if (m_pArguments)
 		{
 			for (const auto& [sid, bind] : m_updateBindings)

@@ -91,7 +91,6 @@ void CLevelSystem::ClearLevel()
 	CGame::Get().GetLogicalSystem()->Clear();
 	CGame::Get().GetPhysicalSystem()->Clear();
 	CGame::Get().GetRenderSystem()->Clear();
-	CGame::Get().GetUISystem()->ResetLayout();
 }
 
 void CLevelSystem::SavePlayersInfo()
@@ -103,6 +102,7 @@ void CLevelSystem::SavePlayersInfo()
 				if (pController->GetType() != IController::Network || static_cast<CNetworkController*>(pController.get())->GetClientId() != -1)
 				{
 					SPlayerInfo info;
+					info.sid = pPlayer->GetEntityId();
 					info.config = pPlayer->GetConfigName();
 					info.controller = pPlayer->GetController();
 					m_savedPlayers.push_back(std::move(info));
@@ -114,9 +114,22 @@ void CLevelSystem::SavePlayersInfo()
 
 void CLevelSystem::RecoverPlayers()
 {
-	for (const SPlayerInfo& playerInfo : m_savedPlayers)
+	for (int i = 0; i < m_playerSpawners.size(); ++i)
+	{
+		if (m_playerSpawners[i] != InvalidLink)
+		{
+			CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(m_playerSpawners[i], true);
+		}
+	}
+
+	for (SPlayerInfo& playerInfo : m_savedPlayers)
 	{
 		SmartId sid = SpawnPlayer(playerInfo.config, playerInfo.controller);
+		playerInfo.sid = sid;
+		if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+		{
+			pPlayer->SetScore(playerInfo.dScore);
+		}
 	}
 
 	if (!IsInGame())
@@ -220,12 +233,34 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_p
 	return playerId;
 }
 
-void CLevelSystem::FreePlayerSpawner(SmartId sid)
+void CLevelSystem::OnPlayerDestroyed(SmartId sid, int dScore)
 {
-	auto fnd = std::find(m_playerSpawners.begin(), m_playerSpawners.end(), sid);
-	if (fnd != m_playerSpawners.end())
+	auto fnd = std::find_if(m_savedPlayers.begin(), m_savedPlayers.end(),
+		[sid](const SPlayerInfo& player) { return player.sid == sid; });
+	if (fnd != m_savedPlayers.end())
 	{
-		*fnd = InvalidLink;
+		fnd->sid = InvalidLink;
+		fnd->dScore = dScore;
+	}
+
+	int numAlive = 0;
+	for (int i = 0; i < m_playerSpawners.size(); ++i)
+	{
+		if (m_playerSpawners[i] == sid)
+		{
+			m_playerSpawners[i] = InvalidLink;
+			continue;
+		}
+
+		if (m_playerSpawners[i] != InvalidLink)
+		{
+			++numAlive;
+		}
+	}
+	
+	if (numAlive == 1)
+	{
+		ScheduleRevive();
 	}
 
 	ReloadPlayersLayouts();
@@ -305,6 +340,14 @@ void CLevelSystem::ScheduleBonus()
 	}
 }
 
+void CLevelSystem::ScheduleRevive()
+{
+	if (m_pLevelConfig)
+	{
+		m_fReviveCooldown = m_pLevelConfig->fReviveDelay;
+	}
+}
+
 void CLevelSystem::Update(sf::Time dt)
 {
 	if (!m_pLevelConfig)
@@ -316,6 +359,15 @@ void CLevelSystem::Update(sf::Time dt)
 	if (CGame::Get().IsServer() && m_pLevelConfig->bAllowConsumables && m_fNextBonusCooldown <= 0.f)
 	{
 		SpawnBonus(m_pLevelConfig->bonuses.bonuses[RandInt(0, (int)(m_pLevelConfig->bonuses.bonuses.size() - 1))]);
+	}
+
+	if (m_fReviveCooldown > 0.f)
+	{
+		m_fReviveCooldown -= dt.asSeconds();
+		if (m_fReviveCooldown <= 0.f)
+		{
+			RecoverPlayers();
+		}
 	}
 }
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Event.hpp>
 
@@ -13,14 +11,14 @@ class CKeyboardController : public IController, public IWindowEventListener
 {
 public:
 
-	CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig);
+	CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig) : m_pConfig(pConfig) {}
 
 	virtual EControllerType GetType() const override { return Keyboard; }
+	virtual void Update() override;
 
 	virtual void OnWindowEvent(const sf::Event& evt) override;
 
 private:
 
-	std::map<std::pair<sf::Event::EventType, sf::Keyboard::Key>, EControllerEvent> m_eventsMap;
-	EControllerEvent m_lastEvent = EControllerEvent_Invalid;
+	const CControllerConfiguration::SConfiguration* m_pConfig = nullptr;
 };

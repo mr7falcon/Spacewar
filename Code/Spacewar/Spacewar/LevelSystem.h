@@ -20,7 +20,7 @@ public:
 	void CreateLevel(const std::string& config);
 	void ClearLevel();
 	SmartId SpawnPlayer(const std::string& config, const std::shared_ptr<IController>& pController = nullptr);
-	void FreePlayerSpawner(SmartId sid);
+	void OnPlayerDestroyed(SmartId sid, int dScore);
 
 	void ReloadPlayersLayouts();
 	void ReloadGlobalLayout();
@@ -45,6 +45,7 @@ private:
 	void SpawnBonus(const CLevelConfiguration::SBonusConfiguration& config);
 
 	void ScheduleBonus();
+	void ScheduleRevive();
 
 	float RandFloat();
 	int RandInt(int min, int max);
@@ -59,11 +60,14 @@ private:
 
 	float m_fNextBonusCooldown = 0.f;
 	float m_fNextHoleCooldown = 0.f;
+	float m_fReviveCooldown = 0.f;
 
 	struct SPlayerInfo
 	{
+		SmartId sid = InvalidLink;
 		std::string config;
 		std::shared_ptr<IController> controller;
+		int dScore = 0;
 	};
 	std::vector<SPlayerInfo> m_savedPlayers;
 };

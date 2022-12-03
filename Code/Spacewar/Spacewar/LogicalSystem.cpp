@@ -8,11 +8,13 @@
 #include "RenderProxy.h"
 #include "Game.h"
 #include "Player.h"
+#include "FeedbackSystem.h"
 
 CLogicalSystem::CLogicalSystem()
 	: CEntitySystem(64)
 	, m_pActorSystem(std::make_unique<CActorSystem>())
 	, m_pLevelSystem(std::make_unique<CLevelSystem>())
+	, m_pFeedbackSystem(std::make_unique<CFeedbackSystem>())
 {}
 
 CLogicalSystem::~CLogicalSystem() = default;
@@ -21,6 +23,7 @@ void CLogicalSystem::Release()
 {
 	m_pActorSystem.reset();
 	m_pLevelSystem.reset();
+	m_pFeedbackSystem.reset();
 }
 
 void CLogicalSystem::Update(sf::Time dt)
@@ -68,17 +71,14 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 				}
 			}
 
-			if (pEntityClass->texture >= 0)
+			SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity(CRenderEntity::Sprite);
+			pEntity->SetRender(renderEntityId);
+
+			for (const auto& slot : pEntityClass->renderSlots)
 			{
-				SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity(CRenderEntity::Sprite);
-				pEntity->SetRender(renderEntityId);
-				CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
-				pRenderProxy->OnCommand<RenderCommand::SetTextureCommand>(renderEntityId, pEntityClass->texture);
-				if (pEntityClass->vSize != sf::Vector2f())
-				{
-					pRenderProxy->OnCommand<RenderCommand::SetSizeCommand>(renderEntityId, pEntityClass->vSize);
-				}
+				pEntity->AddRenderSlot(slot);
 			}
+			pEntity->ActivateRenderSlot(0);
 		}
 
 		return sid;

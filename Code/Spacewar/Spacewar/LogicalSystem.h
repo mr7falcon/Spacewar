@@ -7,6 +7,7 @@
 
 class CActorSystem;
 class CLevelSystem;
+class CFeedbackSystem;
 
 class CLogicalSystem : public CEntitySystem<CLogicalEntity, false>
 {
@@ -26,9 +27,11 @@ public:
 
 	CActorSystem* GetActorSystem() { return m_pActorSystem.get(); }
 	CLevelSystem* GetLevelSystem() { return m_pLevelSystem.get(); }
+	CFeedbackSystem* GetFeedbackSystem() { return m_pFeedbackSystem.get(); }
 
 private:
 
 	std::unique_ptr<CActorSystem> m_pActorSystem;
 	std::unique_ptr<CLevelSystem> m_pLevelSystem;
+	std::unique_ptr<CFeedbackSystem> m_pFeedbackSystem;
 };

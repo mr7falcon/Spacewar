@@ -9,6 +9,7 @@
 
 #include "PhysicalPrimitive.h"
 #include "ResourceSystem.h"
+#include "LogicalEntity.h"
 
 class CEntityConfiguration
 {
@@ -43,10 +44,9 @@ public:
 
 	struct SEntityClass
 	{
-		int texture = InvalidResourceId;
-		sf::Vector2f vSize;
 		PhysicalPrimitive::EPrimitiveType physicsType = PhysicalPrimitive::EPrimitiveType_Num;
 		std::unique_ptr<IPrimitiveConfig> pPhysics;
+		std::vector<CLogicalEntity::SRenderSlot> renderSlots;
 	};
 
 	CEntityConfiguration(const std::filesystem::path& path);
@@ -57,9 +57,9 @@ public:
 private:
 
 	void ParsePhysics(const pugi::xml_node& node, const std::string& name, SEntityClass& entityClass);
+	CLogicalEntity::SRenderSlot ParseRender(const pugi::xml_node& node, const std::string& name);
 
 private:
 
 	std::map<std::string, SEntityClass> m_entityClasses;
-
 };

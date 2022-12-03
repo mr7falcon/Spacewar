@@ -9,6 +9,7 @@
 
 #include <SFML\Graphics\Image.hpp>
 #include <SFML\Graphics\Font.hpp>
+#include <SFML\Audio\SoundBuffer.hpp>
 
 static constexpr int InvalidResourceId = -1;
 
@@ -26,10 +27,14 @@ public:
 	int GetFontId(const std::string& path) const { return GetResourceId(m_fonts, path); }
 	const sf::Font* GetFont(int id) const { return GetResource(m_fonts, id); }
 
+	int GetSoundId(const std::string& path) const { return GetResourceId(m_sounds, path); }
+	const sf::SoundBuffer* GetSound(int id) const { return GetResource(m_sounds, id); }
+
 private:
 
 	static constexpr const char* TexturesDirectory = "Textures";
 	static constexpr const char* FontsDirectory = "Fonts";
+	static constexpr const char* SoundsDirectory = "Sounds";
 
 	template <typename T>
 	struct SResources
@@ -99,4 +104,5 @@ private:
 
 	SResources<sf::Image> m_textures;
 	SResources<sf::Font> m_fonts;
+	SResources<sf::SoundBuffer> m_sounds;
 };

@@ -40,6 +40,7 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 			config.layout = iter->attribute("layout").value();
 			config.bGameLevel = iter->attribute("gameLevel").as_bool();
 			config.bAllowConsumables = iter->attribute("allowConsumables").as_bool();
+			config.fReviveDelay = iter->attribute("reviveDelay").as_float();
 
 			auto holes = iter->child("Holes");
 			if (holes)

@@ -4,6 +4,7 @@
 
 #include "ControllerConfiguration.h"
 #include "KeyboardController.h"
+#include "GamepadController.h"
 #include "NetworkProxy.h"
 
 inline static sf::Keyboard::Key ParseKey(const std::string& key)
@@ -281,6 +282,14 @@ std::shared_ptr<IController> CControllerConfiguration::CreateController(const st
 	else if (config == "Network")
 	{
 		return CGame::Get().GetNetworkProxy()->CreateNetworkController();
+	}
+	else if (config == "Gamepad1")
+	{
+		return std::make_shared<CGamepadController>(0);
+	}
+	else if (config == "Gamepad2")
+	{
+		return std::make_shared<CGamepadController>(1);
 	}
 	return nullptr;
 }

@@ -14,6 +14,7 @@ public:
 	{
 		std::string entityName;
 		std::string projectileEntityName;
+		std::string feedbackSchema;
 		float fAccel = 5.f;
 		float fAngSpeed = 5.f;
 		float fProjSpeed = 10.f;

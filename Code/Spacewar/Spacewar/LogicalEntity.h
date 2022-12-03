@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/System/Time.hpp>
 
@@ -12,10 +14,20 @@ class CLogicalEntity : public CEntity, private sf::Transformable
 {
 public:
 
+	struct SRenderSlot
+	{
+		int textureId;
+		sf::Vector2f vSize;
+	};
+
 	CLogicalEntity() = default;
 
 	void SetPhysics(SmartId sid) { m_physicalEntityId = sid; }
 	void SetRender(SmartId sid) { m_renderEntityId = sid; }
+
+	void AddRenderSlot(const SRenderSlot& slot);
+	void ActivateRenderSlot(int slot);
+	int GetActiveRenderSlot() const { return m_dActiveRenderSlot; }
 
 	void SetPosition(const sf::Vector2f& vPos);
 	void SetRotation(float fRot);
@@ -47,4 +59,7 @@ private:
 	
 	sf::Vector2f m_vVel;
 	float m_fAngSpeed = 0.f;
+
+	int m_dActiveRenderSlot = 0;
+	std::vector<SRenderSlot> m_renderSlots;
 };

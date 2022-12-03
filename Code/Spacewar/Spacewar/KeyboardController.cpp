@@ -1,60 +1,33 @@
 #include <iostream>
 
-#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 #include "KeyboardController.h"
 #include "Player.h"
 
-CKeyboardController::CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig)
+void CKeyboardController::Update()
 {
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->moveForward)] = EControllerEvent_MoveForward_Pressed;
-	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->moveForward)] = EControllerEvent_MoveForward_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->moveBack)] = EControllerEvent_MoveBack_Pressed;
-	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->moveBack)] = EControllerEvent_MoveBack_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->rotatePositive)] = EControllerEvent_RotatePositive_Pressed;
-	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->rotatePositive)] = EControllerEvent_RotatePositive_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->rotateNegative)] = EControllerEvent_RotateNegative_Pressed;
-	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->rotateNegative)] = EControllerEvent_RotateNegative_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->shoot)] = EControllerEvent_Shoot_Pressed;
-	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->shoot)] = EControllerEvent_Shoot_Released;
-	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->escape)] = EControllerEvent_Quit;
+	if (!m_pConfig || !CGame::Get().IsActive())
+	{
+		return;
+	}
+
+	std::vector<EControllerEvent> events;
+
+	CheckButton<sf::Keyboard::Key>(sf::Keyboard::isKeyPressed, m_pConfig->moveForward, EControllerEvent_MoveForward_Pressed, EControllerEvent_MoveForward_Released, events);
+	CheckButton<sf::Keyboard::Key>(sf::Keyboard::isKeyPressed, m_pConfig->moveBack, EControllerEvent_MoveBack_Pressed, EControllerEvent_MoveBack_Released, events);
+	CheckButton<sf::Keyboard::Key>(sf::Keyboard::isKeyPressed, m_pConfig->shoot, EControllerEvent_Shoot_Pressed, EControllerEvent_Shoot_Released, events);
+	CheckButton<sf::Keyboard::Key>(sf::Keyboard::isKeyPressed, m_pConfig->escape, EControllerEvent_Quit, events);
+	CheckButton<sf::Keyboard::Key>(sf::Keyboard::isKeyPressed, m_pConfig->rotatePositive, m_pConfig->rotateNegative, 
+		EControllerEvent_RotatePositive_Pressed, EControllerEvent_RotateNegative_Pressed, EControllerEvent_Rotate_Released, events);
+
+	SendEvents(std::move(events));
 }
 
 void CKeyboardController::OnWindowEvent(const sf::Event& evt)
 {
-	if (evt.type == sf::Event::KeyPressed || evt.type == sf::Event::KeyReleased)
-	{
-		auto fnd = m_eventsMap.find(std::make_pair(evt.type, evt.key.code));
-		if (fnd != m_eventsMap.end() && m_lastEvent != fnd->second)
-		{
-			for (auto iter = m_listeners.begin(); iter != m_listeners.end();)
-			{
-				if (*iter == nullptr)
-				{
-					iter = m_listeners.erase(iter);
-				}
-				else
-				{
-					(*iter)->OnControllerEvent(fnd->second);
-					++iter;
-				}
-			}
-		}
-	}
-
 	if (evt.type == sf::Event::TextEntered)
 	{
-		for (auto iter = m_listeners.begin(); iter != m_listeners.end();)				// Make this function common-generic
-		{
-			if (*iter == nullptr)
-			{
-				iter = m_listeners.erase(iter);
-			}
-			else
-			{
-				(*iter)->OnTextEntered(evt.text.unicode);
-				++iter;
-			}
-		}
+		ForEachListener([evt](IControllerEventListener* pEventListener) { pEventListener->OnTextEntered(evt.text.unicode); });
 	}
 }

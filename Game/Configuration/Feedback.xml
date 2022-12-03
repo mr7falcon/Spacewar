@@ -1,0 +1,12 @@
+<Schemas>
+	<Schema name="feedback1">
+		<Move continuous="1" renderSlot="1" sound="Resources/Sounds/move1.wav"/>
+		<Shoot continuous="0" sound="Resources/Sounds/shot1.wav" pitch="1" volume="100"/>
+		<Death continuous="0" sound="Resources/Sounds/explosion1.wav" pitch="1" volume="100"/>
+	</Schema>
+	<Schema name="feedback2">
+		<Move continuous="1" renderSlot="1" sound="Resources/Sounds/move2.wav"/>
+		<Shoot continuous="0" sound="Resources/Sounds/shot2.wav" pitch="1" volume="100"/>
+		<Death continuous="0" sound="Resources/Sounds/explosion1.wav" pitch="1" volume="100"/>
+	</Schema>
+</Schemas>

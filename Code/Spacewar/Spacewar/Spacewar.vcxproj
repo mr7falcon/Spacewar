@@ -149,7 +149,10 @@
     <ClCompile Include="ConfigurationSystem.cpp" />
     <ClCompile Include="ControllerConfiguration.cpp" />
     <ClCompile Include="EntityConfiguration.cpp" />
+    <ClCompile Include="FeedbackConfiguration.cpp" />
+    <ClCompile Include="FeedbackSystem.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GamepadController.cpp" />
     <ClCompile Include="Hole.cpp" />
     <ClCompile Include="KeyboardController.cpp" />
     <ClCompile Include="LevelConfiguration.cpp" />
@@ -169,6 +172,7 @@
     <ClCompile Include="RenderProxy.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="ResourceSystem.cpp" />
+    <ClCompile Include="SoundSystem.cpp" />
     <ClCompile Include="UISystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +184,10 @@
     <ClInclude Include="ControllerConfiguration.h" />
     <ClInclude Include="EntityConfiguration.h" />
     <ClInclude Include="EntitySystem.h" />
+    <ClInclude Include="FeedbackConfiguration.h" />
+    <ClInclude Include="FeedbackSystem.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GamepadController.h" />
     <ClInclude Include="Hole.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="IController.h" />
@@ -204,6 +211,7 @@
     <ClInclude Include="RenderProxy.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="ResourceSystem.h" />
+    <ClInclude Include="SoundSystem.h" />
     <ClInclude Include="UISystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

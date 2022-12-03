@@ -30,9 +30,11 @@ public:
 
 	int GetAmmoCount() const { return m_dAmmoCount; }
 	float GetFuel() const { return m_fFuel; }
+	int GetScore() const { return m_dScore; }
 
 	void SetAmmoCount(int dAmmoCount);
 	void SetFuel(float fFuel);
+	void SetScore(int dScore);
 
 	const std::string& GetConfigName() const { return m_configName; }
 	bool IsLocal() const { return m_pController ? m_pController->GetType() != IController::Network : false; }
@@ -59,4 +61,5 @@ private:
 
 	int m_dAmmoCount = -1;
 	float m_fFuel = -1.f;
+	int m_dScore = 0;
 };

@@ -1,5 +1,5 @@
 <Levels>
-	<Level name="Classic" layout="HUDClassic.xml" size="1000" gameLevel="1" allowConsumables="0">
+	<Level name="Classic" layout="HUDClassic.xml" size="1000" gameLevel="1" allowConsumables="0" reviveDelay="3">
 		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
 		<Holes minTeleportRange="100" rotationSpeed="30" minAppearingSpeed="20" maxAppearingSpeed="70">
 			<Hole position="500,500" gravity="7000"/>
@@ -11,7 +11,7 @@
 			<PlayerSpawner position="200,800" rotation="180" layout="Player4"/>
 		</PlayerSpawners>
 	</Level>
-	<Level name="Custom" layout="HUDCustom.xml" size="1000" gameLevel="1" allowConsumables="1">
+	<Level name="Custom" layout="HUDCustom.xml" size="1000" gameLevel="1" allowConsumables="1" reviveDelay="3">
 		<Stars rowPlaces="10" availableSpace="0.7" spawnProbability="0.7" scaleMin="0.01" scaleMax="0.02"/>
 		<Holes minTeleportRange="100" rotationSpeed="30" minAppearingSpeed="20" maxAppearingSpeed="70">
 			<Hole position="500,500" gravity="0"/>

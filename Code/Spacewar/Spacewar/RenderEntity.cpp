@@ -206,6 +206,21 @@ uint32_t CRenderEntity::GetStyle() const
 	return sf::Text::Regular;
 }
 
+const sf::Vector2f CRenderEntity::GetSize() const
+{
+	sf::FloatRect rect;
+	switch (m_type)
+	{
+	case Sprite:
+		rect = static_cast<sf::Sprite*>(m_pRenderObject.get())->getLocalBounds();
+		break;
+	case Text:
+		rect = static_cast<sf::Text*>(m_pRenderObject.get())->getLocalBounds();
+		break;
+	}
+	return sf::Vector2f(rect.width, rect.height);
+}
+
 void CRenderEntity::Render(sf::RenderTarget& target) const
 {
 	sf::RenderStates states;

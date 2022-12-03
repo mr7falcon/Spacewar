@@ -5,13 +5,41 @@
 #include "ControllerConfiguration.h"
 #include "LevelConfiguration.h"
 #include "PlayerConfiguration.h"
+#include "FeedbackConfiguration.h"
 
 CConfigurationSystem::CConfigurationSystem(const std::filesystem::path& path)
 	: m_pEntityConfiguration(std::make_unique<CEntityConfiguration>(path / "Entities.xml"))
 	, m_pControllerConfiguration(std::make_unique<CControllerConfiguration>(path / "Controller.xml"))
 	, m_pLevelConfiguration(std::make_unique<CLevelConfiguration>(path / "Levels.xml"))
 	, m_pPlayerConfiguration(std::make_unique<CPlayerConfiguration>(path / "Players.xml"))
-{}
+	, m_pFeedbackConfiguration(std::make_unique<CFeedbackConfiguration>(path / "Feedback.xml"))
+{
+	LoadWindowConfiguration(path / "Window.xml");
+}
+
+void CConfigurationSystem::LoadWindowConfiguration(const std::filesystem::path& path)
+{
+	pugi::xml_document doc;
+
+	auto res = doc.load_file(path.c_str());
+	if (!res)
+	{
+		std::cout << "Failed to load window configuration: " << res.description() << std::endl;
+		return;
+	}
+
+	auto root = doc.child("Window");
+	if (!root)
+	{
+		std::cout << "Invalid root element in window configuration" << std::endl;
+		return;
+	}
+
+	m_windowConfiguration.resX = root.attribute("resX").as_int();
+	m_windowConfiguration.resY = root.attribute("resY").as_int();
+	m_windowConfiguration.bVerticalSynq = root.attribute("verticalSynq").as_bool();
+	m_windowConfiguration.frameLitimit = root.attribute("frameLimit").as_int();
+}
 
 CConfigurationSystem::~CConfigurationSystem() = default;
 

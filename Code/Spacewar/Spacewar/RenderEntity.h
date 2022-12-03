@@ -48,6 +48,7 @@ public:
 
 	const sf::Transform& GetTransform() const { return m_transform; }
 	sf::Color GetColor() const;
+	const sf::Vector2f GetSize() const;
 
 	void Render(sf::RenderTarget& target) const;
 

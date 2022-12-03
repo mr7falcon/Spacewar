@@ -59,6 +59,20 @@ void CEntityConfiguration::ParsePhysics(const pugi::xml_node& node, const std::s
 	}
 }
 
+CLogicalEntity::SRenderSlot CEntityConfiguration::ParseRender(const pugi::xml_node& node, const std::string& name)
+{
+	CLogicalEntity::SRenderSlot slot;
+	
+	slot.textureId = CGame::Get().GetResourceSystem()->GetTextureId(node.attribute("texture").value());
+	if (slot.textureId < 0)
+	{
+		std::cout << "Invalid texture " << node.attribute("texture").value() << " specified for entity " << name << std::endl;
+	}
+
+	slot.vSize = node.attribute("size").as_vector();
+	return slot;
+}
+
 CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 {
 	pugi::xml_document doc;
@@ -91,22 +105,16 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 
 			SEntityClass entityClass;
 
-			entityClass.vSize = iter->attribute("size").as_vector();
-
 			auto physics = iter->child("Physics");
 			if (physics)
 			{
 				ParsePhysics(physics, name, entityClass);
 			}
-			
-			auto render = iter->child("Render");
-			if (render)
+
+			auto render = iter->children("Render");
+			for (auto node = render.begin(); node != render.end(); ++node)
 			{
-				entityClass.texture = CGame::Get().GetResourceSystem()->GetTextureId(render.attribute("texture").value());
-				if (entityClass.texture < 0)
-				{
-					std::cout << "Invalid texture " << render.attribute("texture").value() << " specified for entity " << name << std::endl;
-				}
+				entityClass.renderSlots.push_back(ParseRender(*node, name));
 			}
 
 			m_entityClasses.emplace(std::move(name), std::move(entityClass));

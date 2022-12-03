@@ -15,4 +15,10 @@ CResourceSystem::CResourceSystem(const std::filesystem::path& path)
 		{
 			return font.loadFromFile(path);
 		});
+
+	LoadResource<sf::SoundBuffer>(path / SoundsDirectory, m_sounds,
+		[](const std::string& path, sf::SoundBuffer& sound) -> bool
+		{
+			return sound.loadFromFile(path);
+		});
 }
