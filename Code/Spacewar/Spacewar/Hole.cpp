@@ -43,13 +43,13 @@ void CHole::Update(sf::Time dt)
 		});
 }
 
-void CHole::Serialize(sf::Packet& packet, bool bReading)
+void CHole::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 {
-	CActor::Serialize(packet, bReading);
+	CActor::Serialize(packet, mode, size);
 
 	float fGravity = m_fGravityForce;
 
-	SerializeParameters(packet, bReading, fGravity);
+	SerializeParameters(packet, mode, size, fGravity);
 
 	m_fGravityForce = fGravity;
 }

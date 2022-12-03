@@ -27,5 +27,10 @@
 		<Binding key="Enter" function="$SpawnPlayer" argument="Network"/>
 		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
 		<Binding key="Up" function="$SetActiveItem" argument="Gamepad2"/>
+		<Binding key="Down" function="$SetActiveItem" argument="BackButton"/>
+	</Text>
+	<Text id="BackButton" value="Back" font="Resources/Fonts/Happiness.ttf" color="White" size="40" position="500,800" rotation="0">
+		<Binding key="Enter" function="$ChangeLayout" argument="MainMenu.xml"/>
+		<Binding key="Up" function="$SetActiveItem" argument="Network"/>
 	</Text>
 </Layout>

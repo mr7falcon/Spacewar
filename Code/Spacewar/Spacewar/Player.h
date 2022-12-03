@@ -24,7 +24,7 @@ public:
 	virtual void OnCollision(SmartId sid) override;
 	virtual EActorType GetType() const override { return EActorType_Player; }
 	virtual void Update(sf::Time dt) override;
-	virtual void Serialize(sf::Packet& packet, bool bReading) override;
+	virtual void Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size) override;
 
 	void SetShooting(bool bShoot);
 

@@ -14,7 +14,6 @@ class CKeyboardController : public IController, public IWindowEventListener
 public:
 
 	CKeyboardController(const CControllerConfiguration::SConfiguration* pConfig);
-	~CKeyboardController();
 
 	virtual EControllerType GetType() const override { return Keyboard; }
 
@@ -23,4 +22,5 @@ public:
 private:
 
 	std::map<std::pair<sf::Event::EventType, sf::Keyboard::Key>, EControllerEvent> m_eventsMap;
+	EControllerEvent m_lastEvent = EControllerEvent_Invalid;
 };

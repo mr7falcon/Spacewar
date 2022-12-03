@@ -1,641 +1,248 @@
 #include "NetworkSystem.h"
-#include "LogicalSystem.h"
-#include "ActorSystem.h"
-#include "LevelSystem.h"
 #include "Game.h"
-#include "Player.h"
+#include "NetworkProxy.h"
 
-CNetworkController::~CNetworkController()
-{
-	CGame::Get().GetNetworkSystem()->OnNetworkControllerRemoved();
-}
-
-void CNetworkController::ProcessEvent(EControllerEvent evt)			// make this function member of IController
-{
-	for (auto iter = m_listeners.begin(); iter != m_listeners.end();)
-	{
-		if (*iter == nullptr)
-		{
-			iter = m_listeners.erase(iter);
-		}
-		else
-		{
-			(*iter)->OnControllerEvent(evt);
-			++iter;
-		}
-	}
-}
-
-CNetworkSystem::CNetworkSystem()
-{
-	m_client.setBlocking(false);
-	m_server.setBlocking(false);
-}
-
-std::shared_ptr<CNetworkController> CNetworkSystem::CreateNetworkController()
-{
-	auto pController = std::make_shared<CNetworkController>();
-	m_controllers.push_back(pController);
-	m_state = Server;
-	return pController;
-}
-
-void CNetworkSystem::OnNetworkControllerRemoved()
-{
-	for (auto iter = m_controllers.cbegin(); iter != m_controllers.cend();)
-	{
-		if (iter->expired())
-		{
-			iter = m_controllers.erase(iter);
-		}
-		else
-		{
-			++iter;
-		}
-	}
-
-	if (m_controllers.empty())
-	{
-		m_state = Disconnected;
-	}
-}
-
-void CNetworkSystem::SetVirtualController(const std::shared_ptr<IController>& pController)
-{
-	if (m_pVirtualController)
-	{
-		m_pVirtualController->UnregisterEventListener(this);
-	}
-	m_pVirtualController = pController;
-	if (m_pVirtualController)
-	{
-		m_pVirtualController->RegisterEventListener(this);
-	}
-}
-
-SmartId CNetworkSystem::OuterToInner(SmartId outerId)
-{
-	auto fnd = m_actorBindings.find(outerId);
-	return fnd != m_actorBindings.end() ? fnd->second : InvalidLink;
-}
-
-SmartId CNetworkSystem::InnerToOuter(SmartId innerId)
-{
-	auto fnd = std::find_if(m_actorBindings.begin(), m_actorBindings.end(),
-		[innerId](const std::pair<SmartId, SmartId>& bind) { return bind.second == innerId; });
-	return fnd != m_actorBindings.end() ? fnd->first : InvalidLink;
-}
-
-const CNetworkSystem::SSocket* CNetworkSystem::FindClient(int dClientId)
-{
-	auto fnd = m_remoteClients.find(dClientId);
-	return fnd != m_remoteClients.end() ? &fnd->second : nullptr;
-}
-
-int CNetworkSystem::GetClientId(const CNetworkSystem::SSocket& socket)
-{
-	auto fnd = std::find_if(m_remoteClients.begin(), m_remoteClients.end(),
-		[socket](const std::pair<int, SSocket>& s) { return s.second == socket; });
-	return fnd != m_remoteClients.end() ? fnd->first : -1;
-}
-
-static constexpr unsigned short ServerPort = 7777;
-
-bool CNetworkSystem::Connect(const std::string& host)
-{
-	if (m_state != Connected && m_state != InProcess)
-	{
-		m_serverAddress = host;
-		m_client.bind(sf::Socket::AnyPort);
-		m_state = InProcess;
-		m_connectionClock.restart();
-		if (!m_remoteClients.empty())
-		{
-			SendDisconnect();
-			m_remoteClients.clear();
-		}
-
-		sf::Packet packet;
-		packet << EClientMessage_Connect;
-		return SendMessageToServer(packet);
-	}
-	return true;
-}
-
-bool CNetworkSystem::Disconnect()
-{
-	if (m_state != Server)
-	{
-		sf::Packet packet;
-		packet << EClientMessage_Disconnect;
-		OnDisconnect();
-		return SendMessageToServer(packet);
-	}
-	return true;
-}
-
-void CNetworkSystem::BroadcastMessage(sf::Packet& packet)
-{
-	for (auto iter = m_remoteClients.cbegin(); iter != m_remoteClients.cend();)
-	{
-		if (m_server.send(packet, iter->second.addr, iter->second.port) == sf::Socket::Done)
-		{
-			++iter;
-		}
-		else
-		{
-			iter = m_remoteClients.erase(iter);
-		}
-	}
-}
-
-bool CNetworkSystem::SendMessageToServer(sf::Packet& packet)
-{
-	return m_client.send(packet, m_serverAddress, ServerPort) == sf::Socket::Done;
-}
-
-bool CNetworkSystem::SendMessageToClient(sf::Packet& packet, int dClientId)
-{
-	if (const SSocket* pClient = FindClient(dClientId))
-	{
-		return m_server.send(packet, pClient->addr, pClient->port) == sf::Socket::Done;
-	}
-	return false;
-}
+static constexpr unsigned short TcpServerPort = 7777;
+static constexpr unsigned short UdpServerPort = 7778;
 
 bool CNetworkSystem::StartServer()
 {
-	return m_server.bind(ServerPort) == sf::Socket::Done;
+	if (IsServerStarted())
+	{
+		return true;
+	}
+
+	if (IsConnected())
+	{
+		return false;
+	}
+
+	auto status = m_tcpServer.listen(TcpServerPort);
+	if (status != sf::Socket::Done)
+	{
+		return false;
+	}
+
+	status = m_udpServer.bind(UdpServerPort);
+	if (status != sf::Socket::Done)
+	{
+		return false;
+	}
+
+	m_tcpServer.setBlocking(false);
+	m_udpServer.setBlocking(false);
+
+	return true;
 }
 
-void CNetworkSystem::ProcessServerMessages()
+bool CNetworkSystem::Connect(const std::string& host)
 {
-	if (m_state != Server)
+	if (IsConnected())
 	{
-		return;
+		return true;
+	}
+
+	if (IsServerStarted())
+	{
+		return false;
+	}
+
+	auto status = m_tcpClient.connect(host, TcpServerPort);
+	if (status != sf::Socket::Done)
+	{
+		CGame::Get().GetNetworkProxy()->OnConnectionFailed();
+		return false;
+	}
+
+	status = m_udpClient.bind(sf::Socket::AnyPort);
+	if (status != sf::Socket::Done)
+	{
+		CGame::Get().GetNetworkProxy()->OnConnectionFailed();
+		return false;
 	}
 
 	sf::Packet packet;
-	SSocket socket;
-	if (m_server.receive(packet, socket.addr, socket.port) == sf::Socket::Done)
+	packet << m_udpClient.getLocalPort();
+	status = m_tcpClient.send(packet);
+	if (status != sf::Socket::Done)
 	{
-		sf::Uint8 message;
-		packet >> message;
+		CGame::Get().GetNetworkProxy()->OnConnectionFailed();
+		return false;
+	}
 
-		bool res = false;
-		int dClientId = GetClientId(socket);
+	m_tcpClient.setBlocking(false);
+	m_udpClient.setBlocking(false);
 
-		switch (message)
+	m_serverAddress = host;
+	CGame::Get().GetNetworkProxy()->OnConnect();
+
+	return true;
+}
+
+void CNetworkSystem::Disconnect()
+{
+	if (IsConnected())
+	{
+		m_tcpClient.setBlocking(true);
+		m_udpClient.setBlocking(true);
+		m_tcpClient.disconnect();
+		m_udpClient.unbind();
+		CGame::Get().GetNetworkProxy()->OnDisconnect();
+	}
+}
+
+void CNetworkSystem::StopServer()
+{
+	if (IsServerStarted())
+	{
+		m_tcpServer.setBlocking(true);
+		m_udpServer.setBlocking(true);
+		m_tcpServer.close();
+		m_udpServer.unbind();
+
+		for (auto& [id, client] : m_remoteClients)
 		{
-		case EClientMessage_Connect:
-			res = ProcessConnection(socket);
-			break;
-		case EClientMessage_Disconnect:
-			res = false;
-			break;
-		case EClientMessage_ChangePlayerPreset:
-			res = ProcessChangePlayerPreset(dClientId, packet);
-			break;
-		case EClientMessage_ControllerInput:
-			res = ProcessControllerInput(dClientId, packet);
-			break;
-		case EClientMessage_SetPause:
-			res = ProcessPause(packet);
-			break;
+			client.tcpSocket.disconnect();
 		}
+		m_remoteClients.clear();
+	}
+}
 
-		if (!res)
-		{
-			ProcessDisconnection(dClientId);
-		}
+bool CNetworkSystem::IsServerStarted() const
+{
+	return m_tcpServer.getLocalPort() != 0 && m_udpServer.getLocalPort() != 0;
+}
+
+bool CNetworkSystem::IsConnected() const
+{
+	return m_tcpClient.getLocalPort() != 0 && m_udpClient.getLocalPort() != 0;
+}
+
+void CNetworkSystem::AcceptConnections()
+{
+	int id = (int)m_remoteClients.size();
+	if (m_tcpServer.accept(m_remoteClients[id].tcpSocket) != sf::Socket::Done)
+	{
+		m_remoteClients.erase(id);
+	}
+	else
+	{
+		m_remoteClients[id].tcpSocket.setBlocking(false);
+		CGame::Get().GetNetworkProxy()->OnClientConnect(id);
 	}
 }
 
 void CNetworkSystem::ProcessClientMessages()
 {
-	if (m_state == InProcess && m_connectionClock.getElapsedTime().asSeconds() > 30.f)
+	for (auto iter = m_remoteClients.begin(); iter != m_remoteClients.end();)
 	{
-		m_state = Failed;
+		sf::Packet packet;
+		auto status = iter->second.tcpSocket.receive(packet);
+		if (status == sf::Socket::Done)
+		{
+			if (iter->second.udpPort == 0)
+			{
+				packet >> iter->second.udpPort;
+			}
+			else
+			{
+				CGame::Get().GetNetworkProxy()->OnClientMessageReceived(iter->first, packet);
+			}
+		}
+		else if (status == sf::Socket::Disconnected || status == sf::Socket::Error)
+		{
+			iter = m_remoteClients.erase(iter);
+			continue;
+		}
+
+		++iter;
+	}
+}
+
+void CNetworkSystem::ProcessServerMessages()
+{
+	sf::Packet packet;
+	auto status = m_tcpClient.receive(packet);
+	if (status == sf::Socket::Done)
+	{
+		CGame::Get().GetNetworkProxy()->OnServerMessageReceived(packet);
+	}
+	else if (status == sf::Socket::Disconnected || status == sf::Socket::Error)
+	{
+		Disconnect();
 	}
 
-	if (m_state != Connected && m_state != InProcess)
+	packet.clear();
+	sf::IpAddress addr;
+	unsigned short port;
+	status = m_udpClient.receive(packet, addr, port);
+	if (status == sf::Socket::Done)
+	{
+		CGame::Get().GetNetworkProxy()->OnSerializationReceived(packet);
+	}
+}
+
+void CNetworkSystem::SendServerMessage(int clientId, sf::Packet& packet)
+{
+	auto fnd = m_remoteClients.find(clientId);
+	if (fnd == m_remoteClients.end())
 	{
 		return;
 	}
 
-	sf::Packet packet;
-	SSocket socket;
-	if (m_client.receive(packet, socket.addr, socket.port) == sf::Socket::Done)
+	sf::Socket::Status status = fnd->second.tcpSocket.send(packet);
+	while (status == sf::Socket::Partial || status == sf::Socket::NotReady)
 	{
-		sf::Uint8 message;
-		packet >> message;
+		status = fnd->second.tcpSocket.send(packet);
+	}
 
-		bool res = false;
+	if (status != sf::Socket::Done)
+	{
+		m_remoteClients.erase(fnd);
+		CGame::Get().GetNetworkProxy()->OnClientDisconnect(clientId);
+	}
+}
 
-		switch (message)
+void CNetworkSystem::BroadcastServerMessage(sf::Packet& packet)
+{
+	for (auto iter = m_remoteClients.begin(); iter != m_remoteClients.end();)
+	{
+		sf::Socket::Status status = iter->second.tcpSocket.send(packet);
+		while (status == sf::Socket::Partial || status == sf::Socket::NotReady)
 		{
-		case EServerMessage_Connect:
-			res = ProcessConnectionResult(packet);
-			break;
-		case EServerMessage_Disconnect:
-			res = false;
-			break;
-		case EServerMessage_CreateActor:
-			res = ProcessCreateActor(packet);
-			break;
-		case EServerMessage_RemoveActor:
-			res = ProcessRemoveActor(packet);
-			break;
-		case EServerMessage_LocalPlayer:
-			res = ProcessLocalPlayer(packet);
-			break;
-		case EServerMessage_Serialize:
-			res = ProcessSerialize(packet);
-			break;
-		case EServerMessage_StartLevel:
-			res = ProcessStartLevel(packet);
-			break;
-		case EServerMessage_SetPause:
-			res = ProcessPause(packet);
-			break;
+			status = iter->second.tcpSocket.send(packet);
 		}
 
-		if (!res)
+		if (status != sf::Socket::Done)
 		{
-			OnDisconnect();
+			CGame::Get().GetNetworkProxy()->OnClientDisconnect(iter->first);
+			iter = m_remoteClients.erase(iter);
+		}
+		else
+		{
+			++iter;
 		}
 	}
 }
 
-void CNetworkSystem::ProcessMessages()
+void CNetworkSystem::SendClientMessage(sf::Packet& packet)
 {
-	ProcessServerMessages();
-	ProcessClientMessages();
-}
-
-bool CNetworkSystem::ProcessConnection(const SSocket& socket)
-{
-	int dClientId = GetClientId(socket);
-	if (dClientId == -1)
+	sf::Socket::Status status = m_tcpClient.send(packet);
+	while (status == sf::Socket::Partial || status == sf::Socket::NotReady)
 	{
-		int id = (int)m_remoteClients.size();
-		m_remoteClients[id] = socket;
-		dClientId = id;
+		status = m_tcpClient.send(packet);
 	}
 
-	EConnectionResult res = BindToPlayer(dClientId) ? EConnectionResult_Success : EConnectionResult_OutOfSockets;
-	if (SendConnectionResult(dClientId, res))
+	if (status != sf::Socket::Done)
 	{
-		return SendPlayers(dClientId);
-	}
-
-	return false;
-}
-
-bool CNetworkSystem::ProcessConnectionResult(sf::Packet& packet)
-{
-	sf::Uint8 result;
-	packet >> result;
-	
-	if (result == EConnectionResult_Success)
-	{
-		m_state = Connected;
-		CGame::Get().SetServer(false);
-		CGame::Get().GetLogicalSystem()->GetActorSystem()->Release();
-	}
-	else
-	{
-		m_client.unbind();
-		m_state = Rejected;
-	}
-
-	return true;
-}
-
-void CNetworkSystem::ProcessDisconnection(int dClientId)
-{
-	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-	pActorSystem->ForEachPlayer([&](CPlayer* pPlayer)
-		{
-			if (const auto& pController = pPlayer->GetController())
-			{
-				if (pController->GetType() == IController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == dClientId)
-				{
-					pActorSystem->RemoveActor(pPlayer->GetEntityId());
-					static_cast<CNetworkController*>(pController.get())->SetClientId(-1);
-					return false;
-				}
-			}
-			return true;
-		});
-
-	m_remoteClients.erase(dClientId);
-}
-
-bool CNetworkSystem::ProcessControllerInput(int dClientId, sf::Packet& packet)
-{
-	for (int i = 0; i < m_controllers.size(); ++i)
-	{
-		if (auto pController = m_controllers[i].lock())
-		{
-			if (pController->GetClientId() == dClientId)
-			{
-				sf::Uint8 event;
-				packet >> event;
-				pController->ProcessEvent((EControllerEvent)event);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool CNetworkSystem::ProcessChangePlayerPreset(int dClientId, sf::Packet& packet)
-{
-	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-
-	CPlayer* pBindedPlayer = nullptr;
-	
-	pActorSystem->ForEachPlayer([&](CPlayer* pPlayer)
-		{
-			if (const auto& pController = pPlayer->GetController())
-			{
-				if (pController->GetType() == IController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == dClientId)
-				{
-					pBindedPlayer = pPlayer;
-					return false;
-				}
-			}
-			return true;
-		});
-
-	if (pBindedPlayer)
-	{
-		auto pController = pBindedPlayer->GetController();
-		pActorSystem->RemoveActor(pBindedPlayer->GetEntityId(), true);
-
-		std::string preset;
-		packet >> preset;
-
-		SmartId sid = CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(preset, pController);
-		return SendLocalPlayer(dClientId, sid);
-	}
-
-	return false;
-}
-
-bool CNetworkSystem::ProcessCreateActor(sf::Packet& packet)
-{
-	sf::Uint32 outerId;
-	std::string config;
-	uint8_t type;
-	packet >> outerId >> type >> config;
-
-	auto fnd = m_actorBindings.find(outerId);
-	if (fnd != m_actorBindings.end())
-	{
-		return true;
-	}
-
-	SmartId innerId = InvalidLink;
-	if (type != EActorType_Player)
-	{
-		innerId = CGame::Get().GetLogicalSystem()->GetActorSystem()->CreateActor((EActorType)type, config);
-	}
-	else
-	{
-		innerId = CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(config, m_pVirtualController);
-	}
-
-	if (innerId != InvalidLink)
-	{
-		m_actorBindings[outerId] = innerId;
-		return true;
-	}
-
-	return false;
-}
-
-bool CNetworkSystem::ProcessRemoveActor(sf::Packet& packet)
-{
-	sf::Uint32 outerId;
-	packet >> outerId;
-
-	auto fnd = m_actorBindings.find(outerId);
-	if (fnd != m_actorBindings.end())
-	{
-		CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(fnd->second);
-		m_actorBindings.erase(fnd);
-	}
-
-	return true;
-}
-
-bool CNetworkSystem::ProcessLocalPlayer(sf::Packet& packet)
-{
-	SmartIdWrapper sid;
-	packet >> sid;
-
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid.sid)))
-	{
-		pPlayer->SetController(m_pVirtualController);
-		CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadPlayersLayouts();
-		return true;
-	}
-	
-	return false;
-}
-
-bool CNetworkSystem::ProcessStartLevel(sf::Packet& packet)
-{
-	std::string level;
-	packet >> level;
-
-	m_actorBindings.clear();
-
-	CGame::Get().GetLogicalSystem()->GetLevelSystem()->CreateLevel(level);
-	return true;
-}
-
-bool CNetworkSystem::ProcessSerialize(sf::Packet& packet)
-{
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->Serialize(packet, true);
-	return true;
-}
-
-bool CNetworkSystem::ProcessPause(sf::Packet& packet)
-{
-	bool pause;
-	packet >> pause;
-	CGame::Get().Pause(pause);
-	return true;
-}
-
-bool CNetworkSystem::BindToPlayer(int dClientId)
-{
-	for (int i = 0; i < m_controllers.size(); ++i)
-	{
-		if (auto pController = m_controllers[i].lock())
-		{
-			if (pController->GetClientId() == -1)
-			{
-				pController->SetClientId(dClientId);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void CNetworkSystem::OnDisconnect()
-{
-	m_actorBindings.clear();
-	m_client.unbind();
-	m_state = Disconnected;
-	CGame::Get().SetServer(true);
-	CGame::Get().GetLogicalSystem()->GetLevelSystem()->CreateLevel("Menu");
-}
-
-void CNetworkSystem::OnControllerEvent(EControllerEvent evt)
-{
-	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
-	{
-		SendControllerInput(evt);
+		Disconnect();
 	}
 }
 
-bool CNetworkSystem::SendConnectionResult(int dClientId, EConnectionResult result)
+void CNetworkSystem::SendSerializationMessage(sf::Packet& packet)
 {
-	sf::Packet packet;
-	packet << EServerMessage_Connect << result;
-	return SendMessageToClient(packet, dClientId);
-}
-
-bool CNetworkSystem::SendControllerInput(EControllerEvent event)
-{
-	sf::Packet packet;
-	packet << EClientMessage_ControllerInput << event;
-	return SendMessageToServer(packet);
-}
-
-bool CNetworkSystem::SendChangePlayerPreset(const std::string& preset)
-{
-	sf::Packet packet;
-	packet << EClientMessage_ChangePlayerPreset << preset;
-	return SendMessageToServer(packet);
-}
-
-bool CNetworkSystem::SendCreateActor(SmartId sid, uint8_t type, const std::string& config, const CPlayerConfiguration::SPlayerConfiguration* pConfig)
-{
-	if (!CGame::Get().IsServer())
+	for (const auto& [id, client] : m_remoteClients)
 	{
-		return false;
+		while (m_udpServer.send(packet, client.tcpSocket.getRemoteAddress(), client.udpPort) == sf::Socket::Partial) {}
 	}
-
-	if (type != EActorType_Player && !CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
-	{
-		return true;
-	}
-
-	sf::Packet packet;
-	packet << EServerMessage_CreateActor << (sf::Uint32)sid << type << config;
-	
-	BroadcastMessage(packet);
-	return true;
-}
-
-bool CNetworkSystem::SendRemoveActor(SmartId sid)
-{
-	if (!CGame::Get().IsServer())
-	{
-		return false;
-	}
-
-	sf::Packet packet;
-	packet << EServerMessage_RemoveActor << (sf::Uint32)sid;
-
-	BroadcastMessage(packet);
-	return true;
-}
-
-bool CNetworkSystem::SerializeActors()
-{
-	if (m_state == Server)
-	{
-		sf::Packet packet;
-		packet << EServerMessage_Serialize;
-
-		CGame::Get().GetLogicalSystem()->GetActorSystem()->Serialize(packet, false);
-		
-		if (packet.getDataSize() > sizeof(EServerMessage))
-		{
-			BroadcastMessage(packet);
-		}
-	}
-	return true;
-}
-
-bool CNetworkSystem::SendPlayers(int dClientId)
-{
-	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([&](CPlayer* pPlayer)
-		{
-			SendCreateActor(pPlayer->GetEntityId(), EActorType_Player, pPlayer->GetConfigName(), nullptr);
-
-			if (const auto& pController = pPlayer->GetController())
-			{
-				if (pController->GetType() == IController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == dClientId)
-				{
-					SendLocalPlayer(dClientId, pPlayer->GetEntityId());
-				}
-			}
-
-			return true;
-		});
-
-	return true;
-}
-
-bool CNetworkSystem::SendLocalPlayer(int dClientId, SmartId sid)
-{
-	sf::Packet packet;
-	SmartIdWrapper wrapper(sid);
-	packet << EServerMessage_LocalPlayer << wrapper;
-	return SendMessageToClient(packet, dClientId);
-}
-
-bool CNetworkSystem::SendStartLevel(const std::string& level)
-{
-	if (!CGame::Get().IsServer())
-	{
-		return false;
-	}
-
-	sf::Packet packet;
-	packet << EServerMessage_StartLevel << level;
-
-	BroadcastMessage(packet);
-	return true;
-}
-
-bool CNetworkSystem::SendPause(bool bPause)
-{
-	sf::Packet packet;
-	packet << (sf::Uint8)(CGame::Get().IsServer() ? EServerMessage_SetPause : EClientMessage_SetPause) << bPause;
-	if (CGame::Get().IsServer())
-	{
-		BroadcastMessage(packet);
-	}
-	else
-	{
-		SendMessageToServer(packet);
-	}
-	return true;
-}
-
-bool CNetworkSystem::SendDisconnect()
-{
-	sf::Packet packet;
-	packet << EServerMessage_Disconnect;
-	BroadcastMessage(packet);
-	return true;
 }

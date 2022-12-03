@@ -10,7 +10,7 @@
 #include "RenderSystem.h"
 #include "RenderProxy.h"
 #include "PhysicalSystem.h"
-#include "NetworkSystem.h"
+#include "NetworkProxy.h"
 #include "ActorSystem.h"
 #include "UISystem.h"
 #include "Player.h"
@@ -50,7 +50,10 @@ void CLevelSystem::CreateLevel(const std::string& config)
 		return;
 	}
 
-	CGame::Get().GetNetworkSystem()->SendStartLevel(config);
+	if (CGame::Get().IsServer())
+	{
+		CGame::Get().GetNetworkProxy()->BroadcastServerMessage<ServerMessage::SStartLevelMessage>(config);
+	}
 
 	m_playerSpawners.resize(m_pLevelConfig->playerSpawners.size());
 	for (int i = 0; i < m_playerSpawners.size(); ++i)
@@ -168,7 +171,7 @@ void CLevelSystem::SpawnStar(int textureId, const sf::Vector2f& vPos, const sf::
 	if (CRenderEntity* pEntity = pRenderSystem->GetEntity(renderEntityId))
 	{
 		pEntity->SetTransform(sf::Transform().translate(vPos).scale(vScale));
-		CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, textureId);
+		CGame::Get().GetRenderProxy()->OnCommand<RenderCommand::SetTextureCommand>(renderEntityId, textureId);
 	}
 }
 
@@ -212,7 +215,7 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_p
 
 	m_playerSpawners[spawnerId] = playerId;
 
-	CGame::Get().GetUISystem()->LoadPlayerLayout(config.layout, playerId);
+	CGame::Get().GetUISystem()->ReloadPlayerLayout(config.layout, playerId);
 	
 	return playerId;
 }
@@ -224,6 +227,8 @@ void CLevelSystem::FreePlayerSpawner(SmartId sid)
 	{
 		*fnd = InvalidLink;
 	}
+
+	ReloadPlayersLayouts();
 }
 
 void CLevelSystem::ReloadPlayersLayouts()
@@ -235,10 +240,7 @@ void CLevelSystem::ReloadPlayersLayouts()
 
 	for (int i = 0; i < m_playerSpawners.size(); ++i)
 	{
-		if (m_playerSpawners[i] != InvalidLink)
-		{
-			CGame::Get().GetUISystem()->LoadPlayerLayout(m_pLevelConfig->playerSpawners[i].layout, m_playerSpawners[i]);
-		}
+		CGame::Get().GetUISystem()->ReloadPlayerLayout(m_pLevelConfig->playerSpawners[i].layout, m_playerSpawners[i]);
 	}
 }
 

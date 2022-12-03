@@ -4,7 +4,7 @@
 
 #include "ControllerConfiguration.h"
 #include "KeyboardController.h"
-#include "NetworkSystem.h"
+#include "NetworkProxy.h"
 
 inline static sf::Keyboard::Key ParseKey(const std::string& key)
 {
@@ -274,11 +274,13 @@ std::shared_ptr<IController> CControllerConfiguration::CreateController(const st
 	const auto* pKeyboardSchema = GetConfiguration(config);
 	if (pKeyboardSchema)
 	{
-		return std::make_shared<CKeyboardController>(pKeyboardSchema);
+		auto pController = std::make_shared<CKeyboardController>(pKeyboardSchema);
+		CGame::Get().RegisterWindowEventListener(pController);
+		return pController;
 	}
 	else if (config == "Network")
 	{
-		return CGame::Get().GetNetworkSystem()->CreateNetworkController();
+		return CGame::Get().GetNetworkProxy()->CreateNetworkController();
 	}
 	return nullptr;
 }
@@ -287,7 +289,9 @@ std::shared_ptr<IController> CControllerConfiguration::CreateDefaultController()
 {
 	if (!m_configurations.empty())
 	{
-		return std::make_shared<CKeyboardController>(&m_configurations.begin()->second);
+		auto pController = std::make_shared<CKeyboardController>(&m_configurations.begin()->second);
+		CGame::Get().RegisterWindowEventListener(pController);
+		return pController;
 	}
 	return nullptr;
 }

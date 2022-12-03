@@ -86,10 +86,10 @@ const std::string& CPlayerConfiguration::GetNextConfiguration(const std::string&
 
 const std::string& CPlayerConfiguration::GetPreviousConfiguration(const std::string& current) const
 {
-	auto fnd = std::map<std::string, SPlayerConfiguration>::const_reverse_iterator(m_configurations.find(current));
-	if (fnd != m_configurations.rend())
+	auto fnd = m_configurations.find(current);
+	if (fnd != m_configurations.end())
 	{
-		if (++fnd != m_configurations.rend())
+		if (--fnd != m_configurations.end())
 		{
 			return fnd->first;
 		}

@@ -155,16 +155,16 @@ void CPlayer::Update(sf::Time dt)
 	}
 }
 
-void CPlayer::Serialize(sf::Packet& packet, bool bReading)
+void CPlayer::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 {
-	CActor::Serialize(packet, bReading);
+	CActor::Serialize(packet, mode, size);
 
 	float fAccel = m_fAccel;
 	sf::Int16 dNumShotsInBurst = m_dShotsInBurst;
 	sf::Int16 dAmmoCount = m_dAmmoCount;
 	float fFuel = m_fFuel;
 
-	SerializeParameters(packet, bReading, fAccel, dNumShotsInBurst, dAmmoCount, fFuel);
+	SerializeParameters(packet, mode, size, fAccel, dNumShotsInBurst, dAmmoCount, fFuel);
 
 	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
 	{
@@ -177,7 +177,7 @@ void CPlayer::Serialize(sf::Packet& packet, bool bReading)
 
 bool CPlayer::CanShoot() const
 {
-	return m_dShotsInBurst > 0 && m_fShotsCooldown <= 0.f;
+	return m_dShotsInBurst > 0 && m_fShotsCooldown <= 0.f && m_dAmmoCount != 0;
 }
 
 void CPlayer::Shoot()

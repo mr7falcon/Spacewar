@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "UISystem.h"
 #include "NetworkSystem.h"
+#include "NetworkProxy.h"
 
 CGame::CGame() = default;
 CGame::~CGame() = default;
@@ -39,6 +40,7 @@ void CGame::Initialize()
 	m_pRenderProxy = std::make_unique<CRenderProxy>();
 	m_pUISystem = std::make_unique<CUISystem>("UI");
 	m_pNetworkSystem = std::make_unique<CNetworkSystem>();
+	m_pNetworkProxy = std::make_unique<CNetworkProxy>();
 
 	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
 	
@@ -50,13 +52,22 @@ void CGame::Initialize()
 	m_window.setActive(false);
 }
 
+void CGame::Release()
+{
+	m_pLogicalSystem->Release();
+	m_pLogicalSystem.reset();
+	m_pUISystem.reset();
+	m_pNetworkProxy.reset();
+	m_pNetworkSystem.reset();
+	m_pConfigurationSystem.reset();
+	m_pResourceSystem.reset();
+}
+
 void CGame::Start()
 {
 	Initialize();
 
 	std::thread render(StartRender);
-
-	m_pNetworkSystem->StartServer();
 
 	sf::Clock frameClock;
 
@@ -70,19 +81,27 @@ void CGame::Start()
 
 			for (auto iter = m_windowEventListeners.begin(); iter != m_windowEventListeners.end();)
 			{
-				if (*iter == nullptr)
+				if (auto pEventListener = iter->lock())
 				{
-					iter = m_windowEventListeners.erase(iter);
+					pEventListener->OnWindowEvent(event);
+					++iter;
 				}
 				else
 				{
-					(*iter)->OnWindowEvent(event);
-					++iter;
+					iter = m_windowEventListeners.erase(iter);
 				}
 			}
 		}
 
-		m_pNetworkSystem->ProcessMessages();
+		if (m_pNetworkSystem->IsServerStarted())
+		{
+			m_pNetworkSystem->AcceptConnections();
+			m_pNetworkSystem->ProcessClientMessages();
+		}
+		else if (m_pNetworkSystem->IsConnected())
+		{
+			m_pNetworkSystem->ProcessServerMessages();
+		}
 
 		if (!m_bPaused)
 		{
@@ -97,7 +116,10 @@ void CGame::Start()
 
 		m_pUISystem->Update();
 
-		m_pNetworkSystem->SerializeActors();
+		if (m_pNetworkSystem->IsServerStarted())
+		{
+			m_pNetworkProxy->Serialize();
+		}
 		
 		{
 			std::unique_lock<std::mutex> lock(m_renderLock);
@@ -114,9 +136,7 @@ void CGame::Start()
 		m_renderSync.notify_one();
 	}
 
-	m_pLogicalSystem->GetLevelSystem()->ClearLevel();
-	m_pUISystem->Release();
-	m_pNetworkSystem->SetVirtualController(nullptr);
+	Release();
 
 	render.join();
 }
@@ -147,29 +167,28 @@ void CGame::StartRender()
 	}
 }
 
-void CGame::RegisterWindowEventListener(IWindowEventListener* pEventListener)
+void CGame::RegisterWindowEventListener(const std::weak_ptr<IWindowEventListener>& pEventListener)
 {
-	auto fnd = std::find(m_windowEventListeners.begin(), m_windowEventListeners.end(), pEventListener);
+	auto fnd = std::find_if(m_windowEventListeners.begin(), m_windowEventListeners.end(),
+		[pEventListener](const std::weak_ptr<IWindowEventListener>& pIter) { return pIter.lock() == pEventListener.lock(); });
 	if (fnd == m_windowEventListeners.end())
 	{
 		m_windowEventListeners.push_front(pEventListener);
 	}
 }
 
-void CGame::UnregisterWindowEventListener(IWindowEventListener* pEventListener)
-{
-	auto fnd = std::find(m_windowEventListeners.begin(), m_windowEventListeners.end(), pEventListener);
-	if (fnd != m_windowEventListeners.end())
-	{
-		*fnd = nullptr;
-	}
-}
-
 void CGame::Pause(bool bPause)
 {
-	if (m_bServer && bPause != m_bPaused)
+	if (bPause != m_bPaused)
 	{
-		m_pNetworkSystem->SendPause(bPause);
+		if (m_bServer)
+		{
+			m_pNetworkProxy->BroadcastServerMessage<ServerMessage::SSetPauseMessage>(bPause);
+		}
+		else
+		{
+			m_pNetworkProxy->SendClientMessage<ClientMessage::SSetPauseMessage>(bPause);
+		}
 	}
 	m_bPaused = bPause;
 }

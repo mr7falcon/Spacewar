@@ -11,6 +11,8 @@
 #include "Projectile.h"
 #include "Bonus.h"
 #include "Player.h"
+#include "Game.h"
+#include "NetworkProxy.h"
 
 template <typename>
 struct is_player : std::false_type {};
@@ -31,7 +33,7 @@ public:
 		SmartId sid = pActor->GetEntityId();
 		m_actors[sid] = std::move(pActor);
 
-		CGame::Get().GetNetworkSystem()->SendCreateActor(sid, m_actors[sid]->GetType(), std::forward<V>(args)...);
+		CGame::Get().GetNetworkProxy()->SendCreateActor(sid, m_actors[sid]->GetType(), std::forward<V>(args)...);
 
 		if constexpr (is_player<T>::value)
 		{

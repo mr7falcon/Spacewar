@@ -5,7 +5,7 @@
 #include "LogicalSystem.h"
 #include "LevelSystem.h"
 #include "ActorSystem.h"
-#include "NetworkSystem.h"
+#include "NetworkProxy.h"
 #include "Layout.h"
 #include "Player.h"
 #include "ConfigurationSystem.h"
@@ -60,7 +60,7 @@ static void ChangePlayerConfig(SmartId sid, const std::string& config)
 {
 	if (!CGame::Get().IsServer())
 	{
-		CGame::Get().GetNetworkSystem()->SendChangePlayerPreset(config);
+		CGame::Get().GetNetworkProxy()->SendClientMessage<ClientMessage::SChangePlayerPresetMessage>(config);
 	}
 	else
 	{
@@ -86,7 +86,7 @@ static void NextPlayerConfig(SmartId sid)
 
 static void PreviousPlayerConfig(SmartId sid)
 {
-	const std::string& nextConfig = GetNextPlayerConfig(sid);
+	const std::string& nextConfig = GetPreviousPlayerConfig(sid);
 	ChangePlayerConfig(sid, nextConfig);
 }
 
@@ -95,7 +95,7 @@ static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
 	auto pController = CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateController(controller);
 	if (!CGame::Get().IsServer())
 	{
-		CGame::Get().GetNetworkSystem()->SetVirtualController(pController);
+		CGame::Get().GetNetworkProxy()->SetVirtualController(pController);
 		CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([pController](CPlayer* pPlayer)
 			{
 				if (pPlayer->GetController())
@@ -115,11 +115,14 @@ static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
 
 static void RemovePlayer(ILayout* pCaller)
 {
-	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-	SmartId sid = pActorSystem->GetLastPlayerId();
-	if (sid != InvalidLink)
+	if (CGame::Get().IsServer())
 	{
-		pActorSystem->RemoveActor(sid);
+		CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
+		SmartId sid = pActorSystem->GetLastPlayerId();
+		if (sid != InvalidLink)
+		{
+			pActorSystem->RemoveActor(sid);
+		}
 	}
 }
 
@@ -174,7 +177,7 @@ static void ReloadLayout(ILayout* pCaller)
 static void Connect(ILayout* pCaller)
 {
 	CGame::Get().GetNetworkSystem()->Connect(pCaller->GetText());
-	CGame::Get().GetNetworkSystem()->SetVirtualController(CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController());
+	CGame::Get().GetNetworkProxy()->SetVirtualController(CGame::Get().GetConfigurationSystem()->GetControllerConfiguration()->CreateDefaultController());
 }
 
 static void Disconnect(ILayout* pCaller)
@@ -184,20 +187,20 @@ static void Disconnect(ILayout* pCaller)
 
 static std::string GetConnectionStatus(ILayout* pCaller)
 {
-	auto status = CGame::Get().GetNetworkSystem()->GetConnectionState();
+	auto status = CGame::Get().GetNetworkProxy()->GetConnectionState();
 	switch (status)
 	{
-	case CNetworkSystem::Connected:
+	case CNetworkProxy::Connected:
 		return "Connected";
-	case CNetworkSystem::Disconnected:
+	case CNetworkProxy::Disconnected:
 		return "Disconnected";
-	case CNetworkSystem::Rejected:
+	case CNetworkProxy::Rejected:
 		return "Host rejected connection";
-	case CNetworkSystem::Failed:
+	case CNetworkProxy::Failed:
 		return "Failed to connect to host";
-	case CNetworkSystem::InProcess:
+	case CNetworkProxy::InProcess:
 		return "In progress";
-	case CNetworkSystem::Server:
+	case CNetworkProxy::Server:
 		return "Server";
 	}
 	return "";
@@ -266,12 +269,6 @@ void CUISystem::Update()
 	}
 }
 
-void CUISystem::Release()
-{
-	m_pLayout.reset();
-	m_pController.reset();
-}
-
 typedef CLayout<> CGlobalLayout;
 
 void CUISystem::LoadGlobalLayout(const std::string& path)
@@ -292,20 +289,29 @@ void CUISystem::LoadGlobalLayoutInternal()
 	CGame::Get().GetLogicalSystem()->GetLevelSystem()->ReloadPlayersLayouts();
 }
 
-void CUISystem::LoadPlayerLayout(const std::string& id, SmartId playerId)
+void CUISystem::ReloadPlayerLayout(const std::string& id, SmartId playerId)
 {
-	if (m_pLayout)
+	if (!m_pLayout)
 	{
-		if (ILayout* pPlayerLayout = static_cast<CGlobalLayout*>(m_pLayout.get())->ActivateSubLayout<SmartId>(id, m_root, playerId))
-		{
-			if (playerId != InvalidLink)
-			{
-				if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
-				{
-					pPlayerLayout->SetController(pPlayer->GetController());
-				}
-			}
+		return;
+	}
 
+	if (playerId == InvalidLink && !static_cast<CGlobalLayout*>(m_pLayout.get())->IsSubLayoutLoaded(id))
+	{
+		return;
+	}
+
+	ILayout* pPlayerLayout = static_cast<CGlobalLayout*>(m_pLayout.get())->ActivateSubLayout<SmartId>(id, m_root, playerId);
+	if (!pPlayerLayout)
+	{
+		return;
+	}
+
+	if (playerId != InvalidLink)
+	{
+		if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
+		{
+			pPlayerLayout->SetController(pPlayer->GetController());
 		}
 	}
 }

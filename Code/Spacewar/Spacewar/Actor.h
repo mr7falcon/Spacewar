@@ -3,10 +3,11 @@
 #include <string>
 
 #include <SFML/System/Time.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Network/Packet.hpp>
 
 #include "LogicalEntity.h"
 #include "PhysicalEntity.h"
-#include "NetworkSystem.h"
 
 enum EActorType : uint8_t
 {
@@ -30,9 +31,9 @@ public:
 	virtual EActorType GetType() const = 0;
 	virtual void Update(sf::Time dt) = 0;
 
-	bool NeedSerialize() const { return m_bNeedSerialize; }
+	bool NeedSerialize() const { return m_bNeedSerialize || m_lastSerialize.getElapsedTime().asSeconds() > 1.f; }
 	void SetNeedSerialize();
-	virtual void Serialize(sf::Packet& packet, bool bReading);
+	virtual void Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size);
 
 	void Destroy();
 
@@ -41,4 +42,5 @@ protected:
 	SmartId m_entityId = InvalidLink;
 
 	bool m_bNeedSerialize = false;
+	sf::Clock m_lastSerialize;
 };

@@ -10,7 +10,7 @@ void CActorSystem::RemoveActor(SmartId sid, bool immediate)
 	{
 		m_removeDeferred.push_back(sid);
 	}
-	CGame::Get().GetNetworkSystem()->SendRemoveActor(sid);
+	CGame::Get().GetNetworkProxy()->BroadcastServerMessage<ServerMessage::SRemoveActorMessage>(sid);
 }
 
 CActor* CActorSystem::GetActor(SmartId sid)
@@ -101,9 +101,14 @@ void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 		{
 			if (pActor->NeedSerialize())
 			{
-				SmartIdWrapper wrapper(sid);
-				packet << wrapper;
-				pActor->Serialize(packet, bReading);
+				packet << sid;
+				
+				uint16_t size = 0;
+				pActor->Serialize(packet, ESerializationMode_Count, size);
+				packet << size;
+
+				size = 0;
+				pActor->Serialize(packet, ESerializationMode_Write, size);
 			}
 		}
 	}
@@ -111,12 +116,23 @@ void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 	{
 		while (!packet.endOfPacket())
 		{
-			SmartIdWrapper wrapper;
-			packet >> wrapper;
+			SmartId serverId;
+			uint16_t size;
+			packet >> serverId;
+			packet >> size;
 
-			if (CActor* pActor = GetActor(wrapper.sid))
+			if (CActor* pActor = GetActor(CGame::Get().GetNetworkProxy()->GetLocalEntityId(serverId)))
 			{
-				pActor->Serialize(packet, bReading);
+				size = 0;
+				pActor->Serialize(packet, ESerializationMode_Read, size);
+			}
+			else
+			{
+				for (uint16_t i = 0; i < size; ++i)
+				{
+					uint8_t byte;
+					packet >> byte;
+				}
 			}
 		}
 	}

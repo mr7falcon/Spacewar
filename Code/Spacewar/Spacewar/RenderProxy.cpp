@@ -11,40 +11,40 @@ void CRenderProxy::ExecuteCommands()
 {
 	while (!m_memoryStreams[m_dReadStream].Empty())
 	{
-		ERenderCommand cmd;
+		RenderCommand::ERenderCommand cmd;
 		m_memoryStreams[m_dReadStream] >> cmd;
 
 		switch (cmd)
 		{
-		case ERenderCommand_SetTransform:
-			m_memoryStreams[m_dReadStream].Extract<SetTransformCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetTransform:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetTransformCommand>().Execute();
 			break;
-		case ERenderCommand_SetTexture:
-			m_memoryStreams[m_dReadStream].Extract<SetTextureCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetTexture:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetTextureCommand>().Execute();
 			break;
-		case ERenderCommand_SetSize:
-			m_memoryStreams[m_dReadStream].Extract<SetSizeCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetSize:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetSizeCommand>().Execute();
 			break;
-		case ERenderCommand_SetColor:
-			m_memoryStreams[m_dReadStream].Extract<SetColorCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetColor:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetColorCommand>().Execute();
 			break;
-		case ERenderCommand_SetText:
-			m_memoryStreams[m_dReadStream].Extract<SetTextCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetText:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetTextCommand>().Execute();
 			break;
-		case ERenderCommand_SetStyle:
-			m_memoryStreams[m_dReadStream].Extract<SetStyleCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetStyle:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetStyleCommand>().Execute();
 			break;
-		case ERenderCommand_SetCharacterSize:
-			m_memoryStreams[m_dReadStream].Extract<SetCharacterSizeCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetCharacterSize:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetCharacterSizeCommand>().Execute();
 			break;
-		case ERenderCommand_SetFont:
-			m_memoryStreams[m_dReadStream].Extract<SetFontCommand>().Execute();
+		case RenderCommand::ERenderCommand_SetFont:
+			m_memoryStreams[m_dReadStream].Extract<RenderCommand::SetFontCommand>().Execute();
 			break;
 		}
 	}
 }
 
-void CRenderProxy::SetTransformCommand::Execute() const
+void RenderCommand::SetTransformCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -52,7 +52,7 @@ void CRenderProxy::SetTransformCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetTextureCommand::Execute() const
+void RenderCommand::SetTextureCommand::Execute() const
 {
 	CRenderSystem* pRenderSystem = CGame::Get().GetRenderSystem();
 	if (CRenderEntity* pRenderEntity = pRenderSystem->GetEntity(sid))
@@ -64,7 +64,7 @@ void CRenderProxy::SetTextureCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetSizeCommand::Execute() const
+void RenderCommand::SetSizeCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -72,7 +72,7 @@ void CRenderProxy::SetSizeCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetColorCommand::Execute() const
+void RenderCommand::SetColorCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -80,7 +80,7 @@ void CRenderProxy::SetColorCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetTextCommand::Execute() const
+void RenderCommand::SetTextCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -88,7 +88,7 @@ void CRenderProxy::SetTextCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetStyleCommand::Execute() const
+void RenderCommand::SetStyleCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -96,7 +96,7 @@ void CRenderProxy::SetStyleCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetCharacterSizeCommand::Execute() const
+void RenderCommand::SetCharacterSizeCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{
@@ -104,7 +104,7 @@ void CRenderProxy::SetCharacterSizeCommand::Execute() const
 	}
 }
 
-void CRenderProxy::SetFontCommand::Execute() const
+void RenderCommand::SetFontCommand::Execute() const
 {
 	if (CRenderEntity* pRenderEntity = CGame::Get().GetRenderSystem()->GetEntity(sid))
 	{

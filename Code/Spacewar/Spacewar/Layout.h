@@ -26,6 +26,7 @@ public:
 	virtual ~ILayout() = default;
 	virtual void SetController(const std::weak_ptr<IController>& pController) = 0;
 	virtual bool IsLoaded() const = 0;
+	virtual bool IsSubLayoutLoaded(const std::string& id) const = 0;
 	virtual void Update() = 0;
 	virtual void OnControllerEvent(EControllerEvent evt) override = 0;
 	virtual void OnTextEntered(char chr) override = 0;
@@ -161,6 +162,12 @@ public:
 		return nullptr;
 	}
 
+	virtual bool IsSubLayoutLoaded(const std::string& id) const override
+	{
+		auto fnd = m_subLayouts.find(id);
+		return (fnd != m_subLayouts.end() && fnd->second) ? fnd->second->IsLoaded() : false;
+	}
+
 	virtual void Update() override
 	{
 		if (m_pArguments)
@@ -168,7 +175,7 @@ public:
 			for (const auto& [sid, bind] : m_updateBindings)
 			{
 				std::string value = InvokeFunction<std::string>(bind);
-				CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetText>(sid, value);
+				CGame::Get().GetRenderProxy()->OnCommand<RenderCommand::SetTextCommand>(sid, std::move(value));
 			}
 		}
 
@@ -227,9 +234,9 @@ public:
 	inline void SetActiveStyle(SmartId sid, const SActiveStyle& style)
 	{
 		CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
-		pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetColor>(sid, style.color);
-		pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetStyle>(sid, style.style);
-		pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetCharacterSize>(sid, style.size);
+		pRenderProxy->OnCommand<RenderCommand::SetColorCommand>(sid, style.color);
+		pRenderProxy->OnCommand<RenderCommand::SetStyleCommand>(sid, style.style);
+		pRenderProxy->OnCommand<RenderCommand::SetCharacterSizeCommand>(sid, style.size);
 	}
 
 	virtual void ActivateItem(const std::string& id) override
@@ -374,17 +381,17 @@ private:
 				SmartId sid = CGame::Get().GetRenderSystem()->CreateEntity(CRenderEntity::Sprite);
 
 				CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
-				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(sid, textureId);
+				pRenderProxy->OnCommand<RenderCommand::SetTextureCommand>(sid, textureId);
 				
 				sf::Vector2f vSize = node.attribute("size").as_vector();
-				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetSize>(sid, std::move(vSize));
+				pRenderProxy->OnCommand<RenderCommand::SetSizeCommand>(sid, std::move(vSize));
 
 				sf::Vector2f vPos = node.attribute("position").as_vector();
 				float fRot = node.attribute("rotation").as_float();
 				sf::Transform transform;
 				transform.translate(m_vOrg + vPos);
 				transform.rotate(fRot);
-				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(sid, std::move(transform));
+				pRenderProxy->OnCommand<RenderCommand::SetTransformCommand>(sid, std::move(transform));
 
 				m_items.emplace(std::move(id), sid);
 			}
@@ -483,7 +490,7 @@ private:
 
 	struct SActionBinding
 	{
-		EControllerEvent evt;
+		EControllerEvent evt = EControllerEvent_Invalid;
 		std::string function;
 		std::optional<std::string> argument;
 	};

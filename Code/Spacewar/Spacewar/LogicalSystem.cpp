@@ -17,6 +17,12 @@ CLogicalSystem::CLogicalSystem()
 
 CLogicalSystem::~CLogicalSystem() = default;
 
+void CLogicalSystem::Release()
+{
+	m_pActorSystem.reset();
+	m_pLevelSystem.reset();
+}
+
 void CLogicalSystem::Update(sf::Time dt)
 {
 	m_pActorSystem->Update(dt);
@@ -67,10 +73,10 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 				SmartId renderEntityId = CGame::Get().GetRenderSystem()->CreateEntity(CRenderEntity::Sprite);
 				pEntity->SetRender(renderEntityId);
 				CRenderProxy* pRenderProxy = CGame::Get().GetRenderProxy();
-				pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetTexture>(renderEntityId, pEntityClass->texture);
+				pRenderProxy->OnCommand<RenderCommand::SetTextureCommand>(renderEntityId, pEntityClass->texture);
 				if (pEntityClass->vSize != sf::Vector2f())
 				{
-					pRenderProxy->OnCommand<CRenderProxy::ERenderCommand_SetSize>(renderEntityId, pEntityClass->vSize);
+					pRenderProxy->OnCommand<RenderCommand::SetSizeCommand>(renderEntityId, pEntityClass->vSize);
 				}
 			}
 		}

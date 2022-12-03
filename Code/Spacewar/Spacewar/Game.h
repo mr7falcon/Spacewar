@@ -24,6 +24,7 @@ class CResourceSystem;
 class CConfigurationSystem;
 class CUISystem;
 class CNetworkSystem;
+class CNetworkProxy;
 
 class CGame
 {
@@ -51,11 +52,11 @@ public:
 	CRenderProxy* GetRenderProxy() { return m_pRenderProxy.get(); }
 	const CResourceSystem* GetResourceSystem() const { return m_pResourceSystem.get(); }
 	const CConfigurationSystem* GetConfigurationSystem() const { return m_pConfigurationSystem.get(); }
-	CUISystem* GetUISystem() const { return m_pUISystem.get(); }
-	CNetworkSystem* GetNetworkSystem() const { return m_pNetworkSystem.get(); }
+	CUISystem* GetUISystem() { return m_pUISystem.get(); }
+	CNetworkSystem* GetNetworkSystem() { return m_pNetworkSystem.get(); }
+	CNetworkProxy* GetNetworkProxy() { return m_pNetworkProxy.get(); }
 
-	void RegisterWindowEventListener(IWindowEventListener* pEventListener);
-	void UnregisterWindowEventListener(IWindowEventListener* pEventListener);
+	void RegisterWindowEventListener(const std::weak_ptr<IWindowEventListener>& pEventListener);
 
 	sf::Time GetCurrentTime() const { return m_gameClock.getElapsedTime(); }
 
@@ -64,6 +65,7 @@ private:
 	CGame();
 
 	void Initialize();
+	void Release();
 	
 	static void StartRender();
 
@@ -77,6 +79,7 @@ private:
 	std::unique_ptr<CConfigurationSystem> m_pConfigurationSystem;
 	std::unique_ptr<CUISystem> m_pUISystem;
 	std::unique_ptr<CNetworkSystem> m_pNetworkSystem;
+	std::unique_ptr<CNetworkProxy> m_pNetworkProxy;
 
 	std::mutex m_renderLock;
 	std::condition_variable m_renderSync;
@@ -87,7 +90,7 @@ private:
 	sf::View m_view;
 	sf::Clock m_gameClock;
 
-	std::list<IWindowEventListener*> m_windowEventListeners;
+	std::list<std::weak_ptr<IWindowEventListener>> m_windowEventListeners;
 
 	bool m_bPaused = false;
 	bool m_bServer = true;

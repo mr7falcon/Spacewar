@@ -49,7 +49,7 @@ void CActor::SetNeedSerialize()
 	}
 }
 
-void CActor::Serialize(sf::Packet& packet, bool bReading)
+void CActor::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 {
 	CLogicalEntity* pEntity = GetEntity();
 
@@ -59,7 +59,7 @@ void CActor::Serialize(sf::Packet& packet, bool bReading)
 	sf::Vector2f vVel = pEntity->GetVelocity();
 	float fAngSpeed = pEntity->GetAngularSpeed();
 	
-	SerializeParameters(packet, bReading, vPos, fRot, fScale, vVel, fAngSpeed);
+	SerializeParameters(packet, mode, size, vPos, fRot, fScale, vVel, fAngSpeed);
 
 	pEntity->SetPosition(vPos);
 	pEntity->SetRotation(fRot);
@@ -68,4 +68,5 @@ void CActor::Serialize(sf::Packet& packet, bool bReading)
 	pEntity->SetAngularSpeed(fAngSpeed);
 
 	m_bNeedSerialize = false;
+	m_lastSerialize.restart();
 }

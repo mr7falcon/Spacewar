@@ -22,6 +22,7 @@ public:
 	virtual void Clear() override;
 
 	void Update(sf::Time dt);
+	void Release();
 
 	CActorSystem* GetActorSystem() { return m_pActorSystem.get(); }
 	CLevelSystem* GetLevelSystem() { return m_pLevelSystem.get(); }

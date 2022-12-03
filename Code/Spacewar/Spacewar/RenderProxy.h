@@ -6,10 +6,8 @@
 #include "RenderSystem.h"
 #include "Game.h"
 
-class CRenderProxy
+namespace RenderCommand
 {
-public:
-
 	enum ERenderCommand : unsigned char
 	{
 		ERenderCommand_SetTransform,
@@ -21,52 +19,6 @@ public:
 		ERenderCommand_SetCharacterSize,
 		ERenderCommand_SetFont
 	};
-
-	CRenderProxy() = default;
-	CRenderProxy(const CRenderProxy&) = delete;
-
-	template <ERenderCommand cmd, typename... V>
-	void OnCommand(SmartId sid, V&&... args)
-	{
-		m_memoryStreams[m_dWriteStream] << cmd;
-		if constexpr (cmd == ERenderCommand_SetTransform)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetTransformCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetTexture)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetTextureCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetSize)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetSizeCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetColor)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetColorCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetText)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetTextCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetStyle)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetStyleCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetCharacterSize)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetCharacterSizeCommand>(sid, std::forward<V>(args)...);
-		}
-		else if constexpr (cmd == ERenderCommand_SetFont)
-		{
-			m_memoryStreams[m_dWriteStream].Emplace<SetFontCommand>(sid, std::forward<V>(args)...);
-		}
-	}
-
-	void SwitchStreams();
-	void ExecuteCommands();
-
-private:
 
 	struct RenderCommand
 	{
@@ -83,7 +35,8 @@ private:
 			: RenderCommand(_sid), transform(_transform) {}
 		SetTransformCommand(SmartId _sid, const sf::Transform& _transform)
 			: RenderCommand(_sid), transform(_transform) {}
-		
+
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetTransform; }
 		virtual void Execute() const override;
 
 		sf::Transform transform;
@@ -94,6 +47,7 @@ private:
 		SetTextureCommand(SmartId _sid, int _textureId)
 			: RenderCommand(_sid), textureId(_textureId) {}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetTexture; }
 		virtual void Execute() const override;
 
 		int textureId;
@@ -106,6 +60,7 @@ private:
 		SetSizeCommand(SmartId _sid, const sf::Vector2f& _size)
 			: RenderCommand(_sid), size(_size) {}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetSize; }
 		virtual void Execute() const override;
 
 		sf::Vector2f size;
@@ -116,6 +71,7 @@ private:
 		SetColorCommand(SmartId _sid, sf::Color _color)
 			: RenderCommand(_sid), color(_color) {}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetColor; }
 		virtual void Execute() const override;
 
 		sf::Color color;
@@ -131,6 +87,7 @@ private:
 			strcpy_s(text, _text.c_str());
 		}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetText; }
 		virtual void Execute() const override;
 
 		char text[MaxTextLength];
@@ -140,7 +97,8 @@ private:
 	{
 		SetStyleCommand(SmartId _sid, uint32_t _style)
 			: RenderCommand(_sid), style(_style) {}
-		
+
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetStyle; }
 		virtual void Execute() const override;
 
 		uint32_t style;
@@ -151,6 +109,7 @@ private:
 		SetCharacterSizeCommand(SmartId _sid, unsigned int _size)
 			: RenderCommand(_sid), size(_size) {}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetCharacterSize; }
 		virtual void Execute() const override;
 
 		unsigned int size;
@@ -161,14 +120,35 @@ private:
 		SetFontCommand(SmartId _sid, int _fontId)
 			: RenderCommand(_sid), fontId(_fontId) {}
 
+		static constexpr ERenderCommand GetType() { return ERenderCommand_SetFont; }
 		virtual void Execute() const override;
 
 		int fontId;
 	};
+}
 
-	static constexpr const size_t memory_buffer_initial_size = 1024;
+class CRenderProxy
+{
+public:
 
-	CMemoryStream m_memoryStreams[2] = { CMemoryStream(memory_buffer_initial_size), CMemoryStream(memory_buffer_initial_size) };
+	CRenderProxy() = default;
+	CRenderProxy(const CRenderProxy&) = delete;
+
+	template <typename T, typename... V>
+	void OnCommand(SmartId sid, V&&... args)
+	{
+		m_memoryStreams[m_dWriteStream] << T::GetType();
+		m_memoryStreams[m_dWriteStream].Emplace<T>(sid, std::forward<V>(args)...);
+	}
+
+	void SwitchStreams();
+	void ExecuteCommands();
+
+private:
+
+	static constexpr const size_t MemoryBufferInitialSize = 1024;
+
+	CMemoryStream m_memoryStreams[2] = { CMemoryStream(MemoryBufferInitialSize), CMemoryStream(MemoryBufferInitialSize) };
 	int m_dWriteStream = 0;
 	int m_dReadStream = 1;
 };

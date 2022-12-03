@@ -18,13 +18,6 @@ CKeyboardController::CKeyboardController(const CControllerConfiguration::SConfig
 	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->shoot)] = EControllerEvent_Shoot_Pressed;
 	m_eventsMap[std::make_pair(sf::Event::KeyReleased, pConfig->shoot)] = EControllerEvent_Shoot_Released;
 	m_eventsMap[std::make_pair(sf::Event::KeyPressed, pConfig->escape)] = EControllerEvent_Quit;
-
-	CGame::Get().RegisterWindowEventListener(this);
-}
-
-CKeyboardController::~CKeyboardController()
-{
-	CGame::Get().UnregisterWindowEventListener(this);
 }
 
 void CKeyboardController::OnWindowEvent(const sf::Event& evt)
@@ -32,7 +25,7 @@ void CKeyboardController::OnWindowEvent(const sf::Event& evt)
 	if (evt.type == sf::Event::KeyPressed || evt.type == sf::Event::KeyReleased)
 	{
 		auto fnd = m_eventsMap.find(std::make_pair(evt.type, evt.key.code));
-		if (fnd != m_eventsMap.end())
+		if (fnd != m_eventsMap.end() && m_lastEvent != fnd->second)
 		{
 			for (auto iter = m_listeners.begin(); iter != m_listeners.end();)
 			{

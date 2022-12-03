@@ -10,7 +10,7 @@ void CLogicalEntity::OnTransformUpdated()
 	{
 		pPhysicalEntity->OnTransformChanged(getTransform());
 	}
-	CGame::Get().GetRenderProxy()->OnCommand<CRenderProxy::ERenderCommand_SetTransform>(m_renderEntityId, getTransform());
+	CGame::Get().GetRenderProxy()->OnCommand<RenderCommand::SetTransformCommand>(m_renderEntityId, getTransform());
 }
 
 void CLogicalEntity::SetPosition(const sf::Vector2f& vPos)

@@ -21,10 +21,9 @@ public:
 	CUISystem(const CUISystem&) = delete;
 
 	void Update();
-	void Release();
 
 	void LoadGlobalLayout(const std::string& path);
-	void LoadPlayerLayout(const std::string& id, SmartId playerId);
+	void ReloadPlayerLayout(const std::string& id, SmartId playerId);
 	void ResetLayout();
 
 	template <typename R, typename... V>
