@@ -16,6 +16,7 @@ public:
 	sf::Sound* GetSound(int id);
 
 	void Update();
+	void Clear();
 
 private:
 

@@ -123,10 +123,19 @@ void CPlayer::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType_Projectile && static_cast<CProjectile*>(pActor)->GetOwnerId() != m_entityId)
+		if (pActor->GetType() == EActorType_Projectile)
 		{
-			CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Death);
-			Destroy();
+			SmartId ownerId = static_cast<CProjectile*>(pActor)->GetOwnerId();
+			if (ownerId != m_entityId)
+			{
+				CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Death);
+				Destroy();
+
+				if (CPlayer* pOwner = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(ownerId)))
+				{
+					pOwner->SetScore(pOwner->GetScore() + 1);
+				}
+			}
 		}
 		else if (pActor->GetType() == EActorType_Hole)
 		{

@@ -12,6 +12,7 @@
 #include "PhysicalSystem.h"
 #include "NetworkProxy.h"
 #include "ActorSystem.h"
+#include "SoundSystem.h"
 #include "UISystem.h"
 #include "Player.h"
 #include "Hole.h"
@@ -49,6 +50,8 @@ void CLevelSystem::CreateLevel(const std::string& config)
 		std::cout << "Invalid level configuration " << config << std::endl;
 		return;
 	}
+
+	CGame::Get().ResetView(m_pLevelConfig->fSize);
 
 	if (CGame::Get().IsServer())
 	{
@@ -91,6 +94,7 @@ void CLevelSystem::ClearLevel()
 	CGame::Get().GetLogicalSystem()->Clear();
 	CGame::Get().GetPhysicalSystem()->Clear();
 	CGame::Get().GetRenderSystem()->Clear();
+	CGame::Get().GetSoundSystem()->Clear();
 }
 
 void CLevelSystem::SavePlayersInfo()
@@ -367,6 +371,7 @@ void CLevelSystem::Update(sf::Time dt)
 		if (m_fReviveCooldown <= 0.f)
 		{
 			RecoverPlayers();
+			CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveProjectiles();
 		}
 	}
 }

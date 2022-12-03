@@ -45,16 +45,12 @@ void CGame::Initialize()
 	m_pSoundSystem = std::make_unique<CSoundSystem>();
 
 	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
-	
-	float levelSize = m_pLogicalSystem->GetLevelSystem()->GetLevelSize();
-	m_view.reset(sf::FloatRect(0.f, 0.f, levelSize, levelSize));
 
 	const CConfigurationSystem::SWindowConfiguration& config = m_pConfigurationSystem->GetWindowConfiguration();
 	
 	m_window.create(sf::VideoMode(config.resX, config.resY), "Spacewar");
 	m_window.setVerticalSyncEnabled(config.bVerticalSynq);
 	m_window.setFramerateLimit(config.frameLitimit);
-	m_window.setView(m_view);
 	m_window.setActive(false);
 }
 
@@ -199,4 +195,10 @@ void CGame::Pause(bool bPause)
 		}
 	}
 	m_bPaused = bPause;
+}
+
+void CGame::ResetView(float fSize)
+{
+	sf::View view(sf::FloatRect(0.f, 0.f, fSize, fSize));
+	m_window.setView(view);
 }

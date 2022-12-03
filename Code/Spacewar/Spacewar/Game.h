@@ -44,7 +44,7 @@ public:
 	void Pause(bool pause);
 	bool IsServer() const { return m_bServer; }
 	void SetServer(bool bServer) { m_bServer = bServer; }
-	bool IsActive() { return m_window.hasFocus(); }
+	bool IsActive() const { return m_window.hasFocus(); }
 
 public:
 
@@ -60,9 +60,8 @@ public:
 	CSoundSystem* GetSoundSystem() { return m_pSoundSystem.get(); }
 
 	void RegisterWindowEventListener(const std::weak_ptr<IWindowEventListener>& pEventListener);
-
-	sf::Time GetCurrentTime() const { return m_gameClock.getElapsedTime(); }
-
+	void ResetView(float fSize);
+	
 private:
 
 	CGame();
@@ -91,8 +90,6 @@ private:
 	bool m_bRenderComplete = true;
 
 	sf::RenderWindow m_window;
-	sf::View m_view;
-	sf::Clock m_gameClock;
 
 	std::list<std::weak_ptr<IWindowEventListener>> m_windowEventListeners;
 

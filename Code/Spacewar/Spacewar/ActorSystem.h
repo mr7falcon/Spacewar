@@ -69,6 +69,8 @@ public:
 	SmartId GetFirstPlayerId() const;
 	SmartId GetLastPlayerId() const;
 
+	void RemoveProjectiles();
+
 	void Update(sf::Time dt);
 	void CollectGarbage();
 	void Release();

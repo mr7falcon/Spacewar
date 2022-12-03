@@ -12,11 +12,6 @@ void CProjectile::OnCollision(SmartId sid)
 		if (pActor->GetType() == EActorType_Player)
 		{
 			Destroy();
-
-			if (CPlayer* pOwner = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(m_owner)))
-			{
-				pOwner->SetScore(pOwner->GetScore() + 1);
-			}
 		}
 	}
 }

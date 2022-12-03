@@ -33,6 +33,17 @@ void CActorSystem::ForEachPlayer(std::function<bool(CPlayer*)> f)
 	}
 }
 
+void CActorSystem::RemoveProjectiles()
+{
+	for (const auto& [sid, pActor] : m_actors)
+	{
+		if (pActor->GetType() == EActorType_Projectile)
+		{
+			m_removeDeferred.push_back(pActor->GetEntityId());
+		}
+	}
+}
+
 int CActorSystem::GetNumPlayers() const
 {
 	int count = 0;

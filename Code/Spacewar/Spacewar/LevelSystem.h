@@ -35,7 +35,6 @@ public:
 
 private:
 
-
 	void SavePlayersInfo();
 	void RecoverPlayers();
 

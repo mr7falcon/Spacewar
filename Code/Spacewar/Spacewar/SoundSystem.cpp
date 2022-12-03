@@ -49,3 +49,12 @@ void CSoundSystem::Update()
 		}
 	}
 } 
+
+void CSoundSystem::Clear()
+{
+	for (sf::Sound& sound : m_activeSounds)
+	{
+		sound.stop();
+	}
+	m_activeSounds.clear();
+}

@@ -35,10 +35,10 @@ void CConfigurationSystem::LoadWindowConfiguration(const std::filesystem::path& 
 		return;
 	}
 
-	m_windowConfiguration.resX = root.attribute("resX").as_int();
-	m_windowConfiguration.resY = root.attribute("resY").as_int();
-	m_windowConfiguration.bVerticalSynq = root.attribute("verticalSynq").as_bool();
-	m_windowConfiguration.frameLitimit = root.attribute("frameLimit").as_int();
+	m_windowConfiguration.resX = root.attribute("resX").as_int(m_windowConfiguration.resX);
+	m_windowConfiguration.resY = root.attribute("resY").as_int(m_windowConfiguration.resY);
+	m_windowConfiguration.bVerticalSynq = root.attribute("verticalSynq").as_bool(m_windowConfiguration.bVerticalSynq);
+	m_windowConfiguration.frameLitimit = root.attribute("frameLimit").as_int(m_windowConfiguration.frameLitimit);
 }
 
 CConfigurationSystem::~CConfigurationSystem() = default;
