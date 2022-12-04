@@ -1,5 +1,6 @@
 #include <pugixml.hpp>
 
+#include "Game.h"
 #include "ConfigurationSystem.h"
 #include "EntityConfiguration.h"
 #include "ControllerConfiguration.h"
@@ -24,14 +25,14 @@ void CConfigurationSystem::LoadWindowConfiguration(const std::filesystem::path& 
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Failed to load window configuration: " << res.description() << std::endl;
+		Log("Failed to load window configuration: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Window");
 	if (!root)
 	{
-		std::cout << "Invalid root element in window configuration" << std::endl;
+		Log("Invalid root element in window configuration");
 		return;
 	}
 

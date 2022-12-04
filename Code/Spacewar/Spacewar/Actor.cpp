@@ -7,25 +7,31 @@
 
 CActor::CActor(const std::string& entityName)
 {
-	m_entityId = CGame::Get().GetLogicalSystem()->CreateEntityFromClass(entityName);				// Make error if we cannot find these entities
-	if (CPhysicalEntity* pPhysics = CGame::Get().GetPhysicalSystem()->GetEntity(GetEntity()->GetPhysicalEntityId()))
+	m_entityId = CGame::Get().GetLogicalSystem()->CreateEntityFromClass(entityName);
+	if (m_entityId != InvalidLink)
 	{
-		pPhysics->RegisterEventListener(this);
-	}
+		if (CPhysicalEntity* pPhysics = CGame::Get().GetPhysicalSystem()->GetEntity(GetEntity()->GetPhysicalEntityId()))
+		{
+			pPhysics->RegisterEventListener(this);
+		}
 
-	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
-	{
-		SetNeedSerialize();
+		if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
+		{
+			SetNeedSerialize();
+		}
 	}
 }
 
 CActor::~CActor()
 {
-	if (CPhysicalEntity* pPhysics = CGame::Get().GetPhysicalSystem()->GetEntity(GetEntity()->GetPhysicalEntityId()))
+	if (m_entityId != InvalidLink)
 	{
-		pPhysics->UnregisterEventListener(this);
+		if (CPhysicalEntity* pPhysics = CGame::Get().GetPhysicalSystem()->GetEntity(GetEntity()->GetPhysicalEntityId()))
+		{
+			pPhysics->UnregisterEventListener(this);
+		}
+		CGame::Get().GetLogicalSystem()->RemoveEntity(m_entityId);
 	}
-	CGame::Get().GetLogicalSystem()->RemoveEntity(m_entityId);
 }
 
 CLogicalEntity* CActor::GetEntity()

@@ -9,7 +9,7 @@ int CSoundSystem::PlaySound(int resourceId, bool bCicled)
 	const sf::SoundBuffer* pBuffer = CGame::Get().GetResourceSystem()->GetSound(resourceId);
 	if (!pBuffer)
 	{
-		std::cout << "Failed to load sound" << std::endl;
+		Log("Failed to play sound");
 		return -1;
 	}
 

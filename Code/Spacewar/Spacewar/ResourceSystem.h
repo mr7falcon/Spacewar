@@ -11,6 +11,8 @@
 #include <SFML\Graphics\Font.hpp>
 #include <SFML\Audio\SoundBuffer.hpp>
 
+#include "Game.h"
+
 static constexpr int InvalidResourceId = -1;
 
 class CResourceSystem
@@ -63,7 +65,7 @@ private:
 				}
 				else
 				{
-					std::cout << "Failed to load resource " << resPath << std::endl;
+					Log("Failed to load resource ", resPath);
 				}
 			}
 		}

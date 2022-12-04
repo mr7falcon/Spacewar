@@ -104,10 +104,6 @@ void CActorSystem::Release()
 	m_actors.clear();
 }
 
-
-#include <iostream>
-
-
 void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 {
 	if (!bReading)
@@ -143,7 +139,6 @@ void CActorSystem::Serialize(sf::Packet& packet, bool bReading)
 			}
 			else
 			{
-				std::cout << "Serialize invalid actor " << serverId << std::endl;
 				for (uint16_t i = 0; i < size; ++i)
 				{
 					uint8_t byte;

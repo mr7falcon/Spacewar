@@ -3,8 +3,8 @@
 		<Binding key="Esc" function="!PauseGame"/>
 		<Binding key="Esc" function="$ChangeLayout" argument="Pause.xml"/>
 	</Text>
-	<PlayerLayout id="Player1" path="PlayerHUDCustom.xml" position="100,1300"/>
-	<PlayerLayout id="Player2" path="PlayerHUDCustom.xml" position="1300,1300"/>
-	<PlayerLayout id="Player3" path="PlayerHUDCustom.xml" position="100,100"/>
-	<PlayerLayout id="Player4" path="PlayerHUDCustom.xml" position="1300,100"/>
+	<PlayerLayout id="Player1" path="PlayerHUDClassic.xml" position="100,100"/>
+	<PlayerLayout id="Player2" path="PlayerHUDClassic.xml" position="1300,1300"/>
+	<PlayerLayout id="Player3" path="PlayerHUDClassic.xml" position="1300,100"/>
+	<PlayerLayout id="Player4" path="PlayerHUDClassic.xml" position="100,1300"/>
 </Layout>

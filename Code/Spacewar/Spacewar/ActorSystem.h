@@ -31,13 +31,16 @@ public:
 	{
 		std::unique_ptr<CActor> pActor = std::make_unique<T>(std::forward<V>(args)...);
 		SmartId sid = pActor->GetEntityId();
-		m_actors[sid] = std::move(pActor);
-
-		CGame::Get().GetNetworkProxy()->SendCreateActor(sid, m_actors[sid]->GetType(), std::forward<V>(args)...);
-
-		if constexpr (is_player<T>::value)
+		if (sid != InvalidLink)
 		{
-			static_cast<CPlayer*>(m_actors[sid].get())->SetShooting(m_bPlayersShooting);
+			m_actors[sid] = std::move(pActor);
+
+			CGame::Get().GetNetworkProxy()->SendCreateActor(sid, m_actors[sid]->GetType(), std::forward<V>(args)...);
+
+			if constexpr (is_player<T>::value)
+			{
+				static_cast<CPlayer*>(m_actors[sid].get())->SetShooting(m_bPlayersShooting);
+			}
 		}
 
 		return sid;

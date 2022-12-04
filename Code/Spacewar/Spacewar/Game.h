@@ -4,10 +4,23 @@
 #include <mutex>
 #include <condition_variable>
 #include <list>
+#include <iostream>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML\Graphics\View.hpp>
 #include <SFML/System/Time.hpp>
+
+inline void Log()
+{
+	std::cout << std::endl;
+}
+
+template <typename T, typename... V>
+inline void Log(const T& first, const V&... rest)
+{
+	std::cout << first;
+	Log(rest...);
+}
 
 class IWindowEventListener
 {

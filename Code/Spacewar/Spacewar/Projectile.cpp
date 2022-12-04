@@ -9,7 +9,7 @@ void CProjectile::OnCollision(SmartId sid)
 {
 	if (CActor* pActor = CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid))
 	{
-		if (pActor->GetType() == EActorType_Player)
+		if (pActor->GetType() == EActorType_Player && pActor->GetEntityId() != m_owner)
 		{
 			Destroy();
 		}

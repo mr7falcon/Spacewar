@@ -2,6 +2,7 @@
 
 #include <pugixml.hpp>
 
+#include "Game.h"
 #include "LevelConfiguration.h"
 
 CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
@@ -11,14 +12,14 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Levels configuration loading failed: " << res.description() << std::endl;
+		Log("Levels configuration loading failed: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Levels");
 	if (!root)
 	{
-		std::cout << "Invalid root element in levels configuration" << std::endl;
+		Log("Invalid root element in levels configuration");
 		return;
 	}
 
@@ -30,7 +31,7 @@ CLevelConfiguration::CLevelConfiguration(const std::filesystem::path& path)
 			auto fnd = m_configurations.find(name);
 			if (fnd != m_configurations.end())
 			{
-				std::cout << "Level configuration with name " << name << " already exists" << std::endl;
+				Log("Level configuration with name ", name, " already exists");
 				continue;
 			}
 

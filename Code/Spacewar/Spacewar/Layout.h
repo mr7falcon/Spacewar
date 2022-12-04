@@ -71,14 +71,14 @@ public:
 		auto res = doc.load_file((base / m_path).c_str());
 		if (!res)
 		{
-			std::cout << "Failed to load layout: " << res.description() << std::endl;
+			Log("Failed to load layout: ", res.description());
 			return;
 		}
 
 		auto root = doc.child("Layout");
 		if (!root)
 		{
-			std::cout << "Invalid root element in layout" << std::endl;
+			Log("Invalid root element in layout");
 			return;
 		}
 
@@ -371,7 +371,7 @@ private:
 		}
 		else
 		{
-			std::cout << "Failed to get item id" << std::endl;
+			Log("Failed to get item id in ", m_path);
 		}
 	}
 
@@ -403,7 +403,7 @@ private:
 		}
 		else
 		{
-			std::cout << "Failed to get item id" << std::endl;
+			Log("Failed to get item id in ", m_path);
 		}
 	}
 
@@ -453,7 +453,7 @@ private:
 		}
 		else
 		{
-			std::cout << "Failed to get subLayout id" << std::endl;
+			Log("Failed to get subLayout id in ", m_path);
 		}
 	}
 

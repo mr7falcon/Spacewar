@@ -8,14 +8,14 @@ CFeedbackConfiguration::CFeedbackConfiguration(const std::filesystem::path& path
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Failed to load feedback configuration: " << res.description() << std::endl;
+		Log("Failed to load feedback configuration: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Schemas");
 	if (!root)
 	{
-		std::cout << "Invalid root element in feedback configuration" << std::endl;
+		Log("Invalid root element in feedback configuration");
 		return;
 	}
 
@@ -27,7 +27,7 @@ CFeedbackConfiguration::CFeedbackConfiguration(const std::filesystem::path& path
 			auto fnd = m_feedbackSchemas.find("name");
 			if (fnd != m_feedbackSchemas.end())
 			{
-				std::cout << "Feedback schema with name " << name << " already exists" << std::endl;
+				Log("Feedback schema with name ", name, " already exists");
 				continue;
 			}
 

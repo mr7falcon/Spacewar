@@ -47,7 +47,7 @@ void CLevelSystem::CreateLevel(const std::string& config)
 	m_pLevelConfig = CGame::Get().GetConfigurationSystem()->GetLevelConfiguration()->GetConfiguration(config);
 	if (!m_pLevelConfig)
 	{
-		std::cout << "Invalid level configuration " << config << std::endl;
+		Log("Invalid level configuration ", config);;
 		return;
 	}
 
@@ -218,7 +218,7 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_p
 	auto fnd = std::find(m_playerSpawners.begin(), m_playerSpawners.end(), InvalidLink);
 	if (fnd == m_playerSpawners.end())
 	{
-		std::cout << "Maximum player count for this level reached" << std::endl;
+		Log("Maximum players count for this level reached");
 		return InvalidLink;
 	}
 
@@ -228,7 +228,7 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_p
 	const auto* pPlayerConfig = CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetConfiguration(player);
 	if (!pPlayerConfig)
 	{
-		std::cout << "Failed to find player configuration " << player << std::endl;
+		Log("Failed to find player configuration ", player);
 		return InvalidLink;
 	}
 

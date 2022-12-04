@@ -203,10 +203,13 @@ void CPlayer::Update(sf::Time dt)
 	m_fShotsCooldown -= dt.asSeconds();
 	m_fBurstCooldown -= dt.asSeconds();
 
-	if (CGame::Get().IsServer() && m_fBurstCooldown <= 0.f)
+	if (CGame::Get().IsServer() || !CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
 	{
-		m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
-		SetNeedSerialize();
+		if (m_fBurstCooldown <= 0.f)
+		{
+			m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
+			SetNeedSerialize();
+		}
 	}
 
 	if (m_bShooting && CanShoot())

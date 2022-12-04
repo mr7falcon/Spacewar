@@ -87,7 +87,7 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 	}
 	else
 	{
-		std::cout << "Failed to find entity class " << name << std::endl;
+		Log("Failed to find entity class ", name);
 	}
 	return InvalidLink;
 }

@@ -11,7 +11,7 @@ CNetworkController::~CNetworkController()
 	CGame::Get().GetNetworkProxy()->OnNetworkControllerRemoved();
 }
 
-void CNetworkController::ProcessEvent(EControllerEvent evt)			// make this function member of IController
+void CNetworkController::ProcessEvent(EControllerEvent evt)
 {
 	SendEvents({ evt });
 }
@@ -233,13 +233,11 @@ void ClientMessage::SChangePlayerPresetMessage::OnReceive(int clientId) const
 
 void ServerMessage::SCreateActorMessage::OnReceive() const
 {
-	std::cout << "Create actor " << sid << std::endl;
 	CGame::Get().GetNetworkProxy()->CreateActor(sid, (EActorType)type, config);
 }
 
 void ServerMessage::SRemoveActorMessage::OnReceive() const
 {
-	std::cout << "Remove actor " << sid << std::endl;
 	CGame::Get().GetNetworkProxy()->RemoveActor(sid);
 }
 

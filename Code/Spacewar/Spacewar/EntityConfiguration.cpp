@@ -55,7 +55,7 @@ void CEntityConfiguration::ParsePhysics(const pugi::xml_node& node, const std::s
 	}
 	else
 	{
-		std::cout << "Invalid physics type " << node.attribute("type").value() << " specified for entity " << name << std::endl;
+		Log("Invalid physics type ", node.attribute("type").value(), " specified for entity ", name);
 	}
 }
 
@@ -66,7 +66,7 @@ CLogicalEntity::SRenderSlot CEntityConfiguration::ParseRender(const pugi::xml_no
 	slot.textureId = CGame::Get().GetResourceSystem()->GetTextureId(node.attribute("texture").value());
 	if (slot.textureId < 0)
 	{
-		std::cout << "Invalid texture " << node.attribute("texture").value() << " specified for entity " << name << std::endl;
+		Log("Invalid texture ", node.attribute("texture").value(), " specified for entity ", name);
 	}
 
 	slot.vSize = node.attribute("size").as_vector();
@@ -80,14 +80,14 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Entities configuration loading failed: " << res.description() << std::endl;
+		Log("Entities configuration loading failed: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Entities");
 	if (!root)
 	{
-		std::cout << "Invalid root element in entities configuration" << std::endl;
+		Log("Invalid root element in entities configuration");
 		return;
 	}
 
@@ -99,7 +99,7 @@ CEntityConfiguration::CEntityConfiguration(const std::filesystem::path& path)
 			auto fnd = m_entityClasses.find(name);
 			if (fnd != m_entityClasses.end())
 			{
-				std::cout << "Entity with name " << name << " already exists" << std::endl;
+				Log("Entity with name ", name, " already exists");
 				continue;
 			}
 

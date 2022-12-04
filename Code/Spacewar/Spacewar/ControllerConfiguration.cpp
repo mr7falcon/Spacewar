@@ -2,6 +2,7 @@
 
 #include <pugixml.hpp>
 
+#include "Game.h"
 #include "ControllerConfiguration.h"
 #include "KeyboardController.h"
 #include "GamepadController.h"
@@ -221,14 +222,14 @@ CControllerConfiguration::CControllerConfiguration(const std::filesystem::path& 
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Failed to load controller configuration: " << res.description() << std::endl;
+		Log("Failed to load controller configuration: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Schemas");
 	if (!root)
 	{
-		std::cout << "Invalid root element in controller configuration" << std::endl;
+		Log("Invalid root element in controller configuration");
 		return;
 	}
 
@@ -246,7 +247,7 @@ CControllerConfiguration::CControllerConfiguration(const std::filesystem::path& 
 			auto fnd = m_configurations.find(name);
 			if (fnd != m_configurations.end())
 			{
-				std::cout << "Controller schema with name " << name << " already exists" << std::endl;
+				Log("Controller schema with name ", name, " already exists");
 				continue;
 			}
 

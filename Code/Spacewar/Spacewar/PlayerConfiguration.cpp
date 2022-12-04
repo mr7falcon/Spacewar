@@ -1,6 +1,7 @@
 #include <pugixml.hpp>
 #include <iostream>
 
+#include "Game.h"
 #include "PlayerConfiguration.h"
 
 CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
@@ -10,14 +11,14 @@ CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
 	auto res = doc.load_file(path.c_str());
 	if (!res)
 	{
-		std::cout << "Failed to load players configuration: " << res.description() << std::endl;
+		Log("Failed to load players configuration: ", res.description());
 		return;
 	}
 
 	auto root = doc.child("Players");
 	if (!root)
 	{
-		std::cout << "Invalid root element in players configuration" << std::endl;
+		Log("Invalid root element in players configuration");
 		return;
 	}
 
@@ -29,7 +30,7 @@ CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
 			auto fnd = m_configurations.find(name);
 			if (fnd != m_configurations.end())
 			{
-				std::cout << "Player configuration with name " << name << " already exists" << std::endl;
+				Log("Player configuration with name ", name, " already exists");
 				continue;
 			}
 
