@@ -66,3 +66,11 @@ void CFeedbackSystem::OnEventEnd(SmartId sid, CFeedbackConfiguration::FeedbackEv
 		m_activeEvents.erase(fnd);
 	}
 }
+
+void CFeedbackSystem::DestroyEvents(SmartId sid)
+{
+	for (int i = CFeedbackConfiguration::EventsFirst; i < CFeedbackConfiguration::EventsCount; ++i)
+	{
+		OnEventEnd(sid, (CFeedbackConfiguration::FeedbackEvent)i);
+	}
+}

@@ -27,12 +27,15 @@ public:
 	virtual void Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size) override;
 
 	void SetShooting(bool bShoot);
+	void SetAcceleration(float fAccel);
+	void SetAngularSpeed(float fAngSpeed);
 
 	int GetAmmoCount() const { return m_dAmmoCount; }
 	float GetFuel() const { return m_fFuel; }
 	int GetScore() const { return m_dScore; }
 
 	void SetAmmoCount(int dAmmoCount);
+	void SetShotsInBurst(int dShotsInBurst);
 	void SetFuel(float fFuel);
 	void SetScore(int dScore);
 

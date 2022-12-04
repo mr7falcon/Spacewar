@@ -29,6 +29,7 @@ CPlayer::~CPlayer()
 		m_pController->UnregisterEventListener(this);
 	}
 	CGame::Get().GetLogicalSystem()->GetLevelSystem()->OnPlayerDestroyed(m_entityId, m_dScore);
+	CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->DestroyEvents(m_entityId);
 }
 
 void CPlayer::SetController(const std::shared_ptr<IController>& pController)
@@ -46,25 +47,75 @@ void CPlayer::SetController(const std::shared_ptr<IController>& pController)
 
 void CPlayer::SetShooting(bool bShooting)
 {
-	m_bShooting = bShooting;
+	if (m_bShooting != bShooting)
+	{
+		m_bShooting = bShooting;
+		SetNeedSerialize();
+	}
+}
+
+void CPlayer::SetAcceleration(float fAccel)
+{
+	CFeedbackSystem* pFeedbackSystem = CGame::Get().GetLogicalSystem()->GetFeedbackSystem();
+
+	if (m_fAccel == 0.f && fAccel > 0.f)
+	{
+		pFeedbackSystem->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Move);
+		SetNeedSerialize();
+	}
+	else if (m_fAccel > 0.f && fAccel == 0.f)
+	{
+		pFeedbackSystem->OnEventEnd(m_entityId, CFeedbackConfiguration::Move);
+		SetNeedSerialize();
+	}
+
+	m_fAccel = fAccel;
+}
+
+void CPlayer::SetAngularSpeed(float fAngSpeed)
+{
+	CLogicalEntity* pEntity = GetEntity();
+	if (pEntity->GetAngularSpeed() != fAngSpeed)
+	{
+		pEntity->SetAngularSpeed(fAngSpeed);
+		SetNeedSerialize();
+	}
 }
 
 void CPlayer::SetAmmoCount(int dAmmoCount)
 {
-	m_dAmmoCount = dAmmoCount;
-	SetNeedSerialize();
+	if (m_dAmmoCount != dAmmoCount)
+	{
+		m_dAmmoCount = dAmmoCount;
+		SetNeedSerialize();
+	}
+}
+
+void CPlayer::SetShotsInBurst(int dShotsInBurst)
+{
+	if (!CGame::Get().IsServer() && dShotsInBurst < m_dShotsInBurst)
+	{
+		CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Shoot);
+	}
+	m_dShotsInBurst = dShotsInBurst;
 }
 
 void CPlayer::SetFuel(float fFuel)
 {
-	m_fFuel = fFuel;
-	SetNeedSerialize();
+	if (m_fFuel != fFuel)
+	{
+		m_fFuel = fFuel;
+		SetNeedSerialize();
+	}
 }
 
 void CPlayer::SetScore(int dScore)
 {
-	m_dScore = dScore;
-	SetNeedSerialize();
+	if (m_dScore != dScore)
+	{
+		m_dScore = dScore;
+		SetNeedSerialize();
+	}
 }
 
 void CPlayer::OnControllerEvent(EControllerEvent evt)
@@ -74,48 +125,29 @@ void CPlayer::OnControllerEvent(EControllerEvent evt)
 		return;
 	}
 
-	CFeedbackSystem* pFeedbackSystem = CGame::Get().GetLogicalSystem()->GetFeedbackSystem();
-	CLogicalEntity* pEntity = GetEntity();
-
-	bool bChanged = false;
-	
 	switch (evt)
 	{
 	case EControllerEvent_MoveForward_Pressed:
-		bChanged = m_fAccel != m_pConfig->fAccel;
-		m_fAccel = m_pConfig->fAccel;
-		pFeedbackSystem->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Move);
+		SetAcceleration(m_pConfig->fAccel);
 		break;
 	case EControllerEvent_MoveForward_Released:
-		bChanged = m_fAccel != 0.f;
-		m_fAccel = 0.f;
-		pFeedbackSystem->OnEventEnd(m_entityId, CFeedbackConfiguration::Move);
+		SetAcceleration(0.f);
 		break;
 	case EControllerEvent_RotatePositive_Pressed:
-		bChanged = pEntity->GetAngularSpeed() != m_pConfig->fAngSpeed;
-		pEntity->SetAngularSpeed(m_pConfig->fAngSpeed);
+		SetAngularSpeed(m_pConfig->fAngSpeed);
 		break;
 	case EControllerEvent_Rotate_Released:
-		bChanged = pEntity->GetAngularSpeed() != 0.f;
-		pEntity->SetAngularSpeed(0.f);
+		SetAngularSpeed(0.f);
 		break;
 	case EControllerEvent_RotateNegative_Pressed:
-		bChanged = pEntity->GetAngularSpeed() != -m_pConfig->fAngSpeed;
-		pEntity->SetAngularSpeed(-m_pConfig->fAngSpeed);
+		SetAngularSpeed(-m_pConfig->fAngSpeed);
 		break;
 	case EControllerEvent_Shoot_Pressed:
-		bChanged = !m_bShooting;
 		SetShooting(true);
 		break;
 	case EControllerEvent_Shoot_Released:
-		bChanged = m_bShooting;
 		SetShooting(false);
 		break;
-	}
-
-	if (bChanged)
-	{
-		SetNeedSerialize();
 	}
 }
 
@@ -171,9 +203,10 @@ void CPlayer::Update(sf::Time dt)
 	m_fShotsCooldown -= dt.asSeconds();
 	m_fBurstCooldown -= dt.asSeconds();
 
-	if (m_fBurstCooldown <= 0.f)
+	if (CGame::Get().IsServer() && m_fBurstCooldown <= 0.f)
 	{
 		m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
+		SetNeedSerialize();
 	}
 
 	if (m_bShooting && CanShoot())
@@ -187,20 +220,20 @@ void CPlayer::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 	CActor::Serialize(packet, mode, size);
 
 	float fAccel = m_fAccel;
-	sf::Int16 dNumShotsInBurst = m_dShotsInBurst;
 	sf::Int16 dAmmoCount = m_dAmmoCount;
+	sf::Int16 dShotsInBurst = m_dShotsInBurst;
 	float fFuel = m_fFuel;
 	sf::Int16 dScore = m_dScore;
 
-	SerializeParameters(packet, mode, size, fAccel, dNumShotsInBurst, dAmmoCount, fFuel, dScore);
+	SerializeParameters(packet, mode, size, fAccel, dAmmoCount, dShotsInBurst, fFuel, dScore);
 
 	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsInGame())
 	{
-		m_fAccel = fAccel;
-		m_dShotsInBurst = dNumShotsInBurst;
-		m_dAmmoCount = dAmmoCount;
-		m_fFuel = fFuel;
-		m_dScore = dScore;
+		SetAcceleration(fAccel);
+		SetFuel(fFuel);
+		SetScore(dScore);
+		SetAmmoCount(dAmmoCount);
+		SetShotsInBurst(dShotsInBurst);
 	}
 }
 
@@ -218,11 +251,11 @@ void CPlayer::Shoot()
 
 	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
 	SmartId projectileId = pActorSystem->CreateActor<CProjectile>(m_pConfig->projectileEntityName);
-	
+
 	if (CProjectile* pProjectile = static_cast<CProjectile*>(pActorSystem->GetActor(projectileId)))
 	{
 		CLogicalEntity* pEntity = GetEntity();
-		
+
 		pProjectile->SetLifetime(m_pConfig->fProjectileLifetime);
 		pProjectile->SetOwnerId(m_entityId);
 
@@ -237,12 +270,12 @@ void CPlayer::Shoot()
 	--m_dShotsInBurst;
 	m_fShotsCooldown = m_pConfig->fShootCooldown;
 	m_fBurstCooldown = m_pConfig->fBurstCooldown;
-	
+
 	if (m_dAmmoCount > 0)
 	{
 		--m_dAmmoCount;
 	}
-	
+
 	SetNeedSerialize();
 
 	CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Shoot);

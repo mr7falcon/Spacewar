@@ -13,7 +13,8 @@ public:
 
 	enum FeedbackEvent
 	{
-		Move,
+		EventsFirst = 0,
+		Move = EventsFirst,
 		Shoot,
 		Death,
 		EventsCount,

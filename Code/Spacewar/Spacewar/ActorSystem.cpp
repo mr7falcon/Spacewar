@@ -39,7 +39,7 @@ void CActorSystem::RemoveProjectiles()
 	{
 		if (pActor->GetType() == EActorType_Projectile)
 		{
-			m_removeDeferred.push_back(pActor->GetEntityId());
+			RemoveActor(pActor->GetEntityId());
 		}
 	}
 }

@@ -151,6 +151,7 @@ void CNetworkSystem::ProcessClientMessages()
 		}
 		else if (status == sf::Socket::Disconnected || status == sf::Socket::Error)
 		{
+			CGame::Get().GetNetworkProxy()->OnClientDisconnect(iter->first);
 			iter = m_remoteClients.erase(iter);
 			continue;
 		}

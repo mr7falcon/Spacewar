@@ -14,7 +14,8 @@ public:
 	CFeedbackSystem(const CFeedbackSystem&) = delete;
 
 	void OnEvent(SmartId sid, const std::string& schema, CFeedbackConfiguration::FeedbackEvent event);
-	void OnEventEnd(SmartId, CFeedbackConfiguration::FeedbackEvent event);
+	void OnEventEnd(SmartId sid, CFeedbackConfiguration::FeedbackEvent event);
+	void DestroyEvents(SmartId sid);
 
 private:
 

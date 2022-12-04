@@ -69,7 +69,7 @@ void CLevelSystem::CreateLevel(const std::string& config)
 	m_randomEngine.seed((unsigned int)time(nullptr));
 
 	GenerateStars();
-	
+
 	if (!CGame::Get().IsServer())
 	{
 		return;
@@ -152,6 +152,8 @@ void CLevelSystem::RecoverPlayers()
 	{
 		m_savedPlayers.clear();
 	}
+
+	m_fReviveCooldown = 0.f;
 }
 
 void CLevelSystem::GenerateStars()
