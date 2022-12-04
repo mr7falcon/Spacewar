@@ -1,8 +1,9 @@
 <Layout>
-	<Text id="Score" value="Score:" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,100" rotation="0"/>
-	<Text id="ScoreValue" value="#GetPlayerScore" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,100" rotation="0"/>
-	<Text id="Ammo" value="Ammo:"  font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,50" rotation="0"/>
-	<Text id="AmmoValue" value="#GetPlayerAmmo" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,50" rotation="0"/>
-	<Text id="Fuel" value="Fuel:"  font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,0" rotation="0"/>
-	<Text id="FuelValue" value="#GetPlayerFuel" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,0" rotation="0"/>
+	<Text id="Player" value="#GetPlayerConfigName" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,0" rotation="0"/>
+	<Text id="Score" value="Score:" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,150" rotation="0"/>
+	<Text id="ScoreValue" value="#GetPlayerScore" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,150" rotation="0"/>
+	<Text id="Ammo" value="Ammo:"  font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,100" rotation="0"/>
+	<Text id="AmmoValue" value="#GetPlayerAmmo" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,100" rotation="0"/>
+	<Text id="Fuel" value="Fuel:"  font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="0,50" rotation="0"/>
+	<Text id="FuelValue" value="#GetPlayerFuel" font="Resources/Fonts/Happiness.ttf" color="White" size="20" position="100,50" rotation="0"/>
 </Layout>

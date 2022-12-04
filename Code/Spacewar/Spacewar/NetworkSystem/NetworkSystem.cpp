@@ -152,8 +152,9 @@ void CNetworkSystem::ProcessClientMessages()
 		}
 		else if (status == sf::Socket::Disconnected || status == sf::Socket::Error)
 		{
-			CGame::Get().GetNetworkProxy()->OnClientDisconnect(iter->first);
+			SmartId sid = iter->first;
 			iter = m_remoteClients.erase(iter);
+			CGame::Get().GetNetworkProxy()->OnClientDisconnect(sid);
 			continue;
 		}
 
@@ -217,8 +218,9 @@ void CNetworkSystem::BroadcastServerMessage(sf::Packet& packet)
 
 		if (status != sf::Socket::Done)
 		{
-			CGame::Get().GetNetworkProxy()->OnClientDisconnect(iter->first);
+			SmartId sid = iter->first;
 			iter = m_remoteClients.erase(iter);
+			CGame::Get().GetNetworkProxy()->OnClientDisconnect(sid);
 		}
 		else
 		{

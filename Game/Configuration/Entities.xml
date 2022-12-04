@@ -1,21 +1,21 @@
 <Entities>
 	<Entity name="Spaceship1">
-		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Physics type="Capsule" radius="15" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship1_st.png" size="40,60"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship1.png" size="40,60"/>
 	</Entity>
 	<Entity name="Spaceship2">
-		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Physics type="Capsule" radius="15" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship2_st.png" size="40,60"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship2.png" size="40,60"/>
 	</Entity>
 	<Entity name="Spaceship3">
-		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Physics type="Capsule" radius="15" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship3_st.png" size="40,60"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship3.png" size="40,60"/>
 	</Entity>
 	<Entity name="Spaceship4">
-		<Physics type="Capsule" radius="20" halfheight="10" axis="0,1"/>
+		<Physics type="Capsule" radius="15" halfheight="10" axis="0,1"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship4_st.png" size="40,60"/>
 		<Render texture="Resources/Textures/Spaceships/spaceship4.png" size="40,60"/>
 	</Entity>

@@ -136,9 +136,12 @@ void CLevelSystem::RecoverPlayers()
 		SmartId sid = SpawnPlayer(playerInfo.config, playerInfo.controller);
 		playerInfo.sid = sid;
 		
-		if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+		if (IsInGame())
 		{
-			pPlayer->SetScore(playerInfo.dScore);
+			if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+			{
+				pPlayer->SetScore(playerInfo.dScore);
+			}
 		}
 
 		if (playerInfo.controller && playerInfo.controller->GetType() == CController::Network)
@@ -287,6 +290,16 @@ void CLevelSystem::OnPlayerDestroyed(SmartId sid, int dScore)
 	}
 
 	ReloadPlayersLayouts();
+}
+
+void CLevelSystem::DeletePlayer(SmartId sid)
+{
+	auto fnd = std::find_if(m_savedPlayers.begin(), m_savedPlayers.end(), [sid](const SPlayerInfo& player) { return player.sid == sid; });
+	if (fnd != m_savedPlayers.end())
+	{
+		std::iter_swap(fnd, m_savedPlayers.rbegin());
+		m_savedPlayers.pop_back();
+	}
 }
 
 void CLevelSystem::ReloadPlayersLayouts()

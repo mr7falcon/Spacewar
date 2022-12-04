@@ -101,7 +101,6 @@ namespace ServerMessage
 		EServerMessage_LocalPlayer,
 		EServerMessage_StartLevel,
 		EServerMessage_SetPause,
-		EServerMessage_Serialize,
 	};
 
 	struct SServerMessage

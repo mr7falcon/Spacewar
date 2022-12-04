@@ -16,6 +16,7 @@ class ILayout : public IControllerEventListener
 public:
 
 	virtual ~ILayout() = default;
+	virtual void Unload() = 0;
 	virtual void SetController(const std::weak_ptr<CController>& pController) = 0;
 	virtual bool IsLoaded() const = 0;
 	virtual bool IsSubLayoutLoaded(const std::string& id) const = 0;
@@ -104,13 +105,14 @@ public:
 		}
 	}
 
-	void Unload()
+	virtual void Unload() override
 	{
 		for (const auto& [id, sid] : m_items)
 		{
 			CGame::Get().GetRenderSystem()->RemoveEntity(sid);
 		}
 		
+		m_items.clear();
 		m_actionBindings.clear();
 		m_updateBindings.clear();
 		m_subLayouts.clear();

@@ -3,15 +3,20 @@
 
 void CActorSystem::RemoveActor(SmartId sid, bool immediate)
 {
-	if (immediate)
+	bool exist = m_actors.find(sid) != m_actors.end();
+	exist &= std::find(m_removeDeferred.begin(), m_removeDeferred.end(), sid) == m_removeDeferred.end();
+	if (exist)
 	{
-		m_actors.erase(sid);
+		if (immediate)
+		{
+			m_actors.erase(sid);
+		}
+		else
+		{
+			m_removeDeferred.push_back(sid);
+		}
+		CGame::Get().GetNetworkProxy()->BroadcastServerMessage<ServerMessage::SRemoveActorMessage>(sid);
 	}
-	else
-	{
-		m_removeDeferred.push_back(sid);
-	}
-	CGame::Get().GetNetworkProxy()->BroadcastServerMessage<ServerMessage::SRemoveActorMessage>(sid);
 }
 
 CActor* CActorSystem::GetActor(SmartId sid)

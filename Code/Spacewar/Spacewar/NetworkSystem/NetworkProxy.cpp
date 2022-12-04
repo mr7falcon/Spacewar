@@ -103,6 +103,7 @@ void CNetworkProxy::OnClientDisconnect(int clientId)
 			{
 				if (pController->GetType() == CController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == clientId)
 				{
+					CGame::Get().GetLogicalSystem()->GetLevelSystem()->DeletePlayer(pPlayer->GetEntityId());
 					pActorSystem->RemoveActor(pPlayer->GetEntityId());
 					static_cast<CNetworkController*>(pController.get())->SetClientId(-1);
 					return false;

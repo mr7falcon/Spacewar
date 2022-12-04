@@ -22,6 +22,7 @@ public:
 	void ClearLevel();
 	SmartId SpawnPlayer(const std::string& config, const std::shared_ptr<CController>& pController = nullptr);
 	void OnPlayerDestroyed(SmartId sid, int dScore);
+	void DeletePlayer(SmartId sid);
 
 	void ReloadPlayersLayouts();
 	void ReloadGlobalLayout();

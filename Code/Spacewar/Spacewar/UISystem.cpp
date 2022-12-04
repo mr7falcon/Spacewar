@@ -282,6 +282,10 @@ void CUISystem::LoadGlobalLayout(const std::string& path)
 	{
 		LoadGlobalLayoutInternal();
 	}
+	else
+	{
+		m_pLayout->Unload();
+	}
 }
 
 void CUISystem::LoadGlobalLayoutInternal()
