@@ -76,7 +76,7 @@ namespace ClientMessage
 		SControllerInputMessage() = default;
 		SControllerInputMessage(EControllerEvent _event) : event(_event) {}
 
-		uint8_t event;
+		uint8_t event = EControllerEvent_Invalid;
 	};
 
 	struct SSetPauseMessage : public SClientMessage
@@ -87,7 +87,7 @@ namespace ClientMessage
 		SSetPauseMessage() = default;
 		SSetPauseMessage(bool _bPause) : bPause(_bPause) {}
 
-		bool bPause;
+		bool bPause = false;
 	};
 }
 
@@ -117,7 +117,7 @@ namespace ServerMessage
 		SConnectMessage() = default;
 		SConnectMessage(uint8_t _result) : result(_result) {}
 
-		uint8_t result;
+		uint8_t result = EConnectionResult_Failed;
 	};
 
 	struct SCreateActorMessage : public SServerMessage
@@ -131,8 +131,8 @@ namespace ServerMessage
 		SCreateActorMessage(SmartId _sid, EActorType _type, std::string&& _config)
 			: sid(_sid), type(_type), config(_config) {}
 
-		int32_t sid;
-		uint8_t type;
+		int32_t sid = InvalidLink;
+		uint8_t type = EActorType_Player;
 		std::string config;
 	};
 
@@ -144,7 +144,7 @@ namespace ServerMessage
 		SRemoveActorMessage() = default;
 		SRemoveActorMessage(SmartId _sid) : sid(_sid) {}
 
-		int32_t sid;
+		int32_t sid = InvalidLink;
 	};
 
 	struct SLocalPlayerMessage : public SServerMessage
@@ -155,7 +155,7 @@ namespace ServerMessage
 		SLocalPlayerMessage() = default;
 		SLocalPlayerMessage(SmartId _sid) : sid(_sid) {}
 
-		int32_t sid;
+		int32_t sid = InvalidLink;
 	};
 
 	struct SStartLevelMessage : public SServerMessage
@@ -178,7 +178,7 @@ namespace ServerMessage
 		SSetPauseMessage() = default;
 		SSetPauseMessage(bool _bPause) : bPause(_bPause) {}
 
-		bool bPause;
+		bool bPause = false;
 	};
 }
 

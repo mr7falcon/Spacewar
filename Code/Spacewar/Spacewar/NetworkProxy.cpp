@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "NetworkProxy.h"
 #include "Game.h"
 #include "LogicalSystem.h"
@@ -11,18 +13,7 @@ CNetworkController::~CNetworkController()
 
 void CNetworkController::ProcessEvent(EControllerEvent evt)			// make this function member of IController
 {
-	for (auto iter = m_listeners.begin(); iter != m_listeners.end();)
-	{
-		if (*iter == nullptr)
-		{
-			iter = m_listeners.erase(iter);
-		}
-		else
-		{
-			(*iter)->OnControllerEvent(evt);
-			++iter;
-		}
-	}
+	SendEvents({ evt });
 }
 
 std::shared_ptr<CNetworkController> CNetworkProxy::CreateNetworkController()
@@ -242,11 +233,13 @@ void ClientMessage::SChangePlayerPresetMessage::OnReceive(int clientId) const
 
 void ServerMessage::SCreateActorMessage::OnReceive() const
 {
+	std::cout << "Create actor " << sid << std::endl;
 	CGame::Get().GetNetworkProxy()->CreateActor(sid, (EActorType)type, config);
 }
 
 void ServerMessage::SRemoveActorMessage::OnReceive() const
 {
+	std::cout << "Remove actor " << sid << std::endl;
 	CGame::Get().GetNetworkProxy()->RemoveActor(sid);
 }
 

@@ -223,7 +223,10 @@ const sf::Vector2f CRenderEntity::GetSize() const
 
 void CRenderEntity::Render(sf::RenderTarget& target) const
 {
-	sf::RenderStates states;
-	states.transform = m_transform;
-	target.draw(*m_pRenderObject, states);
+	if (m_pRenderObject)
+	{
+		sf::RenderStates states;
+		states.transform = m_transform;
+		target.draw(*m_pRenderObject, states);
+	}
 }
