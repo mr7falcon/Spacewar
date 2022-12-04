@@ -33,7 +33,7 @@ public:
 	virtual void OnTextEntered(char chr) {}
 };
 
-class IController			// make template class for item providers
+class IController
 {
 public:
 

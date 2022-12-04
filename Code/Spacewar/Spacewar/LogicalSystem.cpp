@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "LogicalSystem.h"
 #include "ActorSystem.h"
 #include "LevelSystem.h"
@@ -82,6 +84,10 @@ SmartId CLogicalSystem::CreateEntityFromClass(const std::string& name)
 		}
 
 		return sid;
+	}
+	else
+	{
+		std::cout << "Failed to find entity class " << name << std::endl;
 	}
 	return InvalidLink;
 }

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-class CMemoryStream				// T = std::atomic<size_t> for the thread-safe implementation, T = size_t otherwise
+class CMemoryStream
 {
 public:
 

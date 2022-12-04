@@ -130,9 +130,21 @@ void CLevelSystem::RecoverPlayers()
 	{
 		SmartId sid = SpawnPlayer(playerInfo.config, playerInfo.controller);
 		playerInfo.sid = sid;
+		
 		if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
 		{
 			pPlayer->SetScore(playerInfo.dScore);
+		}
+
+		if (playerInfo.controller && playerInfo.controller->GetType() == IController::Network)
+		{
+			if (CNetworkController* pNetworkController = static_cast<CNetworkController*>(playerInfo.controller.get()))
+			{
+				if (pNetworkController->GetClientId() != InvalidLink)
+				{
+					CGame::Get().GetNetworkProxy()->SendServerMessage<ServerMessage::SLocalPlayerMessage>(pNetworkController->GetClientId(), sid);
+				}
+			}
 		}
 	}
 

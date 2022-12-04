@@ -37,7 +37,7 @@ public:
 
 public:
 
-	static sf::Color ParseColor(const std::string& color);		// make it inline in cpp file (extern)?
+	static sf::Color ParseColor(const std::string& color);
 
 	void LoadWindowConfiguration(const std::filesystem::path& path);
 
