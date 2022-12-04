@@ -42,7 +42,7 @@ public:
 		auto fnd = std::find(m_smartLinks.begin(), m_smartLinks.end(), InvalidLink);
 		if (fnd != m_smartLinks.end())
 		{
-			*fnd = m_entities.size();
+			*fnd = (int)m_entities.size();
 			sid = (SmartId)(fnd - m_smartLinks.begin());
 		}
 		else

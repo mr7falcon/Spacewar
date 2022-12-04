@@ -1,30 +1,22 @@
 #pragma once
 
-#include <map>
-#include <memory>
-#include <functional>
-#include <filesystem>
-#include <optional>
-#include <iostream>
-
-#include <SFML/System/Vector2.hpp>
-#include <pugixml.hpp>
-
-#include "RenderSystem.h"
-#include "RenderProxy.h"
+#include "StdAfx.h"
 #include "Game.h"
+#include "RenderSystem/RenderSystem.h"
+#include "RenderSystem/RenderProxy.h"
+#include "ConfigurationSystem/ConfigurationSystem.h"
+#include "Controllers/Controller.h"
 #include "ResourceSystem.h"
-#include "ConfigurationSystem.h"
-#include "ControllerConfiguration.h"
 #include "UISystem.h"
-#include "IController.h"
+
+#include <optional>
 
 class ILayout : public IControllerEventListener
 {
 public:
 
 	virtual ~ILayout() = default;
-	virtual void SetController(const std::weak_ptr<IController>& pController) = 0;
+	virtual void SetController(const std::weak_ptr<CController>& pController) = 0;
 	virtual bool IsLoaded() const = 0;
 	virtual bool IsSubLayoutLoaded(const std::string& id) const = 0;
 	virtual void Update() = 0;
@@ -134,7 +126,7 @@ public:
 		return !m_items.empty();
 	}
 
-	virtual void SetController(const std::weak_ptr<IController>& pController) override
+	virtual void SetController(const std::weak_ptr<CController>& pController) override
 	{
 		if (auto pOldController = m_pController.lock())
 		{
@@ -486,7 +478,7 @@ private:
 	sf::Vector2f m_vOrg;
 	std::unique_ptr<std::tuple<V...>> m_pArguments;
 	
-	std::weak_ptr<IController> m_pController;
+	std::weak_ptr<CController> m_pController;
 
 	std::map<std::string, SmartId> m_items;
 	SmartId m_activeItem = InvalidLink;

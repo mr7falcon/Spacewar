@@ -1,5 +1,4 @@
-#include <filesystem>
-
+#include "StdAfx.h"
 #include "ResourceSystem.h"
 
 CResourceSystem::CResourceSystem(const std::filesystem::path& path)

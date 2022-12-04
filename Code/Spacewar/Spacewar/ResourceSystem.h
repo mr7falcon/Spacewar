@@ -5,13 +5,10 @@
 #include <functional>
 #include <string>
 #include <filesystem>
-#include <iostream>
 
-#include <SFML\Graphics\Image.hpp>
-#include <SFML\Graphics\Font.hpp>
-#include <SFML\Audio\SoundBuffer.hpp>
-
-#include "Game.h"
+#include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
 
 static constexpr int InvalidResourceId = -1;
 

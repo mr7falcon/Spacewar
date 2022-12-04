@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SFML\System\Vector2.hpp>
-#include <SFML\Graphics\Transform.hpp>
+#include "StdAfx.h"
 
 namespace MathHelpers
 {

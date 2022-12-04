@@ -1,6 +1,5 @@
+#include "StdAfx.h"
 #include "Game.h"
-
-#include <SFML/Graphics/CircleShape.hpp>
 
 int main()
 {

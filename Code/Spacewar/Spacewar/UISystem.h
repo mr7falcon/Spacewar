@@ -1,14 +1,13 @@
 #pragma once
 
+#include "Controllers/Controller.h"
+#include "EntitySystem.h"
+
 #include <functional>
 #include <filesystem>
 #include <string>
 #include <map>
 #include <memory>
-#include <iostream>
-
-#include "EntitySystem.h"
-#include "IController.h"
 
 class ILayout;
 
@@ -50,5 +49,5 @@ private:
 	std::unique_ptr<ILayout> m_pLayout;
 	std::string m_newLayout;
 
-	std::shared_ptr<IController> m_pController;
+	std::shared_ptr<CController> m_pController;
 };

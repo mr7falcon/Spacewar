@@ -18,6 +18,90 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\pugixml\pugixml.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ConfigurationSystem\ConfigurationSystem.cpp" />
+    <ClCompile Include="ConfigurationSystem\ControllerConfiguration.cpp" />
+    <ClCompile Include="ConfigurationSystem\EntityConfiguration.cpp" />
+    <ClCompile Include="ConfigurationSystem\FeedbackConfiguration.cpp" />
+    <ClCompile Include="ConfigurationSystem\LevelConfiguration.cpp" />
+    <ClCompile Include="ConfigurationSystem\PlayerConfiguration.cpp" />
+    <ClCompile Include="Controllers\GamepadController.cpp" />
+    <ClCompile Include="Controllers\KeyboardController.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="LogicalSystem\Actor.cpp" />
+    <ClCompile Include="LogicalSystem\ActorSystem.cpp" />
+    <ClCompile Include="LogicalSystem\Bonus.cpp" />
+    <ClCompile Include="LogicalSystem\FeedbackSystem.cpp" />
+    <ClCompile Include="LogicalSystem\Hole.cpp" />
+    <ClCompile Include="LogicalSystem\LevelSystem.cpp" />
+    <ClCompile Include="LogicalSystem\LogicalEntity.cpp" />
+    <ClCompile Include="LogicalSystem\LogicalSystem.cpp" />
+    <ClCompile Include="LogicalSystem\Player.cpp" />
+    <ClCompile Include="LogicalSystem\Projectile.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="NetworkSystem\NetworkProxy.cpp" />
+    <ClCompile Include="NetworkSystem\NetworkSystem.cpp" />
+    <ClCompile Include="PhysicalSystem\PhysicalEntity.cpp" />
+    <ClCompile Include="PhysicalSystem\PhysicalPrimitive.cpp" />
+    <ClCompile Include="PhysicalSystem\PhysicalSystem.cpp" />
+    <ClCompile Include="RenderSystem\RenderEntity.cpp" />
+    <ClCompile Include="RenderSystem\RenderProxy.cpp" />
+    <ClCompile Include="RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="ResourceSystem.cpp" />
+    <ClCompile Include="SoundSystem.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="UISystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\pugixml\pugixml.hpp" />
+    <ClInclude Include="ConfigurationSystem\ConfigurationSystem.h" />
+    <ClInclude Include="ConfigurationSystem\ControllerConfiguration.h" />
+    <ClInclude Include="ConfigurationSystem\EntityConfiguration.h" />
+    <ClInclude Include="ConfigurationSystem\FeedbackConfiguration.h" />
+    <ClInclude Include="ConfigurationSystem\LevelConfiguration.h" />
+    <ClInclude Include="ConfigurationSystem\PlayerConfiguration.h" />
+    <ClInclude Include="Controllers\Controller.h" />
+    <ClInclude Include="Controllers\GamepadController.h" />
+    <ClInclude Include="Controllers\KeyboardController.h" />
+    <ClInclude Include="EntitySystem.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Layout.h" />
+    <ClInclude Include="LogicalSystem\Actor.h" />
+    <ClInclude Include="LogicalSystem\ActorSystem.h" />
+    <ClInclude Include="LogicalSystem\Bonus.h" />
+    <ClInclude Include="LogicalSystem\FeedbackSystem.h" />
+    <ClInclude Include="LogicalSystem\Hole.h" />
+    <ClInclude Include="LogicalSystem\LevelSystem.h" />
+    <ClInclude Include="LogicalSystem\LogicalEntity.h" />
+    <ClInclude Include="LogicalSystem\LogicalSystem.h" />
+    <ClInclude Include="LogicalSystem\Player.h" />
+    <ClInclude Include="LogicalSystem\Projectile.h" />
+    <ClInclude Include="MathHelpers.h" />
+    <ClInclude Include="NetworkSystem\NetworkProxy.h" />
+    <ClInclude Include="NetworkSystem\NetworkSystem.h" />
+    <ClInclude Include="PhysicalSystem\PhysicalEntity.h" />
+    <ClInclude Include="PhysicalSystem\PhysicalPrimitive.h" />
+    <ClInclude Include="PhysicalSystem\PhysicalSystem.h" />
+    <ClInclude Include="RenderSystem\MemoryStream.h" />
+    <ClInclude Include="RenderSystem\RenderEntity.h" />
+    <ClInclude Include="RenderSystem\RenderProxy.h" />
+    <ClInclude Include="RenderSystem\RenderSystem.h" />
+    <ClInclude Include="ResourceSystem.h" />
+    <ClInclude Include="SoundSystem.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="UISystem.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -108,10 +192,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\pugixml\;$(SolutionDir)..\SFML-2.5.1\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\pugixml\;$(SolutionDir)Spacewar\;$(SolutionDir)..\SFML-2.5.1\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,11 +212,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\pugixml\;$(SolutionDir)..\SFML-2.5.1\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\pugixml\;$(SolutionDir)..\SFML-2.5.1\include\;$(SolutionDir)Spacewar\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>false</ExceptionHandling>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,79 +229,6 @@
       <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-network.lib;sfml-audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\pugixml\pugixml.cpp" />
-    <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="ActorSystem.cpp" />
-    <ClCompile Include="Bonus.cpp" />
-    <ClCompile Include="ConfigurationSystem.cpp" />
-    <ClCompile Include="ControllerConfiguration.cpp" />
-    <ClCompile Include="EntityConfiguration.cpp" />
-    <ClCompile Include="FeedbackConfiguration.cpp" />
-    <ClCompile Include="FeedbackSystem.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GamepadController.cpp" />
-    <ClCompile Include="Hole.cpp" />
-    <ClCompile Include="KeyboardController.cpp" />
-    <ClCompile Include="LevelConfiguration.cpp" />
-    <ClCompile Include="LevelSystem.cpp" />
-    <ClCompile Include="LogicalEntity.cpp" />
-    <ClCompile Include="LogicalSystem.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="NetworkProxy.cpp" />
-    <ClCompile Include="NetworkSystem.cpp" />
-    <ClCompile Include="PhysicalEntity.cpp" />
-    <ClCompile Include="PhysicalPrimitive.cpp" />
-    <ClCompile Include="PhysicalSystem.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PlayerConfiguration.cpp" />
-    <ClCompile Include="Projectile.cpp" />
-    <ClCompile Include="RenderEntity.cpp" />
-    <ClCompile Include="RenderProxy.cpp" />
-    <ClCompile Include="RenderSystem.cpp" />
-    <ClCompile Include="ResourceSystem.cpp" />
-    <ClCompile Include="SoundSystem.cpp" />
-    <ClCompile Include="UISystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\pugixml\pugiconfig.hpp" />
-    <ClInclude Include="..\..\pugixml\pugixml.hpp" />
-    <ClInclude Include="ActorSystem.h" />
-    <ClInclude Include="Bonus.h" />
-    <ClInclude Include="ConfigurationSystem.h" />
-    <ClInclude Include="ControllerConfiguration.h" />
-    <ClInclude Include="EntityConfiguration.h" />
-    <ClInclude Include="EntitySystem.h" />
-    <ClInclude Include="FeedbackConfiguration.h" />
-    <ClInclude Include="FeedbackSystem.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GamepadController.h" />
-    <ClInclude Include="Hole.h" />
-    <ClInclude Include="Actor.h" />
-    <ClInclude Include="IController.h" />
-    <ClInclude Include="KeyboardController.h" />
-    <ClInclude Include="Layout.h" />
-    <ClInclude Include="LevelConfiguration.h" />
-    <ClInclude Include="LevelSystem.h" />
-    <ClInclude Include="LogicalEntity.h" />
-    <ClInclude Include="LogicalSystem.h" />
-    <ClInclude Include="MathHelpers.h" />
-    <ClInclude Include="MemoryStream.h" />
-    <ClInclude Include="NetworkProxy.h" />
-    <ClInclude Include="NetworkSystem.h" />
-    <ClInclude Include="PhysicalEntity.h" />
-    <ClInclude Include="PhysicalPrimitive.h" />
-    <ClInclude Include="PhysicalSystem.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="PlayerConfiguration.h" />
-    <ClInclude Include="Projectile.h" />
-    <ClInclude Include="RenderEntity.h" />
-    <ClInclude Include="RenderProxy.h" />
-    <ClInclude Include="RenderSystem.h" />
-    <ClInclude Include="ResourceSystem.h" />
-    <ClInclude Include="SoundSystem.h" />
-    <ClInclude Include="UISystem.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

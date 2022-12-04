@@ -1,15 +1,15 @@
-#include <SFML/Window/Event.hpp>
-
+#include "StdAfx.h"
 #include "UISystem.h"
 #include "Game.h"
-#include "LogicalSystem.h"
-#include "LevelSystem.h"
-#include "ActorSystem.h"
-#include "NetworkProxy.h"
+#include "LogicalSystem/LogicalSystem.h"
+#include "LogicalSystem/LevelSystem.h"
+#include "LogicalSystem/ActorSystem.h"
+#include "LogicalSystem/Player.h"
+#include "NetworkSystem/NetworkProxy.h"
+#include "ConfigurationSystem/ConfigurationSystem.h"
+#include "ConfigurationSystem/PlayerConfiguration.h"
+#include "ConfigurationSystem/ControllerConfiguration.h"
 #include "Layout.h"
-#include "Player.h"
-#include "ConfigurationSystem.h"
-#include "PlayerConfiguration.h"
 
 static void StartLevel(ILayout* pCaller, const std::string& name)
 {
@@ -64,7 +64,7 @@ static void ChangePlayerConfig(SmartId sid, const std::string& config)
 	}
 	else
 	{
-		std::shared_ptr<IController> pController;
+		std::shared_ptr<CController> pController;
 
 		CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
 		if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(sid)))

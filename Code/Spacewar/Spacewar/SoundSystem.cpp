@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include "StdAfx.h"
 #include "SoundSystem.h"
 #include "Game.h"
 #include "ResourceSystem.h"

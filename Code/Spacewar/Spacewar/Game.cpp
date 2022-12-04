@@ -1,27 +1,19 @@
-#include <thread>
+#include "StdAfx.h"
+#include "Game.h"
+#include "RenderSystem/RenderSystem.h"
+#include "RenderSystem/RenderProxy.h"
+#include "PhysicalSystem/PhysicalSystem.h"
+#include "LogicalSystem/LogicalSystem.h"
+#include "LogicalSystem/LevelSystem.h"
+#include "ConfigurationSystem/ConfigurationSystem.h"
+#include "NetworkSystem/NetworkSystem.h"
+#include "NetworkSystem/NetworkProxy.h"
+#include "ResourceSystem.h"
+#include "UISystem.h"
+#include "SoundSystem.h"
 
 #include <SFML/Window/Event.hpp>
-
-#if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
-#endif
-
-#include "Game.h"
-#include "RenderSystem.h"
-#include "PhysicalSystem.h"
-#include "LogicalSystem.h"
-#include "RenderProxy.h"
-#include "ResourceSystem.h"
-#include "LevelSystem.h"
-#include "ConfigurationSystem.h"
-#include "KeyboardController.h"
-#include "ActorSystem.h"
-#include "UISystem.h"
-#include "Player.h"
-#include "UISystem.h"
-#include "NetworkSystem.h"
-#include "NetworkProxy.h"
-#include "SoundSystem.h"
+#include <thread>
 
 CGame::CGame() = default;
 CGame::~CGame() = default;
@@ -44,7 +36,7 @@ void CGame::Initialize()
 	m_pNetworkProxy = std::make_unique<CNetworkProxy>();
 	m_pSoundSystem = std::make_unique<CSoundSystem>();
 
-	m_pLogicalSystem->GetLevelSystem()->CreateLevel("Menu");
+	m_pLogicalSystem->GetLevelSystem()->CreateDefaultLevel();
 
 	const CConfigurationSystem::SWindowConfiguration& config = m_pConfigurationSystem->GetWindowConfiguration();
 	

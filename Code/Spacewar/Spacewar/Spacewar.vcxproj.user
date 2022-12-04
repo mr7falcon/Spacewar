@@ -6,4 +6,7 @@
     <LocalDebuggerEnvironment>PATH=$(SolutionDir)..\SFML-2.5.1\bin\;%PATH%
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
+  <PropertyGroup>
+    <ShowAllFiles>true</ShowAllFiles>
+  </PropertyGroup>
 </Project>
