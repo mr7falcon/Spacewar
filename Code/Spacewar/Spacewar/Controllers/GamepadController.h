@@ -2,6 +2,10 @@
 
 #include "Controller.h"
 
+/**
+ * @class CGamepadController
+ * Simple class for the transformation of the gamepad state into controller events.
+ */
 class CGamepadController : public CController
 {
 public:

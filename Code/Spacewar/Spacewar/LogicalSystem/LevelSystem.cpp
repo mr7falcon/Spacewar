@@ -123,11 +123,13 @@ void CLevelSystem::SavePlayersInfo()
 
 void CLevelSystem::RecoverPlayers()
 {
+	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
+
 	for (int i = 0; i < m_playerSpawners.size(); ++i)
 	{
 		if (m_playerSpawners[i] != InvalidLink)
 		{
-			CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(m_playerSpawners[i], true);
+			pActorSystem->RemoveActor(m_playerSpawners[i], true);
 		}
 	}
 
@@ -138,7 +140,7 @@ void CLevelSystem::RecoverPlayers()
 		
 		if (IsInGame())
 		{
-			if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+			if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(sid)))
 			{
 				pPlayer->SetScore(playerInfo.dScore);
 			}
@@ -166,7 +168,7 @@ void CLevelSystem::RecoverPlayers()
 
 void CLevelSystem::GenerateStars()
 {
-	if (!m_pLevelConfig || m_pLevelConfig->stars.dNumPlacesInRow == 0)
+	if (!m_pLevelConfig || m_pLevelConfig->stars.numPlacesInRow == 0)
 	{
 		return;
 	}
@@ -179,10 +181,10 @@ void CLevelSystem::GenerateStars()
 
 	const CLevelConfiguration::SStarsConfiguration config = m_pLevelConfig->stars;
 
-	float cellSize = m_pLevelConfig->fSize / config.dNumPlacesInRow;
-	for (int i = 0; i < config.dNumPlacesInRow; ++i)
+	float cellSize = m_pLevelConfig->fSize / config.numPlacesInRow;
+	for (int i = 0; i < config.numPlacesInRow; ++i)
 	{
-		for (int j = 0; j < config.dNumPlacesInRow; ++j)
+		for (int j = 0; j < config.numPlacesInRow; ++j)
 		{
 			float rnd = RandFloat();
 			if (rnd < config.fSpawnProbability)
@@ -259,14 +261,14 @@ SmartId CLevelSystem::SpawnPlayer(const std::string& player, const std::shared_p
 	return playerId;
 }
 
-void CLevelSystem::OnPlayerDestroyed(SmartId sid, int dScore)
+void CLevelSystem::OnPlayerDestroyed(SmartId sid, int score)
 {
 	auto fnd = std::find_if(m_savedPlayers.begin(), m_savedPlayers.end(),
 		[sid](const SPlayerInfo& player) { return player.sid == sid; });
 	if (fnd != m_savedPlayers.end())
 	{
 		fnd->sid = InvalidLink;
-		fnd->dScore = dScore;
+		fnd->dScore = score;
 	}
 
 	int numAlive = 0;

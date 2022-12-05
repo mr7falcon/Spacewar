@@ -11,6 +11,13 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 
+/**
+ * @class CRenderEntity
+ * Render entity presents the visual parameters of the game objects.
+ * It can be of two types: sprite or text. Each of them have their
+ * own properties, but the render entity provides an interface to all of them.
+ * The main purpose of the render entity is to draw something on the screen.
+ */
 class CRenderEntity : public CEntity
 {
 public:
@@ -54,6 +61,8 @@ public:
 
 private:
 
+	// Rotation for all the game entities is defined relative to the center
+	// so this property has to be recovered explicitely after some object changes.
 	void RecoverOrigin();
 
 private:

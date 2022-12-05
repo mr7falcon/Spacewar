@@ -6,6 +6,10 @@
 
 #include <SFML/System/Vector2.hpp>
 
+/**
+ * @class CPlayerConfiguration
+ * Class is used for loading and storing players' configurations.
+ */
 class CPlayerConfiguration
 {
 public:
@@ -20,10 +24,10 @@ public:
 		float fProjSpeed = 10.f;
 		sf::Vector2f vShootHelper;
 		float fShootCooldown = 1.f;
-		int dNumShotsInBurst = 1;
+		int numShotsInBurst = 1;
 		float fBurstCooldown = 0.4f;
 		float fProjectileLifetime = 4.f;
-		int dAmmoCount = -1;
+		int ammoCount = -1;
 		float fFuel = -1.f;
 		float fConsumption = 0.f;
 	};

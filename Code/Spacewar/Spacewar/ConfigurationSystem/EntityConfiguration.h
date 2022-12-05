@@ -10,6 +10,10 @@
 #include <SFML/System/Vector2.hpp>
 #include <pugixml.hpp>
 
+/**
+ * @class CEntityConfiguration
+ * Class, used for loading and storing entities' configurations.
+ */
 class CEntityConfiguration
 {
 public:

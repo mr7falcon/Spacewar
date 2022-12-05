@@ -42,10 +42,10 @@ CPlayerConfiguration::CPlayerConfiguration(const std::filesystem::path& path)
 			config.fProjSpeed = iter->attribute("projectileSpeed").as_float();
 			config.vShootHelper = iter->attribute("shootHelper").as_vector();
 			config.fShootCooldown = iter->attribute("shootCooldown").as_float();
-			config.dNumShotsInBurst = iter->attribute("shotsInBurst").as_int();
+			config.numShotsInBurst = iter->attribute("shotsInBurst").as_int();
 			config.fBurstCooldown = iter->attribute("burstCooldown").as_float();
 			config.fProjectileLifetime = iter->attribute("projectileLifetime").as_float();
-			config.dAmmoCount = iter->attribute("ammoCount").as_int();
+			config.ammoCount = iter->attribute("ammoCount").as_int();
 			config.fFuel = iter->attribute("fuel").as_float();
 			config.fConsumption = iter->attribute("consumption").as_float();
 

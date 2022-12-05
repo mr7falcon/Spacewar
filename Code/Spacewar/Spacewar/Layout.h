@@ -11,23 +11,116 @@
 
 #include <optional>
 
+/**
+ * @interface ILayout
+ * Interface providing the base Layout functional.
+ * Layout is a set of tools to display, update and manage text and icons
+ * which currently used in the game User Interface. Layout can store any
+ * sublayouts which are full-fledged subsystems with their own entities
+ * and which can be managed by different controllers.
+ */
 class ILayout : public IControllerEventListener
 {
 public:
 
 	virtual ~ILayout() = default;
+
+	/**
+	* @function Unload
+	* Remove all the layout entities and updaters. Unlink the controller.
+	*/
 	virtual void Unload() = 0;
+
+	/**
+	* @function SetController
+	* Link the layout to the controller which it will be managed by.
+	*
+	* @param pController - pointer to the controller.
+	*/
 	virtual void SetController(const std::weak_ptr<CController>& pController) = 0;
+
+	/**
+	* @function IsLoaded
+	* Check if the layout is loaded or not.
+	*
+	* @return True if the layout is loaded, false otherwise
+	*/
 	virtual bool IsLoaded() const = 0;
+
+	/**
+	* @function IsSublayoutLoaded
+	* Check if the sublayout is loaded or not.
+	*
+	* @param id - identifier of the sublayout.
+	* @return True if the sublayout with this id exists and is loaded, false otherwise.
+	*/
 	virtual bool IsSubLayoutLoaded(const std::string& id) const = 0;
+
+	/**
+	* @function Update
+	* Update the layout items values, the controller and the sublayouts.
+	*/
 	virtual void Update() = 0;
+
+	/**
+	* @function OnControllerEvent
+	* Inherited method wich is called when the controller has some new events to handle.
+	* Trigger the current active item bindings corresponding to the event.
+	* For more information see CController.
+	*
+	* @param evt - event code.
+	*/
 	virtual void OnControllerEvent(EControllerEvent evt) override = 0;
+	
+	/**
+	* @function OnTextEntered
+	* Inherited method wich is called when the controller has some new text to handle.
+	* Change the entered layout text. For more information see CController.
+	*
+	* @param chr - entered character code.
+	*/
 	virtual void OnTextEntered(char chr) override = 0;
+
+	/**
+	* @function ActivateItem
+	* Make an item with the specified id active. Active items have a specific style
+	* and only the active item bindings is triggered by events.
+	*
+	* @param id - identifier of the item to activate.
+	*/
 	virtual void ActivateItem(const std::string& id) = 0;
+
+	/**
+	* @function SetWriteText
+	* Make the layout remember the entered text if the bWrite parameter is true.
+	* Disable the entered text remembering otherwise.
+	*
+	* @param bWrite - enable or disable the entered text remembering.
+	*/
 	virtual void SetWriteText(bool bWrite) = 0;
+
+	/**
+	* @function GetText
+	* Get the current remembered text by the layout.
+	*
+	* @return The current remembered text.
+	*/
 	virtual const std::string& GetText() const = 0;
 };
 
+/**
+ * @class CLayout
+ * Class to display some text and icons. All the items are loaded from the .xml file
+ * and created in render entities (see CRenderEntity). Besides, items can have bindings
+ * and updaters. Bindings are themethods which are triggered on some controller inputs.
+ * Updaters are the methods called each frame to update the corresponding item values.
+ * After all, layouts have the sublayouts, which have the same functional features.
+ * Each layout positioning is defined by it's origin offset with respect to the base layout,
+ * which has a zero origin.
+ * 
+ * @template params V - types of the arguments which will be passed in some bindings or
+ * updaters. The arguments is set in the Load method.
+ */
 template <typename... V>
 class CLayout : public ILayout
 {
@@ -50,6 +143,15 @@ public:
 
 public:
 
+	/**
+	* @function Load
+	* Create items, bindings, updaters and sublayouts from the xml description.
+	* Besides, this function creates the tuple of arguments which can be applied
+	* in some functions invoked from this layout.
+	*
+	* @param base - base layouts folder, which the current layout will be loaded from.
+	* @params args - arguments to pass into some updaters and bindings.
+	*/
 	void Load(const std::filesystem::path& base, const V&... args)
 	{
 		m_pArguments = std::make_unique<std::tuple<V...>>(args...);
@@ -141,6 +243,14 @@ public:
 		}
 	}
 
+	/**
+	* @function ActivateSubLayout
+	* Load the layout with the specified id and provide it arguments to apply to some functions.
+	*
+	* @param id - identifier of the corresponding sublayout.
+	* @params root - base folder for the corresponding sublayout to load.
+	* @params args - arguments to pass into some sublayout's updaters and bindings.
+	*/
 	template <typename... T>
 	ILayout* ActivateSubLayout(const std::string& id, const std::filesystem::path& root, const T&... args)
 	{
@@ -252,14 +362,6 @@ public:
 			m_activeItem = fnd->second;
 			m_activeStyle = GetActiveStyle(m_activeItem);
 			SetActiveStyle(m_activeItem, tmpStyle);
-		}
-
-		for (auto& [_, pLayout] : m_subLayouts)
-		{
-			if (pLayout)
-			{
-				pLayout->ActivateItem(id);
-			}
 		}
 	}
 
@@ -385,11 +487,9 @@ private:
 				sf::Vector2f vSize = node.attribute("size").as_vector();
 				pRenderProxy->OnCommand<RenderCommand::SetSizeCommand>(sid, std::move(vSize));
 
-				sf::Vector2f vPos = node.attribute("position").as_vector();
-				float fRot = node.attribute("rotation").as_float();
 				sf::Transform transform;
-				transform.translate(m_vOrg + vPos);
-				transform.rotate(fRot);
+				transform.translate(m_vOrg + node.attribute("position").as_vector());
+				transform.rotate(node.attribute("rotation").as_float());
 				pRenderProxy->OnCommand<RenderCommand::SetTransformCommand>(sid, std::move(transform));
 
 				m_items.emplace(std::move(id), sid);
@@ -451,6 +551,19 @@ private:
 		}
 	}
 
+	/**
+	* @function InvokeFunction
+	* Invoke a binding or an updater. Function invokation arguments are depended on it's type:
+	* If the function starts with '#' then the specified layout arguments will be applied to it;
+	* If the function starts with '$' then the sprcified binding argument will be passed into it;
+	* If the function starts with '!' then there are no special arguments will be passed into it.
+	* This function can handle any return value type, but in general there are only two cases:
+	* string for updaters and void for bindings.
+	*
+	* @template param R - return type of the invokable function.
+	* @param func - name of the invokable function.
+	* @param argument - optional binding argument to pass into the function.
+	*/
 	template <typename R>
 	inline R InvokeFunction(const std::string& func, const std::optional<std::string>& argument = std::nullopt)
 	{

@@ -6,6 +6,11 @@
 
 #include <SFML/Window/Event.hpp>
 
+/**
+ * @class CKeyboardController
+ * Simple class for the transformation of the keyboard state into controller events.
+ * Also used for the transformation of the window events into text entered events.
+ */
 class CKeyboardController : public CController, public IWindowEventListener
 {
 public:

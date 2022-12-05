@@ -2,6 +2,12 @@
 
 #include "Actor.h"
 
+/**
+ * @class CHole
+ * Hole is an actor placed in the world, that gravitate all the players to itself.
+ * Also holes teleportate players, which it collides with, in the random point on the map.
+ * This class describes all the holes' logic.
+ */
 class CHole : public CActor
 {
 public:

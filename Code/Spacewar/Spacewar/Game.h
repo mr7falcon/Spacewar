@@ -9,6 +9,13 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 
+/**
+ * @interface IWindowEventListener
+ * Interface for the game window events processing.
+ * Each IWeaponEventListener must be registered in CGame instance
+ * using RegisterWindowEventListener method. Unregistering listeners
+ * after their removal is provided by CGame.
+ */
 class IWindowEventListener
 {
 public:
@@ -27,6 +34,12 @@ class CNetworkSystem;
 class CNetworkProxy;
 class CSoundSystem;
 
+/**
+ * @class CGame
+ * The main game class. Carries out the game loop
+ * and communication between the game systems.
+ * CGame is a singletone and could be accessed from any game system.
+ */
 class CGame
 {
 public:
@@ -40,13 +53,31 @@ public:
 		return game;
 	}
 
+
+	// Start the game. Initialize the main game systems and run the game loop.
 	void Start();
+
+	// Pause the game. Paused game doesn't update physical and logical systems.
 	void Pause(bool pause);
+	
+	/**
+	 * @function IsServer
+	 * @function SetServer
+	 * Get and set this client's server status. Most of the game logic
+	 * in online mode is carried out on the server, after which the state
+	 * of the objects of the game world is serialized to all connected clients.
+	 * For more information see CNetworkSystem and CNetworkProxy.
+	 */
 	bool IsServer() const { return m_bServer; }
 	void SetServer(bool bServer) { m_bServer = bServer; }
+	
+	// Check if the game window is in focus now. While the window is inactive
+	// controllers don't provide any events.
 	bool IsActive() const { return m_window.hasFocus(); }
 
 public:
+
+	// All the game systems getters
 
 	CLogicalSystem* GetLogicalSystem() { return m_pLogicalSystem.get(); }
 	CPhysicalSystem* GetPhysicalSystem() { return m_pPhysicalSystem.get(); }
@@ -64,11 +95,27 @@ public:
 	
 private:
 
+	// The constructor is private, but it is possible to
+	// create and get the game instance via the static Get method
 	CGame();
 
+	// Initialize the game systems in the proper order
 	void Initialize();
+
+	// Release the game systems in the proper order
 	void Release();
+
+	// Process the game window evetns and send them to event listeners
+	void ProcessEvents();
 	
+	/**
+	 * @function StartRender
+	 * Start the render thread logic, that includes processing render
+	 * commands from the Main thread and displaying game objects in the window.
+	 * Synchronization is guaranteed by the dual buffer and the safe entity
+	 * container algorithms.
+	 * For more information see CRenderSystem and CRenderProxy.
+	 */
 	static void StartRender();
 
 private:

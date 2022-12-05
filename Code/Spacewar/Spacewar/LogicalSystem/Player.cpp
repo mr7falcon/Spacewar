@@ -14,8 +14,8 @@ CPlayer::CPlayer(const std::string& configName, const CPlayerConfiguration::SPla
 {
 	if (CGame::Get().GetLogicalSystem()->GetLevelSystem()->IsConsumablesAllowed())
 	{
-		m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
-		m_dAmmoCount = m_pConfig->dAmmoCount;
+		m_shotsInBurst = m_pConfig->numShotsInBurst;
+		m_ammoCount = m_pConfig->ammoCount;
 		m_fFuel = m_pConfig->fFuel;
 	}
 	SetNeedSerialize();
@@ -27,7 +27,7 @@ CPlayer::~CPlayer()
 	{
 		m_pController->UnregisterEventListener(this);
 	}
-	CGame::Get().GetLogicalSystem()->GetLevelSystem()->OnPlayerDestroyed(m_entityId, m_dScore);
+	CGame::Get().GetLogicalSystem()->GetLevelSystem()->OnPlayerDestroyed(m_entityId, m_score);
 	CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->DestroyEvents(m_entityId);
 }
 
@@ -81,22 +81,22 @@ void CPlayer::SetAngularSpeed(float fAngSpeed)
 	}
 }
 
-void CPlayer::SetAmmoCount(int dAmmoCount)
+void CPlayer::SetAmmoCount(int ammoCount)
 {
-	if (m_dAmmoCount != dAmmoCount)
+	if (m_ammoCount != ammoCount)
 	{
-		m_dAmmoCount = dAmmoCount;
+		m_ammoCount = ammoCount;
 		SetNeedSerialize();
 	}
 }
 
-void CPlayer::SetShotsInBurst(int dShotsInBurst)
+void CPlayer::SetShotsInBurst(int shotsInBurst)
 {
-	if (!CGame::Get().IsServer() && dShotsInBurst < m_dShotsInBurst)
+	if (!CGame::Get().IsServer() && shotsInBurst < m_shotsInBurst)
 	{
 		CGame::Get().GetLogicalSystem()->GetFeedbackSystem()->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Shoot);
 	}
-	m_dShotsInBurst = dShotsInBurst;
+	m_shotsInBurst = shotsInBurst;
 }
 
 void CPlayer::SetFuel(float fFuel)
@@ -108,11 +108,11 @@ void CPlayer::SetFuel(float fFuel)
 	}
 }
 
-void CPlayer::SetScore(int dScore)
+void CPlayer::SetScore(int score)
 {
-	if (m_dScore != dScore)
+	if (m_score != score)
 	{
-		m_dScore = dScore;
+		m_score = score;
 		SetNeedSerialize();
 	}
 }
@@ -206,7 +206,7 @@ void CPlayer::Update(sf::Time dt)
 	{
 		if (m_fBurstCooldown <= 0.f)
 		{
-			m_dShotsInBurst = m_pConfig->dNumShotsInBurst;
+			m_shotsInBurst = m_pConfig->numShotsInBurst;
 			SetNeedSerialize();
 		}
 	}
@@ -222,10 +222,10 @@ void CPlayer::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 	CActor::Serialize(packet, mode, size);
 
 	float fAccel = m_fAccel;
-	sf::Int16 dAmmoCount = m_dAmmoCount;
-	sf::Int16 dShotsInBurst = m_dShotsInBurst;
+	sf::Int16 dAmmoCount = m_ammoCount;
+	sf::Int16 dShotsInBurst = m_shotsInBurst;
 	float fFuel = m_fFuel;
-	sf::Int16 dScore = m_dScore;
+	sf::Int16 dScore = m_score;
 
 	SerializeParameters(packet, mode, size, fAccel, dAmmoCount, dShotsInBurst, fFuel, dScore);
 
@@ -241,7 +241,7 @@ void CPlayer::Serialize(sf::Packet& packet, uint8_t mode, uint16_t& size)
 
 bool CPlayer::CanShoot() const
 {
-	return m_dShotsInBurst > 0 && m_fShotsCooldown <= 0.f && m_dAmmoCount != 0;
+	return m_shotsInBurst > 0 && m_fShotsCooldown <= 0.f && m_ammoCount != 0;
 }
 
 void CPlayer::Shoot()
@@ -269,13 +269,13 @@ void CPlayer::Shoot()
 		}
 	}
 
-	--m_dShotsInBurst;
+	--m_shotsInBurst;
 	m_fShotsCooldown = m_pConfig->fShootCooldown;
 	m_fBurstCooldown = m_pConfig->fBurstCooldown;
 
-	if (m_dAmmoCount > 0)
+	if (m_ammoCount > 0)
 	{
-		--m_dAmmoCount;
+		--m_ammoCount;
 	}
 
 	SetNeedSerialize();

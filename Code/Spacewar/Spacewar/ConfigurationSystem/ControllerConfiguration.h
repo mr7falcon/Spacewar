@@ -6,6 +6,11 @@
 #include <map>
 #include <SFML/Window/Keyboard.hpp>
 
+/**
+ * @class CControllerConfiguration
+ * Class, loading and storing keyboard controllers' configurations.
+ * Also used to provide an unified interface for the any type controller creation.
+ */
 class CControllerConfiguration
 {
 public:

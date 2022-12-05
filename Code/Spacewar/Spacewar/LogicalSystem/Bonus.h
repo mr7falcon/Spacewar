@@ -2,6 +2,12 @@
 
 #include "Actor.h"
 
+/**
+ * @class CBonus
+ * Bonus is an actor placed in the world, in contact with which
+ * player gets some additional abstract points (fuel, ammo, etc).
+ * This class describes all the bonuses' logic.
+ */
 class CBonus : public CActor
 {
 public:

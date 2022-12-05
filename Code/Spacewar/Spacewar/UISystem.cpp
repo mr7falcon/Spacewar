@@ -29,9 +29,14 @@ static void SetActiveItem(ILayout* pCaller, const std::string& id)
 	pCaller->ActivateItem(id);
 }
 
+inline static CPlayer* GetPlayer(SmartId sid)
+{
+	return static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid));
+}
+
 static std::string GetPlayerConfigName(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return pPlayer->GetConfigName();
 	}
@@ -40,7 +45,7 @@ static std::string GetPlayerConfigName(SmartId sid)
 
 static std::string GetNextPlayerConfig(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetNextConfiguration(pPlayer->GetConfigName());
 	}
@@ -49,7 +54,7 @@ static std::string GetNextPlayerConfig(SmartId sid)
 
 static std::string GetPreviousPlayerConfig(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return CGame::Get().GetConfigurationSystem()->GetPlayerConfiguration()->GetPreviousConfiguration(pPlayer->GetConfigName());
 	}
@@ -65,29 +70,23 @@ static void ChangePlayerConfig(SmartId sid, const std::string& config)
 	else
 	{
 		std::shared_ptr<CController> pController;
-
-		CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();
-		if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(sid)))
+		if (CPlayer* pPlayer = GetPlayer(sid))
 		{
 			pController = pPlayer->GetController();
 		}
-		pActorSystem->RemoveActor(sid, true);
-
-		CLevelSystem* pLevelSystem = CGame::Get().GetLogicalSystem()->GetLevelSystem();
-		pLevelSystem->SpawnPlayer(config, pController);
+		CGame::Get().GetLogicalSystem()->GetActorSystem()->RemoveActor(sid, true);
+		CGame::Get().GetLogicalSystem()->GetLevelSystem()->SpawnPlayer(config, pController);
 	}
 }
 
 static void NextPlayerConfig(SmartId sid)
 {
-	const std::string& nextConfig = GetNextPlayerConfig(sid);
-	ChangePlayerConfig(sid, nextConfig);
+	ChangePlayerConfig(sid, GetNextPlayerConfig(sid));
 }
 
 static void PreviousPlayerConfig(SmartId sid)
 {
-	const std::string& nextConfig = GetPreviousPlayerConfig(sid);
-	ChangePlayerConfig(sid, nextConfig);
+	ChangePlayerConfig(sid, GetPreviousPlayerConfig(sid));
 }
 
 static void SpawnPlayer(ILayout* pCaller, const std::string& controller)
@@ -148,7 +147,7 @@ static void ResumeGame(ILayout* pCaller)
 
 static std::string GetPlayerScore(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return std::to_string(pPlayer->GetScore());
 	}
@@ -157,7 +156,7 @@ static std::string GetPlayerScore(SmartId sid)
 
 static std::string GetPlayerAmmo(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return std::to_string(pPlayer->GetAmmoCount());
 	}
@@ -166,7 +165,7 @@ static std::string GetPlayerAmmo(SmartId sid)
 
 static std::string GetPlayerFuel(SmartId sid)
 {
-	if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(sid)))
+	if (CPlayer* pPlayer = GetPlayer(sid))
 	{
 		return std::to_string((int)pPlayer->GetFuel());
 	}
@@ -319,7 +318,7 @@ void CUISystem::ReloadPlayerLayout(const std::string& id, SmartId playerId)
 	{
 		if (CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem())
 		{
-			if (CPlayer* pPlayer = static_cast<CPlayer*>(CGame::Get().GetLogicalSystem()->GetActorSystem()->GetActor(playerId)))
+			if (CPlayer* pPlayer = static_cast<CPlayer*>(pActorSystem->GetActor(playerId)))
 			{
 				pPlayerLayout->SetController(pPlayer->GetController());
 			}

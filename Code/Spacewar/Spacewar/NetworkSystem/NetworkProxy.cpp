@@ -94,6 +94,24 @@ void CNetworkProxy::OnClientConnect(int clientId)
 	}
 }
 
+inline static CPlayer* GetLinkedPlayer(int clientId)
+{
+	CPlayer* pLinkedPlayer = nullptr;
+	CGame::Get().GetLogicalSystem()->GetActorSystem()->ForEachPlayer([&](CPlayer* pPlayer)
+		{
+			if (const auto& pController = pPlayer->GetController())
+			{
+				if (pController->GetType() == CController::Network && static_cast<CNetworkController*>(pController.get())->GetClientId() == clientId)
+				{
+					pLinkedPlayer = pPlayer;
+					return false;
+				}
+			}
+			return true;
+		});
+	return pLinkedPlayer;
+}
+
 void CNetworkProxy::OnClientDisconnect(int clientId)
 {
 	CActorSystem* pActorSystem = CGame::Get().GetLogicalSystem()->GetActorSystem();

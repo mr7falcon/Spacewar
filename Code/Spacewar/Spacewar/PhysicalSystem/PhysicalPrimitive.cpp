@@ -15,14 +15,6 @@ void PhysicalPrimitive::Capsule::Transform(const sf::Transform& transform)
 	m_fRad *= MathHelpers::GetScaleAny(transform);
 }
 
-inline static void CheckMinMax(float& min, float& max)
-{
-	if (max < min)
-	{
-		std::swap(min, max);
-	}
-}
-
 void PhysicalPrimitive::Polygon::Transform(const sf::Transform& transform)
 {
 	for (auto& vertex : m_vertices)

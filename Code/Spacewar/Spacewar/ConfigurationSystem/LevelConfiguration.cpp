@@ -106,7 +106,7 @@ CLevelConfiguration::SPlayerSpawnerConfiguration CLevelConfiguration::ParsePlaye
 CLevelConfiguration::SStarsConfiguration CLevelConfiguration::ParseStars(const pugi::xml_node& node)
 {
 	SStarsConfiguration config;
-	config.dNumPlacesInRow = node.attribute("rowPlaces").as_int();
+	config.numPlacesInRow = node.attribute("rowPlaces").as_int();
 	config.fAvailableSpace = node.attribute("availableSpace").as_float();
 	config.fSpawnProbability = node.attribute("spawnProbability").as_float();
 	config.fScaleMin = node.attribute("scaleMin").as_float();

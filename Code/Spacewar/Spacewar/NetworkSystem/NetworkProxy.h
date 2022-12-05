@@ -12,6 +12,11 @@
 #include <SFML/Network/Packet.hpp>
 #include <SFML/System/Time.hpp>
 
+/**
+ * @class CNetworkController
+ * This class retranslates the linked remote client's controller
+ * events to the locally created player.
+ */
 class CNetworkController : public CController
 {
 public:
@@ -300,6 +305,13 @@ inline void SerializeParameters(sf::Packet& packet, uint8_t mode, uint16_t& size
 	SerializeParameters(packet, mode, size, rest...);
 }
 
+/**
+ * @class CNetworkProxy
+ * This class is an intermediate layer between the game logic and the network.
+ * It packs the game messages and sends them to the network as well as receives
+ * the remote messages from the network and processes them. CNetworkProxy also
+ * owns and udpates all the network controllers in the game.
+ */
 class CNetworkProxy : public IControllerEventListener
 {
 public:
@@ -317,6 +329,13 @@ public:
 	CNetworkProxy() = default;
 	CNetworkProxy(const CNetworkProxy&) = delete;
 
+	/**
+	 * @function SendClientMessage
+	 * Create the client message, pack it and forward to the network.
+	 * 
+	 * @template param T - client message type.
+	 * @template params V - arguments for the message creation.
+	 */
 	template <typename T, typename... V>
 	inline void SendClientMessage(V&&... args)
 	{
@@ -326,6 +345,13 @@ public:
 		CGame::Get().GetNetworkSystem()->SendClientMessage(packet);
 	}
 
+	/**
+	 * @function SendServerMessage
+	 * Create the server message, pack it and send it to the specified client.
+	 *
+	 * @template param T - server message type.
+	 * @template params V - arguments for the message creation.
+	 */
 	template <typename T, typename...V>
 	inline void SendServerMessage(int clientId, V&&... args)
 	{
@@ -335,6 +361,13 @@ public:
 		CGame::Get().GetNetworkSystem()->SendServerMessage(clientId, packet);
 	}
 
+	/**
+	 * @function BroadcastServerMessage
+	 * Create the server message, pack it and send it to all the clients.
+	 *
+	 * @template param T - server message type.
+	 * @template params V - arguments for the message creation.
+	 */
 	template <typename T, typename... V>
 	inline void BroadcastServerMessage(V&&... args)
 	{
@@ -344,25 +377,63 @@ public:
 		CGame::Get().GetNetworkSystem()->BroadcastServerMessage(packet);
 	}
 
+	/**
+	 * @function Serialize
+	 * Initiate actors' system serialization. Pack the actors' states and
+	 * forward them to the network.
+	 */
 	void Serialize();
 
+	/**
+	 * @function OnClientMessageReceived
+	 * Called by the network when the new client message received.
+	 * The function determines the message type and process it.
+	 * 
+	 * @param clientId - client identifier from which the message was received.
+	 * @param packet - data packet, containing the message.
+	 */
 	void OnClientMessageReceived(int clientId, sf::Packet& packet);
+
+	/**
+	 * @function OnServerMessageReceived
+	 * Called by the network when the new server message received.
+	 * The function determines the message type and process it.
+	 *
+	 * @param packet - data packet, containing the message.
+	 */
 	void OnServerMessageReceived(sf::Packet& packet);
+	
+	/**
+	 * @function OnSerializationMessageReceived
+	 * Called by the network when the new serialization message received.
+	 * The function initiates the actors' system serialization from the 
+	 * received data.
+	 *
+	 * @param packet - data packet, containing the message.
+	 */
 	void OnSerializationReceived(sf::Packet& packet);
 
+	// CNetworkSystem connection events' handlers
 	void OnConnectionFailed();
 	void OnConnect();
 	void OnDisconnect();
 	void OnClientDisconnect(int clientId);
 	void OnClientConnect(int clientId);
 
+	// Create and register a new network controller
 	std::shared_ptr<CNetworkController> CreateNetworkController();
+
+	// Called when the network controller removed. The function unregisteres
+	// it and kicks the player who is connected to the deleted controller.
 	void OnNetworkControllerRemoved();
+
+	// Set the controller which input will be sent to the server
 	void SetVirtualController(const std::shared_ptr<CController>& pController);
 	const std::shared_ptr<CController>& GetVirtualController() const { return m_pVirtualController; }
 	void ProcessControllerEvent(int clientId, EControllerEvent event);
 	virtual void OnControllerEvent(EControllerEvent event) override;
 
+	// Transform server entity id into the local one
 	SmartId GetLocalEntityId(SmartId serverId) const;
 
 	void SetConnectionState(EConnectionState state);

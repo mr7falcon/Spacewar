@@ -7,6 +7,10 @@
 
 #include <pugixml.hpp>
 
+/**
+ * @class CFeedbackConfiguration
+ * Class, used for loading and storing entities' configurations.
+ */
 class CFeedbackConfiguration
 {
 public:

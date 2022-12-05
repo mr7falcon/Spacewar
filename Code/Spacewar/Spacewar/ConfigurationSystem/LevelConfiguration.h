@@ -7,16 +7,20 @@
 #include <string>
 #include <vector>
 
-#include <SFML\System\Vector2.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <pugixml.hpp>
 
+/**
+ * @class CLevelConfiguration
+ * Class, used for loading and storing levels' configurations.
+ */
 class CLevelConfiguration
 {
 public:
 
 	struct SStarsConfiguration
 	{
-		int dNumPlacesInRow = 0;
+		int numPlacesInRow = 0;
 		float fAvailableSpace = 0.f;
 		float fSpawnProbability = 0.f;
 		float fScaleMin = 0.f;

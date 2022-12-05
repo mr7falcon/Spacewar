@@ -12,6 +12,10 @@ class CLevelConfiguration;
 class CPlayerConfiguration;
 class CFeedbackConfiguration;
 
+/**
+ * @class CConfigurationSystem
+ * Simple class, storing all the configuration subsystems and providing access to them.
+ */
 class CConfigurationSystem
 {
 public:

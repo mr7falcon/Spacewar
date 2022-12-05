@@ -39,7 +39,6 @@ void CGame::Initialize()
 	m_pLogicalSystem->GetLevelSystem()->CreateDefaultLevel();
 
 	const CConfigurationSystem::SWindowConfiguration& config = m_pConfigurationSystem->GetWindowConfiguration();
-	
 	m_window.create(sf::VideoMode(config.resX, config.resY), "Spacewar");
 	m_window.setVerticalSyncEnabled(config.bVerticalSynq);
 	m_window.setFramerateLimit(config.frameLitimit);
@@ -57,6 +56,29 @@ void CGame::Release()
 	m_pResourceSystem.reset();
 }
 
+void CGame::ProcessEvents()
+{
+	sf::Event event;
+	while (m_window.pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+			m_window.close();
+
+		for (auto iter = m_windowEventListeners.begin(); iter != m_windowEventListeners.end();)
+		{
+			if (auto pEventListener = iter->lock())
+			{
+				pEventListener->OnWindowEvent(event);
+				++iter;
+			}
+			else
+			{
+				iter = m_windowEventListeners.erase(iter);
+			}
+		}
+	}
+}
+
 void CGame::Start()
 {
 	Initialize();
@@ -67,25 +89,7 @@ void CGame::Start()
 
 	while (m_window.isOpen())
 	{
-		sf::Event event;
-		while (m_window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				m_window.close();
-
-			for (auto iter = m_windowEventListeners.begin(); iter != m_windowEventListeners.end();)
-			{
-				if (auto pEventListener = iter->lock())
-				{
-					pEventListener->OnWindowEvent(event);
-					++iter;
-				}
-				else
-				{
-					iter = m_windowEventListeners.erase(iter);
-				}
-			}
-		}
+		ProcessEvents();
 
 		if (m_pNetworkSystem->IsServerStarted())
 		{

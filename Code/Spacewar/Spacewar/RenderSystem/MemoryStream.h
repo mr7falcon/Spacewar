@@ -1,13 +1,19 @@
 #pragma once
 
-#include <vector>
+#include "StdAfx.h"
 
+/**
+ * @class CMemoryStream
+ * This class provides effective methods for the storing
+ * and accessing structures from the coherent memory buffer.
+ */
 class CMemoryStream
 {
 public:
 
 	CMemoryStream(size_t initialSize) : m_buffer(initialSize) {}
-
+	
+	// Check if the buffer is needed to be expanded
 	template <typename T>
 	inline void CheckSize()
 	{
@@ -17,6 +23,7 @@ public:
 		}
 	}
 
+	// Copy the value from the variable into the buffer
 	template <typename T>
 	void operator<<(const T& val)
 	{
@@ -25,6 +32,7 @@ public:
 		m_dWriteOffset += sizeof(val);
 	}
 
+	// Copy the value from the buffer into the variable
 	template <typename T>
 	void operator>>(T& val)
 	{
@@ -32,6 +40,7 @@ public:
 		m_dReadOffset += sizeof(val);
 	}
 
+	// Construct the value in the buffer in-place
 	template <typename T, typename... V>
 	void Emplace(V&&... args)
 	{
@@ -40,15 +49,7 @@ public:
 		m_dWriteOffset += sizeof(T);
 	}
 
-	template <typename T>
-	T& Reserve()
-	{
-		CheckSize<T>();
-		T& val = (*(T*)(&m_buffer[m_dWriteOffset]));
-		m_dWriteOffset += sizeof(T);
-		return val;
-	}
-
+	// Get the reference on the value from the buffer
 	template <typename T>
 	const T& Extract()
 	{

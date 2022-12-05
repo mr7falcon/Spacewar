@@ -2,6 +2,13 @@
 
 #include "Actor.h"
 
+/**
+ * @class CProjectile
+ * Projectile is an actor spawned by the players and moving in the specified direction.
+ * Colliding with other players, projectiles are destroyed 
+ * along with the player which are they collided with.
+ * This class describes all the projectiles' logic.
+ */
 class CProjectile : public CActor
 {
 public:

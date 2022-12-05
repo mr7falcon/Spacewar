@@ -14,12 +14,18 @@ namespace PhysicalPrimitive
 		EPrimitiveType_Num,
 	};
 
+	/**
+	 * @interface IPrimitive
+	 * This struct provides the functions to distinguish the primitives
+	 * between themselves and to change their properties according to the new entity transform.
+	 */
 	struct IPrimitive
 	{
 		virtual EPrimitiveType GetType() const = 0;
 		virtual void Transform(const sf::Transform& transform) = 0;
 	};
 
+	// Circle is defined by the origin and radius.
 	struct Circle : public IPrimitive
 	{
 		Circle(const sf::Vector2f& vOrg, float fRad) : m_vOrg(vOrg), m_fRad(fRad) {}
@@ -32,6 +38,7 @@ namespace PhysicalPrimitive
 		float m_fRad = 0.f;
 	};
 
+	// Capsule is defined by the two axes points and radius around the axis
 	struct Capsule : public IPrimitive
 	{
 		Capsule(const sf::Vector2f& vA, const sf::Vector2f& vB, float fRad)
@@ -45,6 +52,7 @@ namespace PhysicalPrimitive
 		float m_fRad = 0.f;
 	};
 
+	// Polygon is defined by the vertices positions
 	struct Polygon : public IPrimitive
 	{
 		Polygon(const std::vector<sf::Vector2f>& vertices) : m_vertices(vertices) {}
