@@ -127,6 +127,18 @@ namespace RenderCommand
 	};
 }
 
+/**
+ * @class CRenderProxy
+ * Render proxy is an intermediate layer between the game and the render.
+ * The one purpose of the render proxy is to provide the safe communication
+ * between the render system and the other game systems. Since the rendering
+ * of the render entities takes place in the separated thread, it is necessary
+ * to guarantee the synchronization between them. There is a double buffer for this.
+ * While the main thread stores the render commands in the one buffer, the render
+ * thread uses another one for the commands execution and the entities processing.
+ * Synchronization takes place in the end of the frame when the reading/writing buffers'
+ * indicies are simply switched. After this both threads can do their job again.
+ */
 class CRenderProxy
 {
 public:
@@ -134,6 +146,15 @@ public:
 	CRenderProxy() = default;
 	CRenderProxy(const CRenderProxy&) = delete;
 
+	/**
+	 * @function OnCommand
+	 * Create a new command in the writing buffer
+	 * 
+	 * @template param T - type of the command to be created.
+	 * @template params V - types of the params to be forwarded into the command constructor.
+	 * @param sid - SmartId of the render entity.
+	 * @param args - arguments to be forwarded into the command constructor.
+	 */
 	template <typename T, typename... V>
 	void OnCommand(SmartId sid, V&&... args)
 	{
@@ -141,7 +162,20 @@ public:
 		m_memoryStreams[m_dWriteStream].Emplace<T>(sid, std::forward<V>(args)...);
 	}
 
+	/**
+	 * @function SwitchStreams
+	 * This function is called from the main thread under the synchronization.
+	 * It switches the reading and writing buffers' indices, so the threads
+	 * can continue their job.
+	 */
 	void SwitchStreams();
+
+	/**
+	 * @function ExecuteCommands
+	 * This function is called from the render thread on the start of the frame.
+	 * It goes through the reading buffer and executes all the render commands
+	 * stored in there.
+	 */
 	void ExecuteCommands();
 
 private:
