@@ -10,7 +10,7 @@
 /**
  * @class CRenderSystem
  * It is a simple system to store and process the render entities.
- * The main purpose of the render system is to draw some staff in the game window.
+ * The main purpose of the render system is to draw some stuff in the game window.
  * Since the render system works in a separated thread, it uses the safe
  * CEntitySystem instance. The number of the entities to process at the end 
  * of each frame is fixed and cannot be modifier until the next synchronization.
