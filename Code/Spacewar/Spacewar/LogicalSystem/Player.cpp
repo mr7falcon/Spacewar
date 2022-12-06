@@ -57,7 +57,7 @@ void CPlayer::SetAcceleration(float fAccel)
 {
 	CFeedbackSystem* pFeedbackSystem = CGame::Get().GetLogicalSystem()->GetFeedbackSystem();
 
-	if (m_fAccel == 0.f && fAccel > 0.f)
+	if (m_fAccel == 0.f && fAccel > 0.f && m_fFuel != 0.f)
 	{
 		pFeedbackSystem->OnEvent(m_entityId, m_pConfig->feedbackSchema, CFeedbackConfiguration::Move);
 		SetNeedSerialize();
@@ -105,6 +105,10 @@ void CPlayer::SetFuel(float fFuel)
 	{
 		m_fFuel = fFuel;
 		SetNeedSerialize();
+		if (m_fFuel == 0.f)
+		{
+			SetAcceleration(0.f);
+		}
 	}
 }
 
@@ -194,8 +198,7 @@ void CPlayer::Update(sf::Time dt)
 
 		if (m_fFuel > 0.f)
 		{
-			m_fFuel = std::max(0.f, m_fFuel - m_pConfig->fConsumption * dt.asSeconds());
-			SetNeedSerialize();
+			SetFuel(std::max(0.f, m_fFuel - m_pConfig->fConsumption * dt.asSeconds()));
 		}
 	}
 
