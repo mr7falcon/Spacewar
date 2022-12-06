@@ -99,6 +99,7 @@ void CLevelSystem::ClearLevel()
 	CGame::Get().GetLogicalSystem()->Clear();
 	CGame::Get().GetPhysicalSystem()->Clear();
 	CGame::Get().GetRenderSystem()->Clear();
+	CGame::Get().GetRenderProxy()->Clear();
 	CGame::Get().GetSoundSystem()->Clear();
 }
 

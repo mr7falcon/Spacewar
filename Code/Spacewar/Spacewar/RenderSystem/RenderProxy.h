@@ -178,6 +178,12 @@ public:
 	 */
 	void ExecuteCommands();
 
+	/**
+	 * @function Clear
+	 * This function is called from the main thread to clear the writing buffer.
+	 */
+	void Clear() { m_memoryStreams[m_dWriteStream].Clear(); }
+
 private:
 
 	static constexpr const size_t MemoryBufferInitialSize = 1024;
